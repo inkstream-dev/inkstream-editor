@@ -3,14 +3,19 @@ import { Schema } from 'prosemirror-model';
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
   nodes: {
-    doc: { content: "block+" },
-    paragraph: { content: "inline*", group: "block" },
-    blockquote: { content: "block+", group: "block" },
-    horizontal_rule: { group: "block" },
-    heading: { attrs: { level: { default: 1 } }, content: "inline*", group: "block" },
-    code_block: { content: "text*", marks: "", group: "block" },
-    text: { inline: true, group: "inline" },
-    hard_break: { inline: true, group: "inline", selectable: false },
+    doc: { content: "block+", toDOM() { return ["div", 0]; } },
+    paragraph: { content: "inline*", group: "block", toDOM() { return ["p", 0]; } },
+    blockquote: { content: "block+", group: "block", toDOM() { return ["blockquote", 0]; } },
+    horizontal_rule: { group: "block", toDOM() { return ["hr"]; } },
+    heading: {
+      attrs: { level: { default: 1 } },
+      content: "inline*",
+      group: "block",
+      toDOM(node) { return ["h" + node.attrs.level, 0]; },
+    },
+    code_block: { content: "text*", marks: "", group: "block", toDOM() { return ["pre", ["code", 0]]; } },
+    text: { inline: true, group: "inline", toDOM(node) { return node.text || ""; } },
+    hard_break: { inline: true, group: "inline", selectable: false, toDOM() { return ["br"]; } },
 
     // Inline nodes
     image: {
@@ -22,6 +27,7 @@ export const inkstreamSchema = new Schema({
       },
       group: "inline",
       draggable: true,
+      toDOM(node) { return ["img", node.attrs]; },
     },
   },
 
@@ -44,10 +50,10 @@ export const inkstreamSchema = new Schema({
         return ["a", node.attrs];
       },
     },
-    strong: {},
-    em: {},
-    underline: {},
-    strike: {},
-    code: {},
+    strong: { toDOM() { return ["strong", 0]; } },
+    em: { toDOM() { return ["em", 0]; } },
+    underline: { toDOM() { return ["u", 0]; } },
+    strike: { toDOM() { return ["s", 0]; } },
+    code: { toDOM() { return ["code", 0]; } },
   },
 });
