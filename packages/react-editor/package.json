@@ -13,12 +13,12 @@
   "files": ["dist"],
   "devDependencies": {
     "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
-    "@types/react-dom": "^18.2.18",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "eslint": "^8.56.0",
     "@inkstream/eslint-config": "workspace:*",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
