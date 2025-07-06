@@ -1,31 +1,63 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager, boldPlugin } from '@inkstream/editor-core'; // Import boldPlugin directly
+import { inkstreamSchema, pluginManager, Plugin, pluginLoader } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
 
 interface RichTextEditorProps {
   initialContent: string;
-  // plugins?: Plugin[]; // Removed plugins prop
+  plugins?: string[]; // Now accepts an array of plugin names (strings)
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins }) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [editorView, setEditorView] = useState<EditorView | null>(null);
-  const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null);
+  const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
+  const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
+  const [toolbarItems, setToolbarItems] = useState<any[]>([]); // State for toolbar items
+
+  // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
+  // and then reflecting that change in React's state.
+  const handleDispatchTransaction = useCallback((transaction: Transaction) => {
+    if (editorViewRef.current) {
+      const newState = editorViewRef.current.state.apply(transaction);
+      editorViewRef.current.updateState(newState);
+      setCurrentEditorState(newState);
+    }
+  }, []); // This callback is stable and won't change
 
   useEffect(() => {
-    if (editorRef.current) {
-      pluginManager.clearPlugins();
+    if (!editorRef.current) return;
 
-      // Register boldPlugin directly here
-      pluginManager.registerPlugin(boldPlugin);
+    // Destroy existing view if it exists before creating a new one
+    if (editorViewRef.current) {
+      console.log("Destroying existing EditorView for re-initialization...");
+      editorViewRef.current.destroy();
+      editorViewRef.current = null;
+      setCurrentEditorState(null);
+    }
+
+    console.log("Initializing EditorView...");
+    // Use the globally exported pluginManager instance
+    pluginManager.clearPlugins(); // Clear plugins before loading new ones
+
+    const loadPluginsAndInitializeEditor = async (currentPlugins?: string[]) => {
+      if (currentPlugins) {
+        for (const pluginName of currentPlugins) {
+          try {
+            const loadedPlugin = await (pluginLoader as any)[pluginName]();
+            pluginManager.registerPlugin(loadedPlugin); // Use the global instance
+          } catch (error) {
+            console.error(`Failed to load plugin ${pluginName}:`, error);
+          }
+        }
+      }
 
       const parser = DOMParser.fromSchema(inkstreamSchema);
       const doc = parser.parse(new window.DOMParser().parseFromString(initialContent, "text/html").body);
+      console.log("Parsed initial content doc:", doc.toJSON());
 
       const state = EditorState.create({
         schema: inkstreamSchema,
@@ -35,30 +67,39 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }
 
       const view = new EditorView(editorRef.current, {
         state,
-        dispatchTransaction(transaction) {
-          const newState = view.state.apply(transaction);
-          view.updateState(newState);
-          setCurrentEditorState(newState);
-        },
+        dispatchTransaction: handleDispatchTransaction,
       });
 
-      setEditorView(view);
+      editorViewRef.current = view;
       setCurrentEditorState(state);
+      const items = pluginManager.getToolbarItems(inkstreamSchema);
+      console.log("Toolbar items collected:", items);
+      setToolbarItems(items);
+    };
 
-      return () => {
-        if (view) {
-          view.destroy();
-        }
-      };
-    }
-  }, [initialContent]);
+    // Await the async function call
+    (async () => {
+      await loadPluginsAndInitializeEditor(plugins);
+    })();
+
+    // Cleanup function for EditorView when component unmounts
+    return () => {
+      if (editorViewRef.current) {
+        console.log("Destroying EditorView on unmount...");
+        editorViewRef.current.destroy();
+        editorViewRef.current = null;
+        setCurrentEditorState(null);
+      }
+    };
+  }, [initialContent, plugins, handleDispatchTransaction]); // Add plugins to dependency array
 
   return (
     <div className="inkstream-editor-wrapper">
       <Toolbar
         editorState={currentEditorState}
-        editorDispatch={editorView ? editorView.dispatch : null}
-        editorView={editorView}
+        editorDispatch={editorViewRef.current ? editorViewRef.current.dispatch : null}
+        editorView={editorViewRef.current}
+        toolbarItems={toolbarItems}
       />
       <div ref={editorRef} className="inkstream-editor" />
     </div>

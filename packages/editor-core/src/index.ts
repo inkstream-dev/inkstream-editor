@@ -6,6 +6,7 @@ import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis } from 'prosemirror-inputrules';
 import { PluginManager, Plugin } from './plugins';
 import { boldPlugin } from './plugins/bold';
+import { imagePlugin } from './plugins/image';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
@@ -105,5 +106,11 @@ export const inkstreamPlugins = (schema: Schema) => [
 
 export const pluginManager = new PluginManager();
 
-export { boldPlugin };
+// Centralized plugin loader for dynamic imports
+const pluginLoader = {
+  bold: () => import('./plugins/bold').then(m => m.boldPlugin),
+  image: () => import('./plugins/image').then(m => m.imagePlugin),
+};
+
 export type { Plugin };
+export { pluginLoader };
