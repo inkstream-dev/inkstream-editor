@@ -109,6 +109,9 @@ importers:
       '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
+      prosemirror-commands:
+        specifier: ^1.5.2
+        version: 1.7.1
       prosemirror-model:
         specifier: ^1.19.0
         version: 1.25.1

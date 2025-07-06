@@ -5,6 +5,7 @@ import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
 import { inkstreamSchema, pluginManager } from '@inkstream/editor-core';
+import { Toolbar } from './Toolbar';
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -22,7 +23,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }
       const state = EditorState.create({
         schema: inkstreamSchema,
         doc: doc,
-        plugins: pluginManager.getProseMirrorPlugins(inkstreamSchema), // Use pluginManager
+        plugins: pluginManager.getProseMirrorPlugins(inkstreamSchema),
       });
 
       const view = new EditorView(editorRef.current, {
@@ -44,5 +45,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }
     }
   }, [initialContent]);
 
-  return <div ref={editorRef} className="inkstream-editor" />;
+  return (
+    <>
+      {viewRef.current && <Toolbar view={viewRef.current} />}
+      <div ref={editorRef} className="inkstream-editor" />
+    </>
+  );
 };
