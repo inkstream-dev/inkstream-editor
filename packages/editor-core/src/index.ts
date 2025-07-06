@@ -4,6 +4,7 @@ import { keymap } from 'prosemirror-keymap';
 import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis } from 'prosemirror-inputrules';
+import { PluginManager } from './plugins';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
@@ -100,3 +101,5 @@ export const inkstreamPlugins = (schema: Schema) => [
   buildKeymap(schema),
   history(),
 ];
+
+export const pluginManager = new PluginManager();

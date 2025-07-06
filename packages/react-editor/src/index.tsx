@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from 'react';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, inkstreamPlugins } from '@inkstream/editor-core';
+import { inkstreamSchema, pluginManager } from '@inkstream/editor-core';
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -22,7 +22,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }
       const state = EditorState.create({
         schema: inkstreamSchema,
         doc: doc,
-        plugins: inkstreamPlugins(inkstreamSchema), // Add plugins here
+        plugins: pluginManager.getProseMirrorPlugins(inkstreamSchema), // Use pluginManager
       });
 
       const view = new EditorView(editorRef.current, {
