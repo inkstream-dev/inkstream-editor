@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  demo:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../apps/demo:/app/apps/demo
+      - ../packages/editor-core:/app/packages/editor-core
+      - ../packages/react-editor:/app/packages/react-editor
+      - /app/node_modules
+    command: pnpm --filter demo dev
