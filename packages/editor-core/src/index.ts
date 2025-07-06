@@ -1,4 +1,9 @@
 import { Schema } from 'prosemirror-model';
+import { EditorState } from 'prosemirror-state';
+import { keymap } from 'prosemirror-keymap';
+import { baseKeymap, toggleMark } from 'prosemirror-commands';
+import { history } from 'prosemirror-history';
+import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis } from 'prosemirror-inputrules';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
@@ -57,3 +62,41 @@ export const inkstreamSchema = new Schema({
     code: { toDOM() { return ["code", 0]; } },
   },
 });
+
+// Input rules
+const buildInputRules = (schema: Schema) => {
+  const rules = smartQuotes.concat(ellipsis, emDash);
+
+  // Rule for headings (e.g., # Heading)
+  rules.push(textblockTypeInputRule(/^#+\s$/, schema.nodes.heading, (match) => ({ level: match[0].length - 1 })));
+
+  // Rule for blockquotes (e.g., > Quote)
+  rules.push(wrappingInputRule(/^>\s$/, schema.nodes.blockquote));
+
+  // Rule for code blocks (e.g., ``` Code)
+  rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
+
+  return inputRules({
+    rules,
+  });
+};
+
+// Keymap
+const buildKeymap = (schema: Schema) => {
+  const keys: { [key: string]: any } = {};
+
+  // Add base keymap commands
+  Object.assign(keys, baseKeymap);
+
+  // Add custom keybindings
+  // Example: Ctrl-b for bold
+  keys["Mod-b"] = toggleMark(schema.marks.strong);
+
+  return keymap(keys);
+};
+
+export const inkstreamPlugins = (schema: Schema) => [
+  buildInputRules(schema),
+  buildKeymap(schema),
+  history(),
+];
