@@ -1,22 +1,29 @@
 "use client";
 
-import React, { useRef, useEffect } from 'react';
-import { EditorState } from 'prosemirror-state';
+import React, { useRef, useEffect, useState } from 'react';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager } from '@inkstream/editor-core';
+import { inkstreamSchema, pluginManager, boldPlugin } from '@inkstream/editor-core'; // Import boldPlugin directly
 import { Toolbar } from './Toolbar';
 
 interface RichTextEditorProps {
   initialContent: string;
+  // plugins?: Plugin[]; // Removed plugins prop
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
+  const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null);
 
   useEffect(() => {
-    if (editorRef.current && !viewRef.current) {
+    if (editorRef.current) {
+      pluginManager.clearPlugins();
+
+      // Register boldPlugin directly here
+      pluginManager.registerPlugin(boldPlugin);
+
       const parser = DOMParser.fromSchema(inkstreamSchema);
       const doc = parser.parse(new window.DOMParser().parseFromString(initialContent, "text/html").body);
 
@@ -31,24 +38,29 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent }
         dispatchTransaction(transaction) {
           const newState = view.state.apply(transaction);
           view.updateState(newState);
+          setCurrentEditorState(newState);
         },
       });
 
-      viewRef.current = view;
+      setEditorView(view);
+      setCurrentEditorState(state);
 
       return () => {
-        if (viewRef.current) {
-          viewRef.current.destroy();
-          viewRef.current = null;
+        if (view) {
+          view.destroy();
         }
       };
     }
   }, [initialContent]);
 
   return (
-    <>
-      {viewRef.current && <Toolbar view={viewRef.current} />}
+    <div className="inkstream-editor-wrapper">
+      <Toolbar
+        editorState={currentEditorState}
+        editorDispatch={editorView ? editorView.dispatch : null}
+        editorView={editorView}
+      />
       <div ref={editorRef} className="inkstream-editor" />
-    </>
+    </div>
   );
 };

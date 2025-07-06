@@ -1,22 +1,28 @@
 import React from 'react';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
+import { EditorView } from 'prosemirror-view';
 
 interface ToolbarProps {
-  view: EditorView;
+  editorState: EditorState | null;
+  editorDispatch: ((tr: Transaction) => void) | null;
+  editorView: EditorView | null; // Add editorView to props
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ view }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView }) => {
   const applyMark = (markType: any) => {
-    const { state, dispatch } = view;
-    toggleMark(markType)(state, dispatch);
+    if (editorState && editorDispatch && editorView) {
+      editorView.focus(); // Ensure editor has focus and updated selection
+      toggleMark(markType)(editorState, editorDispatch);
+    }
   };
 
   return (
     <div className="inkstream-toolbar">
       <button
-        onClick={() => applyMark(view.state.schema.marks.strong)}
+        onClick={() => applyMark(editorState?.schema.marks.strong)}
         className="inkstream-toolbar-button"
+        disabled={!editorState || !editorDispatch || !editorView}
       >
         B
       </button>

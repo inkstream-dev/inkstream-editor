@@ -22,6 +22,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@inkstream/editor-core": [
+        "../../packages/editor-core/src"
+      ],
+      "@inkstream/react-editor": [
+        "../../packages/react-editor/src"
       ]
     },
     "plugins": [

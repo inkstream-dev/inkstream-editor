@@ -13,6 +13,10 @@ export class PluginManager {
     this.plugins.push(plugin);
   }
 
+  clearPlugins() {
+    this.plugins = [];
+  }
+
   getProseMirrorPlugins(schema: Schema): ProseMirrorPlugin[] {
     return this.plugins.flatMap(plugin => plugin.getProseMirrorPlugins(schema));
   }
