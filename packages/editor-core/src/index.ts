@@ -5,6 +5,7 @@ import { baseKeymap, toggleMark } from 'prosemirror-commands';
 import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis } from 'prosemirror-inputrules';
 import { PluginManager } from './plugins';
+import { boldPlugin } from './plugins/bold';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
@@ -103,3 +104,4 @@ export const inkstreamPlugins = (schema: Schema) => [
 ];
 
 export const pluginManager = new PluginManager();
+pluginManager.registerPlugin(boldPlugin);
