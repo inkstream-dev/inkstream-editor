@@ -31,7 +31,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
           title={item.tooltip}
         >
           {item.icon}
-        </button>bo
+        </button>
       ))}
     </div>
   );

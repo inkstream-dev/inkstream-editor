@@ -6,6 +6,7 @@ import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
 import { inkstreamSchema, pluginManager, Plugin, pluginLoader } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
+import './editor.css';
 
 interface RichTextEditorProps {
   initialContent: string;

@@ -1,0 +1,43 @@
+.inkstream-editor-wrapper {
+  border: 1px solid #ccc;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.inkstream-editor {
+  flex-grow: 1;
+  padding: 10px;
+  outline: none; /* Remove default outline */
+}
+
+.inkstream-editor .ProseMirror {
+  min-height: 100%; /* Ensure ProseMirror content fills the container */
+  outline: none; /* Remove default outline */
+}
+
+.inkstream-toolbar {
+  margin-bottom: 0;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  background-color: #f9f9f9;
+  display: flex;
+  gap: 5px;
+}
+
+.inkstream-toolbar-button {
+  background-color: #e0e0e0;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.inkstream-toolbar-button:hover {
+  background-color: #d0d0d0;
+}
+
+.inkstream-toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
