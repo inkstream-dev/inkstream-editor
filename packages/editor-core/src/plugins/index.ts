@@ -4,6 +4,7 @@ import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
 import { historyPlugin } from './history';
+import { listItemPlugin } from './list-item';
 
 
   export interface ToolbarItem {
@@ -44,16 +45,26 @@ export class PluginManager {
   }
 
   getProseMirrorPlugins(schema: Schema): ProseMirrorPlugin[] {
-    return this.plugins.flatMap(plugin => plugin.getProseMirrorPlugins(schema));
+    console.log("PluginManager: Getting ProseMirror plugins for schema:", schema);
+    const pmPlugins = this.plugins.flatMap(plugin => {
+      const plugins = plugin.getProseMirrorPlugins ? plugin.getProseMirrorPlugins(schema) : [];
+      console.log(`PluginManager: Plugin ${plugin.name} returned ProseMirror plugins:`, plugins);
+      return plugins;
+    });
+    console.log("PluginManager: All collected ProseMirror plugins:", pmPlugins);
+    return pmPlugins;
   }
 
   getNodes(): { [key: string]: any } {
-    return this.plugins.reduce((nodes, plugin) => {
+    console.log("PluginManager: Getting nodes.");
+    const nodes = this.plugins.reduce((nodes, plugin) => {
       if (plugin.nodes) {
         Object.assign(nodes, plugin.nodes);
       }
       return nodes;
     }, {});
+    console.log("PluginManager: All collected nodes:", nodes);
+    return nodes;
   }
 
   getToolbarItems(schema: Schema): Map<string, ToolbarItem> {
@@ -61,6 +72,7 @@ export class PluginManager {
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
       const items = plugin.getToolbarItems ? plugin.getToolbarItems(schema) : [];
+      console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
     });
     console.log(`PluginManager: Collected toolbar items:`, toolbarItemMap);
