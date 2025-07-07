@@ -1,3 +1,4 @@
+import { toggleList } from '../commands/toggleList';
 import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { inputRules, InputRule } from 'prosemirror-inputrules';
@@ -11,16 +12,7 @@ type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boo
 export const toggleBulletList: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
   const bulletListType = state.schema.nodes.bullet_list;
   const listItemType = state.schema.nodes.list_item;
-
-  if (!bulletListType || !listItemType) {
-    return false;
-  }
-
-  if (isBulletListActive(state)) {
-    return liftListItem(listItemType)(state, dispatch);
-  } else {
-    return wrapInList(bulletListType, {})(state, dispatch);
-  }
+  return toggleList(bulletListType, listItemType)(state, dispatch);
 };
 
 export const isBulletListActive = (state: EditorState) => {

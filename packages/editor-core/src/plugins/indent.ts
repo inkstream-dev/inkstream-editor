@@ -37,8 +37,6 @@ const indentCommand = (state: EditorState, dispatch?: (tr: Transaction) => void)
     console.log("indentCommand: Paragraph indentation successful");
     return true;
   }
-
-  console.log("indentCommand: No changes made");
   return false;
 };
 
