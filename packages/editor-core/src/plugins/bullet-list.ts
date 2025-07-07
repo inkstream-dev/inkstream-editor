@@ -1,9 +1,10 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { inputRules, InputRule } from 'prosemirror-inputrules';
 import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from 'prosemirror-state';
 import { wrapInList, sinkListItem, liftListItem, splitListItem } from 'prosemirror-schema-list';
 import { keymap } from 'prosemirror-keymap';
-import { Plugin, ToolbarItem } from './'; // Import Plugin and ToolbarItem interfaces
+import { ToolbarItem } from './index'; // Import Plugin and ToolbarItem interfaces
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
 
@@ -41,7 +42,7 @@ export const isBulletListActive = (state: EditorState) => {
   return isActive;
 };
 
-export const bulletListPlugin: Plugin = {
+export const bulletListPlugin = createPlugin({
   name: 'bulletList',
   nodes: {
     bullet_list: {
@@ -101,5 +102,5 @@ export const bulletListPlugin: Plugin = {
       },
     ];
   },
-};
+});
 

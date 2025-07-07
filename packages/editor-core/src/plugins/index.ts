@@ -5,7 +5,8 @@ import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
 import { historyPlugin } from './history';
 
-export interface ToolbarItem {
+
+  export interface ToolbarItem {
   id: string;
   icon: string; // Or a React component, for now a string
   tooltip: string;
@@ -21,6 +22,8 @@ export interface Plugin {
   getProseMirrorPlugins: (schema: Schema) => ProseMirrorPlugin[];
   getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
 }
+
+
 
 export class PluginManager {
   private plugins: Plugin[] = [];
@@ -53,13 +56,15 @@ export class PluginManager {
     }, {});
   }
 
-  getToolbarItems(schema: Schema): ToolbarItem[] {
+  getToolbarItems(schema: Schema): Map<string, ToolbarItem> {
     console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
-    return this.plugins.flatMap(plugin => {
+    const toolbarItemMap = new Map<string, ToolbarItem>();
+    this.plugins.forEach(plugin => {
       const items = plugin.getToolbarItems ? plugin.getToolbarItems(schema) : [];
-      console.log(`PluginManager: Plugin ${plugin.name} toolbar items:`, items);
-      return items;
+      items.forEach(item => toolbarItemMap.set(item.id, item));
     });
+    console.log(`PluginManager: Collected toolbar items:`, toolbarItemMap);
+    return toolbarItemMap;
   }
 
   getMarks(): { [key: string]: any } {

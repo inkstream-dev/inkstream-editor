@@ -5,7 +5,7 @@ import { baseKeymap, toggleMark, splitBlock, chainCommands } from 'prosemirror-c
 import { splitListItem, liftListItem } from 'prosemirror-schema-list';
 import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
-import { PluginManager, Plugin } from './plugins';
+import { PluginManager, Plugin, ToolbarItem } from './plugins';
 
 // Import all plugin instances directly
 import { boldPlugin } from './plugins/bold';
@@ -171,6 +171,13 @@ pluginManager.registerPlugin(codePlugin);
 pluginManager.registerPlugin(historyPlugin); // Register the history plugin
 
 export const inkstreamPlugins = (manager: PluginManager) => {
+  // Register all plugins from pluginLoader with the manager
+  Object.values(pluginLoader).forEach(loadPlugin => {
+    loadPlugin().then(plugin => {
+      manager.registerPlugin(plugin);
+    });
+  });
+
   const schema = inkstreamSchema(manager);
 
   return [
@@ -180,4 +187,20 @@ export const inkstreamPlugins = (manager: PluginManager) => {
   ];
 };
 
-export type { Plugin };
+// Centralized plugin loader for dynamic imports
+const pluginLoader = {
+  bold: () => import('./plugins/bold').then(m => m.boldPlugin),
+  underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
+  italic: () => import('./plugins/italic').then(m => m.italicPlugin),
+  strike: () => import('./plugins/strike').then(m => m.strikePlugin),
+  alignLeft: () => import('./plugins/align-left').then(m => m.alignLeftPlugin),
+  image: () => import('./plugins/image').then(m => m.imagePlugin),
+  indent: () => import('./plugins/indent').then(m => m.indentPlugin),
+  bulletList: () => import('./plugins/bullet-list').then(m => m.bulletListPlugin),
+  orderedList: () => import('./plugins/ordered-list').then(m => m.orderedListPlugin),
+  code: () => import('./plugins/code').then(m => m.codePlugin),
+  history: () => import('./plugins/history').then(m => m.historyPlugin),
+};
+
+export type { Plugin, ToolbarItem };
+export { pluginLoader };

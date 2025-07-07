@@ -1,0 +1,21 @@
+import { Schema } from 'prosemirror-model';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
+import { ToolbarItem, Plugin } from './index';
+
+export interface PluginConfig {
+  name: string;
+  nodes?: { [key: string]: any };
+  marks?: { [key: string]: any };
+  getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
+  getToolbarItems?: (schema: Schema) => ToolbarItem[];
+}
+
+export function createPlugin(config: PluginConfig): Plugin {
+  return {
+    name: config.name,
+    nodes: config.nodes,
+    marks: config.marks,
+    getProseMirrorPlugins: config.getProseMirrorPlugins || (() => []),
+    getToolbarItems: config.getToolbarItems || (() => []),
+  };
+}

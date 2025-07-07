@@ -1,12 +1,13 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from 'prosemirror-state';
 import { history, undo, redo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
-import { Plugin, ToolbarItem } from './';
+import { ToolbarItem } from './index';
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
 
-export const historyPlugin: Plugin = {
+export const historyPlugin = createPlugin({
   name: 'history',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     const keys: { [key: string]: Command } = {
@@ -38,4 +39,4 @@ export const historyPlugin: Plugin = {
       },
     ];
   },
-};
+});

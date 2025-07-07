@@ -1,9 +1,10 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { toggleMark } from 'prosemirror-commands';
 import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { Plugin, ToolbarItem } from '../plugins';
+import { ToolbarItem } from './index';
 import { TextSelection } from 'prosemirror-state';
 
 // Helper function to create a mark input rule
@@ -20,7 +21,7 @@ function markInputRule(regexp: RegExp, markType: any) {
   });
 }
 
-export const boldPlugin: Plugin = {
+export const boldPlugin = createPlugin({
   name: 'bold',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     const plugins: ProseMirrorPlugin[] = [];
@@ -65,4 +66,4 @@ export const boldPlugin: Plugin = {
       },
     ];
   },
-};
+});

@@ -1,7 +1,8 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
 import { setBlockType } from 'prosemirror-commands';
-import { Plugin, ToolbarItem } from '../plugins';
+import { ToolbarItem } from './index';
 
 const setAlign = (align: string) =>
   function (state: EditorState, dispatch?: (tr: Transaction) => void) {
@@ -26,7 +27,7 @@ const setAlign = (align: string) =>
     return false;
   };
 
-export const alignLeftPlugin: Plugin = {
+export const alignLeftPlugin = createPlugin({
   name: 'alignLeft',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     return [];
@@ -52,4 +53,4 @@ export const alignLeftPlugin: Plugin = {
       },
     ];
   },
-};
+});

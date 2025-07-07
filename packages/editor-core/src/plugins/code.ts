@@ -1,9 +1,10 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { Plugin, ToolbarItem } from './';
+import { ToolbarItem } from './index';
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
 
@@ -16,7 +17,7 @@ export const isCodeActive = (state: EditorState) => {
   return state.doc.rangeHasMark(from, to, state.schema.marks.code);
 };
 
-export const codePlugin: Plugin = {
+export const codePlugin = createPlugin({
   name: 'code',
   marks: {
     code: {
@@ -59,4 +60,4 @@ export const codePlugin: Plugin = {
       },
     ];
   },
-};
+});

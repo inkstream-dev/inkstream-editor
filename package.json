@@ -20,6 +20,10 @@
     "node": ">=18.0.0"
   },
   "packageManager": "pnpm@8.9.0",
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "dependencies": {
     "prosemirror-schema-list": "^1.5.1"
   }

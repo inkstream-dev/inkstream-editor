@@ -1,10 +1,12 @@
+import { Schema } from 'prosemirror-model';
+import { createPlugin } from './plugin-factory';
 import { Plugin as ProseMirrorPlugin } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { TextSelection } from 'prosemirror-state';
 import { NodeRange } from 'prosemirror-model';
 import { liftListItem, sinkListItem } from 'prosemirror-schema-list';
-import { Plugin } from '../plugins';
+import { ToolbarItem } from './index';
 
 const INDENT_SIZE = 2; // Default indentation size
 
@@ -87,7 +89,7 @@ const outdentCommand = (state: EditorState, dispatch?: (tr: Transaction) => void
   return false;
 };
 
-export const indentPlugin: Plugin = {
+export const indentPlugin = createPlugin({
   name: 'indent',
   getProseMirrorPlugins: () => {
     return [
@@ -97,4 +99,20 @@ export const indentPlugin: Plugin = {
       }),
     ];
   },
-};
+  getToolbarItems: (schema: Schema): ToolbarItem[] => {
+    return [
+      {
+        id: 'indent',
+        icon: '→',
+        tooltip: 'Indent',
+        command: indentCommand,
+      },
+      {
+        id: 'outdent',
+        icon: '←',
+        tooltip: 'Outdent',
+        command: outdentCommand,
+      },
+    ];
+  },
+});

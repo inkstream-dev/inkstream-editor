@@ -4,20 +4,21 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager, Plugin, inkstreamPlugins } from '@inkstream/editor-core';
+import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins, ToolbarItem } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 
 interface RichTextEditorProps {
   initialContent: string;
   plugins?: string[]; // Now accepts an array of plugin names (strings)
+  toolbarLayout?: string[]; // Optional: Array of toolbar item IDs in desired order
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins, toolbarLayout }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
-  const [toolbarItems, setToolbarItems] = useState<any[]>([]); // State for toolbar items
+  const [toolbarItems, setToolbarItems] = useState<ToolbarItem[]>([]); // State for toolbar items
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
@@ -61,9 +62,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
 
     editorViewRef.current = view;
     setCurrentEditorState(state);
-    const items = pluginManager.getToolbarItems(schema);
-    console.log("Toolbar items collected:", items);
-    setToolbarItems(items);
+
+    // Get all available toolbar items
+    const allToolbarItems = pluginManager.getToolbarItems(schema);
+    let orderedToolbarItems: ToolbarItem[] = [];
+
+    if (toolbarLayout && toolbarLayout.length > 0) {
+      // If a layout is provided, use it to order the items
+      for (const itemId of toolbarLayout) {
+        const item = allToolbarItems.get(itemId);
+        if (item) {
+          orderedToolbarItems.push(item);
+        }
+      }
+    } else {
+      // Otherwise, use the default order (values from the map)
+      orderedToolbarItems = Array.from(allToolbarItems.values());
+    }
+
+    console.log("Toolbar items collected:", orderedToolbarItems);
+    setToolbarItems(orderedToolbarItems);
 
     // Cleanup function for EditorView when component unmounts
     return () => {
@@ -74,7 +92,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         setCurrentEditorState(null);
       }
     };
-  }, [initialContent, handleDispatchTransaction]); // Removed 'plugins' from dependency array as they are now loaded synchronously
+  }, [initialContent, handleDispatchTransaction, toolbarLayout]); // Add toolbarLayout to dependency array
 
   return (
     <div className="inkstream-editor-wrapper">

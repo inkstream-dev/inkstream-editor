@@ -1,11 +1,12 @@
+import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { toggleMark } from 'prosemirror-commands';
-import { Plugin, ToolbarItem } from '../plugins';
+import { ToolbarItem } from './index';
 import { TextSelection } from 'prosemirror-state';
 
-export const italicPlugin: Plugin = {
+export const italicPlugin = createPlugin({
   name: 'italic',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     const plugins: ProseMirrorPlugin[] = [];
@@ -43,4 +44,4 @@ export const italicPlugin: Plugin = {
       },
     ];
   },
-};
+});
