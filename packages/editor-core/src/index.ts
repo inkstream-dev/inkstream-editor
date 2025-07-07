@@ -30,11 +30,15 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       group: "block",
       attrs: {
         align: { default: null },
+        indent: { default: 0 }, // Add indent attribute
       },
       toDOM(node) {
         const attrs: { [key: string]: string } = {};
         if (node.attrs.align) {
           attrs.style = `text-align: ${node.attrs.align}`;
+        }
+        if (node.attrs.indent) {
+          attrs.style = `${attrs.style || ''} padding-left: ${node.attrs.indent * 20}px;`; // Example: 20px per indent level
         }
         return ["p", attrs, 0];
       },

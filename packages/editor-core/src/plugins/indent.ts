@@ -11,81 +11,66 @@ import { ToolbarItem } from './index';
 const INDENT_SIZE = 2; // Default indentation size
 
 const indentCommand = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-  const { $from, $to } = state.selection;
-  let tr = state.tr;
+  console.log("indentCommand triggered");
+  const { selection, tr } = state;
+  const { from, to } = selection;
   let handled = false;
 
-  if ($from.parent.type.name === 'list_item') {
-    // Handle list indentation
-    if (sinkListItem(state.schema.nodes.list_item)(state, dispatch)) {
-      return true;
-    }
-  }
-
-  // Collect changes first, then apply
-  const changes: { pos: number, text: string, oldLength: number }[] = [];
-
-  state.doc.nodesBetween($from.start($from.depth), $to.end($to.depth), (node, pos) => {
-    if (node.isBlock && node.type.name === 'paragraph') {
-      const startOfBlockContent = pos + 1; // Start of the paragraph's text content
-      const currentText = node.textBetween(0, node.content.size);
-      const newText = ' '.repeat(INDENT_SIZE) + currentText;
-      changes.push({ pos: startOfBlockContent, text: newText, oldLength: currentText.length });
-      handled = true;
-    }
-  });
-
-  // Apply changes in reverse order to avoid position issues
-  for (let i = changes.length - 1; i >= 0; i--) {
-    const change = changes[i];
-    tr.replaceWith(change.pos, change.pos + change.oldLength, state.schema.text(change.text));
-  }
-
-  if (handled && dispatch) {
-    dispatch(tr);
+  if (sinkListItem(state.schema.nodes.list_item)(state, dispatch)) {
+    console.log("indentCommand: sinkListItem successful");
     return true;
   }
 
-  return false;
-};
-
-const outdentCommand = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-  const { $from, $to } = state.selection;
-  let tr = state.tr;
-  let handled = false;
-
-  if ($from.parent.type.name === 'list_item') {
-    // Handle list outdentation
-    if (liftListItem(state.schema.nodes.list_item)(state, dispatch)) {
-      return true;
-    }
-  }
-
-  const changes: { pos: number, text: string, oldLength: number }[] = [];
-
-  state.doc.nodesBetween($from.start($from.depth), $to.end($to.depth), (node, pos) => {
-    if (node.isBlock && node.type.name === 'paragraph') {
-      const startOfBlockContent = pos + 1;
-      const currentText = node.textBetween(0, node.content.size);
-      const spacesToRemove = Math.min(INDENT_SIZE, currentText.match(/^\s*/)?.[0].length || 0);
-      if (spacesToRemove > 0) {
-        const newText = currentText.substring(spacesToRemove);
-        changes.push({ pos: startOfBlockContent, text: newText, oldLength: currentText.length });
+  state.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type.name === 'paragraph') {
+      const currentIndent = node.attrs.indent || 0;
+      const newIndent = currentIndent + 1;
+      if (newIndent <= 10) { // Limit indentation to 10 levels
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent: newIndent });
         handled = true;
       }
     }
   });
 
-  for (let i = changes.length - 1; i >= 0; i--) {
-    const change = changes[i];
-    tr.replaceWith(change.pos, change.pos + change.oldLength, state.schema.text(change.text));
-  }
-
   if (handled && dispatch) {
     dispatch(tr);
+    console.log("indentCommand: Paragraph indentation successful");
     return true;
   }
 
+  console.log("indentCommand: No changes made");
+  return false;
+};
+
+const outdentCommand = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+  console.log("outdentCommand triggered");
+  const { selection, tr } = state;
+  const { from, to } = selection;
+  let handled = false;
+
+  if (liftListItem(state.schema.nodes.list_item)(state, dispatch)) {
+    console.log("outdentCommand: liftListItem successful");
+    return true;
+  }
+
+  state.doc.nodesBetween(from, to, (node, pos) => {
+    if (node.type.name === 'paragraph') {
+      const currentIndent = node.attrs.indent || 0;
+      const newIndent = currentIndent - 1;
+      if (newIndent >= 0) {
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent: newIndent });
+        handled = true;
+      }
+    }
+  });
+
+  if (handled && dispatch) {
+    dispatch(tr);
+    console.log("outdentCommand: Paragraph outdentation successful");
+    return true;
+  }
+
+  console.log("outdentCommand: No changes made");
   return false;
 };
 
