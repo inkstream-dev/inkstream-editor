@@ -5,8 +5,6 @@ import { baseKeymap, toggleMark, splitBlock } from 'prosemirror-commands';
 import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
 import { PluginManager, Plugin } from './plugins';
-import { boldPlugin } from './plugins/bold';
-import { imagePlugin } from './plugins/image';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = new Schema({
@@ -143,6 +141,7 @@ export const pluginManager = new PluginManager();
 const pluginLoader = {
   bold: () => import('./plugins/bold').then(m => m.boldPlugin),
   image: () => import('./plugins/image').then(m => m.imagePlugin),
+  underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
 };
 
 export type { Plugin };
