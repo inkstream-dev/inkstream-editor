@@ -41,3 +41,8 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.inkstream-toolbar-button.active {
+  background-color: #a0a0a0;
+  border-color: #888;
+}
