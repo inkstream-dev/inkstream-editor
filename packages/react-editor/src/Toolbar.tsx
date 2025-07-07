@@ -11,8 +11,6 @@ interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems }) => {
-  console.log("Toolbar rendering with items:", toolbarItems); // Log received toolbar items
-
   const executeCommand = (command: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean) => {
     if (editorState && editorDispatch && editorView) {
       editorView.focus();

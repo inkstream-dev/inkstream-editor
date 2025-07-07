@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins } from '@inkstream/editor-core';
+import { inkstreamSchema, pluginManager, Plugin, inkstreamPlugins } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 
@@ -42,47 +42,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
 
     console.log("Initializing EditorView...");
     // Use the globally exported pluginManager instance
-    pluginManager.clearPlugins(); // Clear plugins before loading new ones
 
-    const loadPluginsAndInitializeEditor = async (currentPlugins?: string[]) => {
-      if (currentPlugins) {
-        for (const pluginName of currentPlugins) {
-          try {
-            const loadedPlugin = await (pluginLoader as any)[pluginName]();
-            pluginManager.registerPlugin(loadedPlugin); // Use the global instance
-          } catch (error) {
-            console.error(`Failed to load plugin ${pluginName}:`, error);
-          }
-        }
-      }
+    const schema = inkstreamSchema(pluginManager);
+    const parser = DOMParser.fromSchema(schema);
+    const doc = parser.parse(new window.DOMParser().parseFromString(initialContent, "text/html").body);
+    console.log("Parsed initial content doc:", doc.toJSON());
 
-      const schema = inkstreamSchema(pluginManager);
-      const parser = DOMParser.fromSchema(schema);
-      const doc = parser.parse(new window.DOMParser().parseFromString(initialContent, "text/html").body);
-      console.log("Parsed initial content doc:", doc.toJSON());
+    const state = EditorState.create({
+      schema: schema,
+      doc: doc,
+      plugins: inkstreamPlugins(pluginManager),
+    });
 
-      const state = EditorState.create({
-        schema: schema,
-        doc: doc,
-        plugins: inkstreamPlugins(pluginManager),
-      });
+    const view = new EditorView(editorRef.current, {
+      state,
+      dispatchTransaction: handleDispatchTransaction,
+    });
 
-      const view = new EditorView(editorRef.current, {
-        state,
-        dispatchTransaction: handleDispatchTransaction,
-      });
-
-      editorViewRef.current = view;
-      setCurrentEditorState(state);
-      const items = pluginManager.getToolbarItems(schema);
-      console.log("Toolbar items collected:", items);
-      setToolbarItems(items);
-    };
-
-    // Await the async function call
-    (async () => {
-      await loadPluginsAndInitializeEditor(plugins);
-    })();
+    editorViewRef.current = view;
+    setCurrentEditorState(state);
+    const items = pluginManager.getToolbarItems(schema);
+    console.log("Toolbar items collected:", items);
+    setToolbarItems(items);
 
     // Cleanup function for EditorView when component unmounts
     return () => {
@@ -93,7 +74,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         setCurrentEditorState(null);
       }
     };
-  }, [plugins, handleDispatchTransaction]); // Add plugins to dependency array
+  }, [initialContent, handleDispatchTransaction]); // Removed 'plugins' from dependency array as they are now loaded synchronously
 
   return (
     <div className="inkstream-editor-wrapper">

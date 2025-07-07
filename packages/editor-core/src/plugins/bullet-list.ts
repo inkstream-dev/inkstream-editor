@@ -63,14 +63,6 @@ export const bulletListPlugin: Plugin = {
       'Shift-Control-8': toggleBulletList,
       'Mod-[': liftListItem(listItemType),
       'Mod-]': sinkListItem(listItemType),
-      'Enter': (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-        if (state.selection.$from.parent.type === listItemType) {
-          if (state.selection.$from.end() === state.selection.$from.pos) {
-            return splitListItem(listItemType)(state, dispatch);
-          }
-        }
-        return false;
-      },
       'Shift-Enter': (state, dispatch) => {
         dispatch?.(state.tr.replaceSelectionWith(state.schema.nodes.hard_break.create()).scrollIntoView());
         return true;

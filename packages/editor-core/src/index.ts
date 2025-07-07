@@ -1,10 +1,24 @@
 import { Schema } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
-import { baseKeymap, toggleMark, splitBlock } from 'prosemirror-commands';
+import { baseKeymap, toggleMark, splitBlock, chainCommands } from 'prosemirror-commands';
+import { splitListItem, liftListItem } from 'prosemirror-schema-list';
 import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
 import { PluginManager, Plugin } from './plugins';
+
+// Import all plugin instances directly
+import { boldPlugin } from './plugins/bold';
+import { underlinePlugin } from './plugins/underline';
+import { italicPlugin } from './plugins/italic';
+import { strikePlugin } from './plugins/strike';
+import { alignLeftPlugin } from './plugins/align-left';
+import { imagePlugin } from './plugins/image';
+import { indentPlugin } from './plugins/indent';
+import { bulletListPlugin } from './plugins/bullet-list';
+import { orderedListPlugin } from './plugins/ordered-list';
+import { codePlugin } from './plugins/code';
+import { historyPlugin } from './plugins/history'; // Import the history plugin
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -136,44 +150,34 @@ const buildKeymap = (schema: Schema) => {
   };
 
   // Add keybinding for creating a new paragraph (Enter)
-  keys["Enter"] = splitBlock;
+  keys["Enter"] = chainCommands(splitListItem(schema.nodes.list_item), liftListItem(schema.nodes.list_item), splitBlock);
 
   return keymap(keys);
 };
 
-export const inkstreamPlugins = (manager: PluginManager) => {
-  // Register all plugins from pluginLoader with the manager
-  Object.values(pluginLoader).forEach(loadPlugin => {
-    loadPlugin().then(plugin => {
-      manager.registerPlugin(plugin);
-    });
-  });
+export const pluginManager = new PluginManager();
 
+// Register all plugins with the manager
+pluginManager.registerPlugin(boldPlugin);
+pluginManager.registerPlugin(underlinePlugin);
+pluginManager.registerPlugin(italicPlugin);
+pluginManager.registerPlugin(strikePlugin);
+pluginManager.registerPlugin(alignLeftPlugin);
+pluginManager.registerPlugin(imagePlugin);
+pluginManager.registerPlugin(indentPlugin);
+pluginManager.registerPlugin(bulletListPlugin);
+pluginManager.registerPlugin(orderedListPlugin);
+pluginManager.registerPlugin(codePlugin);
+pluginManager.registerPlugin(historyPlugin); // Register the history plugin
+
+export const inkstreamPlugins = (manager: PluginManager) => {
   const schema = inkstreamSchema(manager);
 
   return [
     ...manager.getProseMirrorPlugins(schema),
     buildInputRules(schema),
     buildKeymap(schema),
-    history(),
   ];
 };
 
-export const pluginManager = new PluginManager();
-
-// Centralized plugin loader for dynamic imports
-const pluginLoader = {
-  bold: () => import('./plugins/bold').then(m => m.boldPlugin),
-  underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
-  italic: () => import('./plugins/italic').then(m => m.italicPlugin),
-  strike: () => import('./plugins/strike').then(m => m.strikePlugin),
-  alignLeft: () => import('./plugins/align-left').then(m => m.alignLeftPlugin),
-  image: () => import('./plugins/image').then(m => m.imagePlugin),
-  indent: () => import('./plugins/indent').then(m => m.indentPlugin),
-  bulletList: () => import('./plugins/bullet-list').then(m => m.bulletListPlugin),
-  orderedList: () => import('./plugins/ordered-list').then(m => m.orderedListPlugin),
-  code: () => import('./plugins/code').then(m => m.codePlugin),
-};
-
 export type { Plugin };
-export { pluginLoader };

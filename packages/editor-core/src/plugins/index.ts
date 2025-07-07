@@ -3,6 +3,7 @@ import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirr
 import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
+import { historyPlugin } from './history';
 
 export interface ToolbarItem {
   id: string;
