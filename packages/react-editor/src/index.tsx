@@ -63,7 +63,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
       const state = EditorState.create({
         schema: inkstreamSchema,
         doc: doc,
-        plugins: inkstreamPlugins(inkstreamSchema),
+        plugins: inkstreamPlugins(inkstreamSchema, pluginManager),
       });
 
       const view = new EditorView(editorRef.current, {

@@ -128,13 +128,9 @@ const buildKeymap = (schema: Schema) => {
   return keymap(keys);
 };
 
-export const inkstreamPlugins = (schema: Schema) => {
-  const pluginManager = new PluginManager();
-  pluginManager.registerPlugin(boldPlugin);
-  pluginManager.registerPlugin(imagePlugin);
-
+export const inkstreamPlugins = (schema: Schema, manager: PluginManager) => {
   return [
-    ...pluginManager.getProseMirrorPlugins(schema),
+    ...manager.getProseMirrorPlugins(schema),
     buildInputRules(schema),
     buildKeymap(schema),
     history(),
