@@ -142,6 +142,7 @@ const pluginLoader = {
   bold: () => import('./plugins/bold').then(m => m.boldPlugin),
   underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
   italic: () => import('./plugins/italic').then(m => m.italicPlugin),
+  strike: () => import('./plugins/strike').then(m => m.strikePlugin),
   image: () => import('./plugins/image').then(m => m.imagePlugin),
 };
 
