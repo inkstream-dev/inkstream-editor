@@ -140,8 +140,9 @@ export const pluginManager = new PluginManager();
 // Centralized plugin loader for dynamic imports
 const pluginLoader = {
   bold: () => import('./plugins/bold').then(m => m.boldPlugin),
-  image: () => import('./plugins/image').then(m => m.imagePlugin),
   underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
+  italic: () => import('./plugins/italic').then(m => m.italicPlugin),
+  image: () => import('./plugins/image').then(m => m.imagePlugin),
 };
 
 export type { Plugin };
