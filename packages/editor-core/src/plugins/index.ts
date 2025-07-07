@@ -2,6 +2,7 @@ import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
 import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
+import { codePlugin } from './code';
 
 export interface ToolbarItem {
   id: string;
@@ -15,6 +16,7 @@ export interface ToolbarItem {
 export interface Plugin {
   name: string;
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
+  marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins: (schema: Schema) => ProseMirrorPlugin[];
   getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
 }
@@ -57,6 +59,15 @@ export class PluginManager {
       console.log(`PluginManager: Plugin ${plugin.name} toolbar items:`, items);
       return items;
     });
+  }
+
+  getMarks(): { [key: string]: any } {
+    return this.plugins.reduce((marks, plugin) => {
+      if (plugin.marks) {
+        Object.assign(marks, plugin.marks);
+      }
+      return marks;
+    }, {});
   }
 
   getPlugin(name: string): Plugin | undefined {

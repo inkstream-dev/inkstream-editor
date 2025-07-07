@@ -75,6 +75,7 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
     underline: { toDOM() { return ["u", 0]; } },
     strike: { toDOM() { return ["s", 0]; } },
     code: { toDOM() { return ["code", 0]; } },
+    ...manager.getMarks(), // Dynamically add marks from plugins
   },
 });
 
@@ -171,6 +172,7 @@ const pluginLoader = {
   indent: () => import('./plugins/indent').then(m => m.indentPlugin),
   bulletList: () => import('./plugins/bullet-list').then(m => m.bulletListPlugin),
   orderedList: () => import('./plugins/ordered-list').then(m => m.orderedListPlugin),
+  code: () => import('./plugins/code').then(m => m.codePlugin),
 };
 
 export type { Plugin };
