@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      prosemirror-schema-list:
+        specifier: ^1.5.1
+        version: 1.5.1
     devDependencies:
       prettier:
         specifier: ^3.2.5
@@ -66,6 +70,9 @@ importers:
       prosemirror-model:
         specifier: ^1.19.0
         version: 1.25.1
+      prosemirror-schema-list:
+        specifier: ^1.5.1
+        version: 1.5.1
       prosemirror-state:
         specifier: ^1.4.0
         version: 1.4.3
@@ -3031,6 +3038,14 @@ packages:
     resolution: {integrity: sha512-AUvbm7qqmpZa5d9fPKMvH1Q5bqYQvAZWOGRvxsB6iFLyycvC9MwNemNVjHVrWgjaoxAfY8XVg7DbvQ/qxvI9Eg==}
     dependencies:
       orderedmap: 2.1.1
+    dev: false
+
+  /prosemirror-schema-list@1.5.1:
+    resolution: {integrity: sha512-927lFx/uwyQaGwJxLWCZRkjXG0p48KpMj6ueoYiu4JX05GGuGcgzAy62dfiV8eFZftgyBUvLx76RsMe20fJl+Q==}
+    dependencies:
+      prosemirror-model: 1.25.1
+      prosemirror-state: 1.4.3
+      prosemirror-transform: 1.10.4
     dev: false
 
   /prosemirror-state@1.4.3:

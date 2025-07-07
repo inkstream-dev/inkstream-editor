@@ -56,14 +56,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         }
       }
 
-      const parser = DOMParser.fromSchema(inkstreamSchema);
+      const schema = inkstreamSchema(pluginManager);
+      const parser = DOMParser.fromSchema(schema);
       const doc = parser.parse(new window.DOMParser().parseFromString(initialContent, "text/html").body);
       console.log("Parsed initial content doc:", doc.toJSON());
 
       const state = EditorState.create({
-        schema: inkstreamSchema,
+        schema: schema,
         doc: doc,
-        plugins: inkstreamPlugins(inkstreamSchema, pluginManager),
+        plugins: inkstreamPlugins(pluginManager),
       });
 
       const view = new EditorView(editorRef.current, {
@@ -73,7 +74,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
 
       editorViewRef.current = view;
       setCurrentEditorState(state);
-      const items = pluginManager.getToolbarItems(inkstreamSchema);
+      const items = pluginManager.getToolbarItems(schema);
       console.log("Toolbar items collected:", items);
       setToolbarItems(items);
     };

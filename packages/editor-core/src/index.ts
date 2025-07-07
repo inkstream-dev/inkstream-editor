@@ -7,10 +7,23 @@ import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emD
 import { PluginManager, Plugin } from './plugins';
 
 // Define a more comprehensive schema for a rich text editor
-export const inkstreamSchema = new Schema({
+export const inkstreamSchema = (manager: PluginManager) => new Schema({
   nodes: {
     doc: { content: "block+", toDOM() { return ["div", 0]; } },
-    paragraph: { content: "inline*", group: "block", toDOM() { return ["p", 0]; } },
+    paragraph: {
+      content: "inline*",
+      group: "block",
+      attrs: {
+        align: { default: null },
+      },
+      toDOM(node) {
+        const attrs: { [key: string]: string } = {};
+        if (node.attrs.align) {
+          attrs.style = `text-align: ${node.attrs.align}`;
+        }
+        return ["p", attrs, 0];
+      },
+    },
     blockquote: { content: "block+", group: "block", toDOM() { return ["blockquote", 0]; } },
     horizontal_rule: { group: "block", toDOM() { return ["hr"]; } },
     heading: {
@@ -35,6 +48,7 @@ export const inkstreamSchema = new Schema({
       draggable: true,
       toDOM(node) { return ["img", node.attrs]; },
     },
+    ...manager.getNodes(), // Dynamically add nodes from plugins
   },
 
   marks: {
@@ -126,7 +140,16 @@ const buildKeymap = (schema: Schema) => {
   return keymap(keys);
 };
 
-export const inkstreamPlugins = (schema: Schema, manager: PluginManager) => {
+export const inkstreamPlugins = (manager: PluginManager) => {
+  // Register all plugins from pluginLoader with the manager
+  Object.values(pluginLoader).forEach(loadPlugin => {
+    loadPlugin().then(plugin => {
+      manager.registerPlugin(plugin);
+    });
+  });
+
+  const schema = inkstreamSchema(manager);
+
   return [
     ...manager.getProseMirrorPlugins(schema),
     buildInputRules(schema),
@@ -143,7 +166,11 @@ const pluginLoader = {
   underline: () => import('./plugins/underline').then(m => m.underlinePlugin),
   italic: () => import('./plugins/italic').then(m => m.italicPlugin),
   strike: () => import('./plugins/strike').then(m => m.strikePlugin),
+  alignLeft: () => import('./plugins/align-left').then(m => m.alignLeftPlugin),
   image: () => import('./plugins/image').then(m => m.imagePlugin),
+  indent: () => import('./plugins/indent').then(m => m.indentPlugin),
+  bulletList: () => import('./plugins/bullet-list').then(m => m.bulletListPlugin),
+  orderedList: () => import('./plugins/ordered-list').then(m => m.orderedListPlugin),
 };
 
 export type { Plugin };

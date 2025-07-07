@@ -10,20 +10,23 @@
   },
   "keywords": [],
   "author": "",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
+    "@inkstream/eslint-config": "workspace:*",
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
-    "@inkstream/eslint-config": "workspace:*",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "prosemirror-model": "^1.19.0",
-    "prosemirror-state": "^1.4.0",
-    "prosemirror-view": "^1.32.2",
     "prosemirror-commands": "^1.5.2",
+    "prosemirror-history": "^1.2.2",
     "prosemirror-inputrules": "^1.2.2",
     "prosemirror-keymap": "^1.2.2",
-    "prosemirror-history": "^1.2.2"
+    "prosemirror-model": "^1.19.0",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.0",
+    "prosemirror-view": "^1.32.2"
   }
 }
