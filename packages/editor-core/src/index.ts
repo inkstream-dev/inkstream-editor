@@ -1,9 +1,9 @@
 import { Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
-import { baseKeymap, toggleMark } from 'prosemirror-commands';
+import { baseKeymap, toggleMark, splitBlock } from 'prosemirror-commands';
 import { history } from 'prosemirror-history';
-import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis } from 'prosemirror-inputrules';
+import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
 import { PluginManager, Plugin } from './plugins';
 import { boldPlugin } from './plugins/bold';
 import { imagePlugin } from './plugins/image';
@@ -79,6 +79,29 @@ const buildInputRules = (schema: Schema) => {
   // Rule for code blocks (e.g., ``` Code)
   rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
 
+  // Rules for bold
+  rules.push(new InputRule(/\*\*([^*]+)\*\*$/, (state, match, start, end) => {
+    const tr = state.tr;
+    if (match[1]) {
+      const textStart = start + match[0].indexOf(match[1]);
+      const textEnd = textStart + match[1].length;
+      tr.delete(textStart, textEnd);
+      tr.addMark(textStart, textEnd, schema.marks.strong.create());
+    }
+    return tr;
+  }));
+
+  rules.push(new InputRule(/__([^_]+)__$/, (state, match, start, end) => {
+    const tr = state.tr;
+    if (match[1]) {
+      const textStart = start + match[0].indexOf(match[1]);
+      const textEnd = textStart + match[1].length;
+      tr.delete(textStart, textEnd);
+      tr.addMark(textStart, textEnd, schema.marks.strong.create());
+    }
+    return tr;
+  }));
+
   return inputRules({
     rules,
   });
@@ -91,18 +114,32 @@ const buildKeymap = (schema: Schema) => {
   // Add base keymap commands
   Object.assign(keys, baseKeymap);
 
-  // Add custom keybindings
-  // Example: Ctrl-b for bold
-  keys["Mod-b"] = toggleMark(schema.marks.strong);
+  // Add keybinding for hard breaks (Shift-Enter)
+  keys["Shift-Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+    if (dispatch) {
+      dispatch(state.tr.replaceSelectionWith(schema.nodes.hard_break.create()).scrollIntoView());
+    }
+    return true;
+  };
+
+  // Add keybinding for creating a new paragraph (Enter)
+  keys["Enter"] = splitBlock;
 
   return keymap(keys);
 };
 
-export const inkstreamPlugins = (schema: Schema) => [
-  buildInputRules(schema),
-  buildKeymap(schema),
-  history(),
-];
+export const inkstreamPlugins = (schema: Schema) => {
+  const pluginManager = new PluginManager();
+  pluginManager.registerPlugin(boldPlugin);
+  pluginManager.registerPlugin(imagePlugin);
+
+  return [
+    ...pluginManager.getProseMirrorPlugins(schema),
+    buildInputRules(schema),
+    buildKeymap(schema),
+    history(),
+  ];
+};
 
 export const pluginManager = new PluginManager();
 

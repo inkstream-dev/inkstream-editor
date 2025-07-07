@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager, Plugin, pluginLoader } from '@inkstream/editor-core';
+import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 
@@ -63,7 +63,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
       const state = EditorState.create({
         schema: inkstreamSchema,
         doc: doc,
-        plugins: pluginManager.getProseMirrorPlugins(inkstreamSchema),
+        plugins: inkstreamPlugins(inkstreamSchema),
       });
 
       const view = new EditorView(editorRef.current, {
@@ -92,7 +92,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         setCurrentEditorState(null);
       }
     };
-  }, [initialContent, plugins, handleDispatchTransaction]); // Add plugins to dependency array
+  }, [plugins, handleDispatchTransaction]); // Add plugins to dependency array
 
   return (
     <div className="inkstream-editor-wrapper">
