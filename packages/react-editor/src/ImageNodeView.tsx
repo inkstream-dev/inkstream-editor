@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Node } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 
@@ -15,6 +15,9 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
   const [error, setError] = useState<string | null>(null);
   const [src, setSrc] = useState<string | null>(node.attrs.src);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
     // Update the node's src attribute when the local src state changes
@@ -72,8 +75,72 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
     }
   };
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!imgRef.current) return;
+
+    // Only allow resizing from the resize handle
+    if (!(e.target as HTMLElement).classList.contains('resize-handle')) {
+      return;
+    }
+
+    e.preventDefault();
+    setIsResizing(true);
+
+    const startX = e.clientX;
+    const initialWidth = imgRef.current.width;
+    const initialHeight = imgRef.current.height;
+    const aspectRatio = initialWidth / initialHeight;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX;
+
+      let newWidth = initialWidth + dx;
+      let newHeight = newWidth / aspectRatio;
+
+      // Ensure minimum size
+      newWidth = Math.max(20, newWidth);
+      newHeight = Math.max(20, newHeight);
+
+      if (imgRef.current) {
+        imgRef.current.style.width = `${newWidth}px`;
+        imgRef.current.style.height = `${newHeight}px`;
+      }
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+
+      // Update ProseMirror node attributes only after resizing is complete
+      if (imgRef.current) {
+        const tr = view.state.tr.setNodeMarkup(getPos(), undefined, {
+          ...node.attrs,
+          width: imgRef.current.width,
+          height: imgRef.current.height,
+        });
+        view.dispatch(tr);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [node.attrs, view, getPos]);
+
   if (src) {
-    return <img src={src} alt={node.attrs.alt} title={node.attrs.title} />;
+    return (
+      <div className="image-node-view-wrapper" contentEditable={false} ref={wrapperRef}>
+        <img
+          src={src}
+          alt={node.attrs.alt}
+          title={node.attrs.title}
+          ref={imgRef}
+          width={node.attrs.width || undefined}
+          height={node.attrs.height || undefined}
+        />
+        <div className="resize-handle" onMouseDown={handleMouseDown}></div>
+      </div>
+    );
   }
 
   return (

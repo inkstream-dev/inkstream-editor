@@ -14,15 +14,28 @@ export const imagePlugin = createPlugin({
         src: { default: null },
         alt: { default: null },
         title: { default: null },
+        width: { default: null },
+        height: { default: null },
       },
       group: "inline",
       draggable: true,
-      parseDOM: [{ tag: "img[src]", getAttrs: (dom: HTMLElement) => ({
-        src: dom.getAttribute("src"),
-        alt: dom.getAttribute("alt"),
-        title: dom.getAttribute("title"),
-      }) }],
-      toDOM(node: Node) { return ["img", node.attrs]; },
+      parseDOM: [{
+        tag: "img[src]",
+        getAttrs: (dom: HTMLElement) => ({
+          src: dom.getAttribute("src"),
+          alt: dom.getAttribute("alt"),
+          title: dom.getAttribute("title"),
+          width: dom.getAttribute("width"),
+          height: dom.getAttribute("height"),
+        }),
+      }],
+      toDOM(node: Node) {
+        const { src, alt, title, width, height } = node.attrs;
+        const attrs: { [key: string]: any } = { src, alt, title };
+        if (width) attrs.width = width;
+        if (height) attrs.height = height;
+        return ["img", attrs];
+      },
     },
   },
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
@@ -38,7 +51,7 @@ export const imagePlugin = createPlugin({
         tooltip: 'Insert Image',
         command: (state: EditorState, dispatch) => {
           const { schema } = state;
-          const node = schema.nodes.image.create(); // Create an empty image node
+          const node = schema.nodes.image.create({ width: 200, height: 200 }); // Create an empty image node with default size
           const tr = state.tr.replaceSelectionWith(node);
           if (dispatch) {
             dispatch(tr);

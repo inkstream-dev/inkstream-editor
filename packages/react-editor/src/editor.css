@@ -105,3 +105,27 @@ blockquote {
   color: red;
   margin-top: 10px;
 }
+
+.image-node-view-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-node-view-wrapper img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.image-node-view-wrapper .resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #007bff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  bottom: -5px;
+  right: -5px;
+  cursor: se-resize;
+  z-index: 10;
+}
