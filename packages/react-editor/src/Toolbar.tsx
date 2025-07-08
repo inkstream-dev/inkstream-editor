@@ -8,10 +8,9 @@ interface ToolbarProps {
   editorDispatch: ((tr: Transaction) => void) | null;
   editorView: EditorView | null;
   toolbarItems: ToolbarItem[];
-  setIsImageModalOpen: (isOpen: boolean) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems, setIsImageModalOpen }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems }) => {
   const executeCommand = (command: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean) => {
     if (editorState && editorDispatch && editorView) {
       editorView.focus();

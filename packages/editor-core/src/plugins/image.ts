@@ -3,6 +3,7 @@ import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin } from 'prosemirror-state';
 import { ToolbarItem } from './index';
 import { Node } from 'prosemirror-model';
+import { EditorState } from 'prosemirror-state';
 
 export const imagePlugin = createPlugin({
   name: 'image',
@@ -27,21 +28,22 @@ export const imagePlugin = createPlugin({
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     const plugins: ProseMirrorPlugin[] = [];
 
-    // No specific input rules or keymaps for a basic image plugin yet.
-    // Image insertion will primarily be via a toolbar button.
-
     return plugins;
   },
-  getToolbarItems: (schema: Schema, openImageModal?: () => void): ToolbarItem[] => {
+  getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
       {
         id: 'image',
         icon: 'Image',
         tooltip: 'Insert Image',
-        onClick: () => {
-          if (openImageModal) {
-            openImageModal();
+        command: (state: EditorState, dispatch) => {
+          const { schema } = state;
+          const node = schema.nodes.image.create(); // Create an empty image node
+          const tr = state.tr.replaceSelectionWith(node);
+          if (dispatch) {
+            dispatch(tr);
           }
+          return true;
         },
       },
     ];

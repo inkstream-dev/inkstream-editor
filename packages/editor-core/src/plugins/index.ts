@@ -78,7 +78,14 @@ export class PluginManager {
     console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
-      const items = plugin.getToolbarItems ? plugin.getToolbarItems(schema, openImageModal) : [];
+      let items: ToolbarItem[] = [];
+      if (plugin.getToolbarItems) {
+        if (plugin.name === 'image') {
+          items = (plugin.getToolbarItems as (schema: Schema, openImageModal?: () => void) => ToolbarItem[])(schema, openImageModal);
+        } else {
+          items = (plugin.getToolbarItems as (schema: Schema) => ToolbarItem[])(schema);
+        }
+      }
       console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
     });
