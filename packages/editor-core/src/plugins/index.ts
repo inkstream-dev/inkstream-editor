@@ -11,9 +11,11 @@ import { listItemPlugin } from './list-item';
   id: string;
   icon: string; // Or a React component, for now a string
   tooltip: string;
-  command: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+  command?: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
   isActive?: (state: EditorState) => boolean;
   isVisible?: (state: EditorState) => boolean;
+  type?: 'dropdown';
+  children?: ToolbarItem[];
 }
 
 export interface Plugin {

@@ -1,0 +1,101 @@
+
+import { createPlugin } from '../../editor-core/src/plugins/plugin-factory';
+import { Schema } from 'prosemirror-model';
+import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
+import { keymap } from 'prosemirror-keymap';
+import { setBlockType } from 'prosemirror-commands';
+import { ToolbarItem } from '../../editor-core/src/plugins/index';
+
+export const headingPlugin = createPlugin({
+  name: 'heading',
+
+  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+    const plugins: ProseMirrorPlugin[] = [];
+
+    // Keymap for heading (e.g., Ctrl-Alt-1 for H1)
+    const keys: { [key: string]: any } = {};
+    if (schema.nodes.heading) {
+      keys['Ctrl-Alt-1'] = setBlockType(schema.nodes.heading, { level: 1 });
+    }
+    plugins.push(keymap(keys));
+
+    return plugins;
+  },
+
+  getToolbarItems: (schema: Schema): ToolbarItem[] => {
+    const items: ToolbarItem[] = [];
+
+    if (schema.nodes.heading) {
+      items.push({
+        id: 'heading',
+        icon: 'H',
+        tooltip: 'Headings',
+        type: 'dropdown',
+        children: [
+          {
+            id: 'heading1',
+            icon: 'H1',
+            tooltip: 'Heading 1',
+            command: setBlockType(schema.nodes.heading, { level: 1 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 1 });
+            },
+          },
+          {
+            id: 'heading2',
+            icon: 'H2',
+            tooltip: 'Heading 2',
+            command: setBlockType(schema.nodes.heading, { level: 2 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 2 });
+            },
+          },
+          {
+            id: 'heading3',
+            icon: 'H3',
+            tooltip: 'Heading 3',
+            command: setBlockType(schema.nodes.heading, { level: 3 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 3 });
+            },
+          },
+          {
+            id: 'heading4',
+            icon: 'H4',
+            tooltip: 'Heading 4',
+            command: setBlockType(schema.nodes.heading, { level: 4 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 4 });
+            },
+          },
+          {
+            id: 'heading5',
+            icon: 'H5',
+            tooltip: 'Heading 5',
+            command: setBlockType(schema.nodes.heading, { level: 5 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 5 });
+            },
+          },
+          {
+            id: 'heading6',
+            icon: 'H6',
+            tooltip: 'Heading 6',
+            command: setBlockType(schema.nodes.heading, { level: 6 }),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.heading, { level: 6 });
+            },
+          },
+        ],
+      });
+    }
+
+    return items;
+  },
+});

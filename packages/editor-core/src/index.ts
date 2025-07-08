@@ -20,6 +20,7 @@ import { orderedListPlugin } from './plugins/ordered-list';
 import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
+import { headingPlugin } from '../../heading/src/heading';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -176,6 +177,7 @@ const pluginLoader = {
   code: () => codePlugin,
   history: () => historyPlugin,
   listItem: () => listItemPlugin,
+  heading: () => headingPlugin,
 };
 
 // Register all plugins with the manager

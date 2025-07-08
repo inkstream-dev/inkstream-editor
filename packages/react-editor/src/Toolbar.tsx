@@ -18,19 +18,39 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     }
   };
 
-  return (
-    <div className="inkstream-toolbar">
-      {toolbarItems.map((item) => (
+  const renderToolbarItem = (item: ToolbarItem) => {
+    if (item.type === 'dropdown' && item.children) {
+      return (
+        <div key={item.id} className="inkstream-toolbar-dropdown">
+          <button
+            className="inkstream-toolbar-button"
+            title={item.tooltip}
+          >
+            {item.icon}
+          </button>
+          <div className="inkstream-toolbar-dropdown-content">
+            {item.children.map(child => renderToolbarItem(child))}
+          </div>
+        </div>
+      );
+    } else {
+      return (
         <button
           key={item.id}
-          onClick={() => executeCommand(item.command)}
+          onClick={() => item.command && executeCommand(item.command)}
           className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
-          disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState))}
+          disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || !item.command}
           title={item.tooltip}
         >
           {item.icon}
         </button>
-      ))}
+      );
+    }
+  };
+
+  return (
+    <div className="inkstream-toolbar">
+      {toolbarItems.map(renderToolbarItem)}
     </div>
   );
 };
