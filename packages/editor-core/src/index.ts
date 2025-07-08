@@ -7,6 +7,7 @@ import { history } from 'prosemirror-history';
 import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
 import { PluginManager, Plugin, ToolbarItem } from './plugins';
 
+
 // Import all plugin instances directly
 import { boldPlugin } from './plugins/bold';
 import { underlinePlugin } from './plugins/underline';
@@ -22,6 +23,7 @@ import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
 import { BlockquotePlugin } from './plugins/blockquote';
 import { headingPlugin } from '../../heading/src/heading';
+import { horizontalLinePlugin } from './plugins/horizontal-line';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -181,7 +183,7 @@ const pluginLoader = {
   listItem: () => listItemPlugin,
   heading: () => headingPlugin,
   blockquote: () => new BlockquotePlugin(),
-  
+  horizontalLine: () => horizontalLinePlugin,
 };
 
 // Register all plugins with the manager

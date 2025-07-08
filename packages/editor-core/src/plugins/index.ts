@@ -9,7 +9,7 @@ import { BlockquotePlugin } from './blockquote';
 import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 
 
-  export interface ToolbarItem {
+export interface ToolbarItem {
   id: string;
   icon: string; // Or a React component, for now a string
   tooltip: string;

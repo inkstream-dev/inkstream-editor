@@ -6,7 +6,8 @@ export default function Home() {
       <h1>Inkstream Demo</h1>
       <RichTextEditor 
         initialContent="<p>Hello world</p>" 
-        plugins={["bold", "underline", "italic", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "undo", "history"]}
+        plugins={["bold", "underline", "italic", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "undo"]}
+        toolbarLayout={["undo", "redo", "heading", "bold", "italic", "underline", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "image", "listItem", "blockquote", "horizontalLine"]}
       />
     </main>
   );
