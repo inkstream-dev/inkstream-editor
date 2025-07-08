@@ -33,8 +33,18 @@ export const headingPlugin = createPlugin({
         type: 'dropdown',
         children: [
           {
+            id: 'paragraph',
+            icon: 'P',
+            tooltip: 'Paragraph',
+            command: setBlockType(schema.nodes.paragraph),
+            isActive: (state: EditorState) => {
+              const { $from } = state.selection;
+              return $from.parent.hasMarkup(schema.nodes.paragraph);
+            },
+          },
+          {
             id: 'heading1',
-            icon: 'H1',
+            icon: 'Heading 1',
             tooltip: 'Heading 1',
             command: setBlockType(schema.nodes.heading, { level: 1 }),
             isActive: (state: EditorState) => {
@@ -44,7 +54,7 @@ export const headingPlugin = createPlugin({
           },
           {
             id: 'heading2',
-            icon: 'H2',
+            icon: 'Heading 2',
             tooltip: 'Heading 2',
             command: setBlockType(schema.nodes.heading, { level: 2 }),
             isActive: (state: EditorState) => {
@@ -54,7 +64,7 @@ export const headingPlugin = createPlugin({
           },
           {
             id: 'heading3',
-            icon: 'H3',
+            icon: 'Heading 3',
             tooltip: 'Heading 3',
             command: setBlockType(schema.nodes.heading, { level: 3 }),
             isActive: (state: EditorState) => {
@@ -64,7 +74,7 @@ export const headingPlugin = createPlugin({
           },
           {
             id: 'heading4',
-            icon: 'H4',
+            icon: 'Heading 4',
             tooltip: 'Heading 4',
             command: setBlockType(schema.nodes.heading, { level: 4 }),
             isActive: (state: EditorState) => {
@@ -74,7 +84,7 @@ export const headingPlugin = createPlugin({
           },
           {
             id: 'heading5',
-            icon: 'H5',
+            icon: 'Heading 5',
             tooltip: 'Heading 5',
             command: setBlockType(schema.nodes.heading, { level: 5 }),
             isActive: (state: EditorState) => {
@@ -84,7 +94,7 @@ export const headingPlugin = createPlugin({
           },
           {
             id: 'heading6',
-            icon: 'H6',
+            icon: 'Heading 6',
             tooltip: 'Heading 6',
             command: setBlockType(schema.nodes.heading, { level: 6 }),
             isActive: (state: EditorState) => {
