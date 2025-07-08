@@ -32,18 +32,16 @@ export const imagePlugin = createPlugin({
 
     return plugins;
   },
-  getToolbarItems: (schema: Schema): ToolbarItem[] => {
+  getToolbarItems: (schema: Schema, openImageModal?: () => void): ToolbarItem[] => {
     return [
       {
         id: 'image',
         icon: 'Image',
         tooltip: 'Insert Image',
-        command: (state, dispatch) => {
-          const src = "https://via.placeholder.com/150";
-          if (src) {
-            insertImage(src)(state, dispatch);
+        onClick: () => {
+          if (openImageModal) {
+            openImageModal();
           }
-          return true;
         },
       },
     ];

@@ -8,9 +8,10 @@ interface ToolbarProps {
   editorDispatch: ((tr: Transaction) => void) | null;
   editorView: EditorView | null;
   toolbarItems: ToolbarItem[];
+  setIsImageModalOpen: (isOpen: boolean) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems, setIsImageModalOpen }) => {
   const executeCommand = (command: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean) => {
     if (editorState && editorDispatch && editorView) {
       editorView.focus();
@@ -37,9 +38,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
       return (
         <button
           key={item.id}
-          onClick={() => item.command && executeCommand(item.command)}
+          onClick={() => item.onClick ? item.onClick() : (item.command && executeCommand(item.command))}
           className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
-          disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || !item.command}
+          disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || (!item.command && !item.onClick)}
           title={item.tooltip}
         >
           {item.icon}

@@ -6,6 +6,7 @@ import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
 import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins, ToolbarItem } from '@inkstream/editor-core';
 import { Toolbar } from './Toolbar';
+import { ImageUploadModal } from './ImageUploadModal';
 import './editor.css';
 
 interface RichTextEditorProps {
@@ -19,6 +20,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
   const [toolbarItems, setToolbarItems] = useState<ToolbarItem[]>([]); // State for toolbar items
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const handleImageUpload = useCallback((src: string) => {
+    if (editorViewRef.current) {
+      const { schema } = editorViewRef.current.state;
+      const node = schema.nodes.image.create({ src });
+      const tr = editorViewRef.current.state.tr.replaceSelectionWith(node);
+      editorViewRef.current.dispatch(tr);
+    }
+  }, []);
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
@@ -64,7 +75,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     setCurrentEditorState(state);
 
     // Get all available toolbar items
-    const allToolbarItems = pluginManager.getToolbarItems(schema);
+    const allToolbarItems = pluginManager.getToolbarItems(schema, () => setIsImageModalOpen(true));
     let orderedToolbarItems: ToolbarItem[] = [];
 
     if (toolbarLayout && toolbarLayout.length > 0) {
@@ -101,8 +112,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         editorDispatch={editorViewRef.current ? editorViewRef.current.dispatch : null}
         editorView={editorViewRef.current}
         toolbarItems={toolbarItems}
+        setIsImageModalOpen={setIsImageModalOpen}
       />
       <div ref={editorRef} className="inkstream-editor" />
+      <ImageUploadModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onImageUpload={handleImageUpload}
+      />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { blockquoteToolbarItem } from './blockquote-toolbar-item';
   icon: string; // Or a React component, for now a string
   tooltip: string;
   command?: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+  onClick?: () => void;
   isActive?: (state: EditorState) => boolean;
   isVisible?: (state: EditorState) => boolean;
   type?: 'dropdown';
@@ -25,7 +26,7 @@ export interface Plugin {
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
+  getToolbarItems?: (schema: Schema, openImageModal?: () => void) => ToolbarItem[]; // Optional method for toolbar items
 }
 
 
@@ -73,11 +74,11 @@ export class PluginManager {
     return nodes;
   }
 
-  getToolbarItems(schema: Schema): Map<string, ToolbarItem> {
+  getToolbarItems(schema: Schema, openImageModal?: () => void): Map<string, ToolbarItem> {
     console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
-      const items = plugin.getToolbarItems ? plugin.getToolbarItems(schema) : [];
+      const items = plugin.getToolbarItems ? plugin.getToolbarItems(schema, openImageModal) : [];
       console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
     });
