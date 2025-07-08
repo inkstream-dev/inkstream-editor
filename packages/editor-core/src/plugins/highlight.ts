@@ -34,6 +34,21 @@ export function setHighlight(color: string): (state: EditorState, dispatch?: (tr
   };
 }
 
+// Command to unset highlight
+export const unsetHighlight = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+  const markType = state.schema.marks.highlight;
+  if (!markType) {
+    return false;
+  }
+  if (dispatch) {
+    let tr = state.tr;
+    const { from, to } = state.selection;
+    tr = tr.removeMark(from, to, markType);
+    dispatch(tr);
+  }
+  return true;
+};
+
 export const highlightPlugin = createPlugin({
   name: 'highlight',
   marks: {
@@ -63,12 +78,48 @@ export const highlightPlugin = createPlugin({
         id: 'highlight',
         icon: 'H', // Placeholder icon
         tooltip: 'Highlight',
-        type: 'color-picker',
-        onColorChange: (color: string) => setHighlight(color),
-        command: setHighlight('#FFFF00'), // Default to yellow
+        type: 'dropdown',
+        children: [
+          {
+            id: 'highlight-yellow',
+            icon: '', // Will be a color swatch
+            tooltip: 'Yellow Highlight',
+            command: setHighlight('yellow'),
+            isActive: (state: EditorState) => state.doc.rangeHasMark(state.selection.from, state.selection.to, schema.marks.highlight),
+          },
+          {
+            id: 'highlight-green',
+            icon: '', // Will be a color swatch
+            tooltip: 'Green Highlight',
+            command: setHighlight('green'),
+            isActive: (state: EditorState) => state.doc.rangeHasMark(state.selection.from, state.selection.to, schema.marks.highlight),
+          },
+          {
+            id: 'highlight-blue',
+            icon: '', // Will be a color swatch
+            tooltip: 'Blue Highlight',
+            command: setHighlight('blue'),
+            isActive: (state: EditorState) => state.doc.rangeHasMark(state.selection.from, state.selection.to, schema.marks.highlight),
+          },
+          {
+            id: 'highlight-unset',
+            icon: 'No Highlight',
+            tooltip: 'Remove Highlight',
+            command: unsetHighlight,
+            isActive: (state: EditorState) => !state.doc.rangeHasMark(state.selection.from, state.selection.to, schema.marks.highlight),
+          },
+          {
+            id: 'highlight-custom',
+            icon: 'Custom',
+            tooltip: 'Custom Highlight Color',
+            type: 'color-picker',
+            onColorChange: (color: string) => setHighlight(color),
+            command: setHighlight('#FFFF00'), // Default to yellow for the picker
+          },
+        ],
         isActive: (state: EditorState) => {
           const { from, to, empty } = state.selection;
-          const markType = state.schema.marks.highlight;
+          const markType = schema.marks.highlight;
           if (!markType) {
             return false;
           }
@@ -88,3 +139,4 @@ export const highlightPlugin = createPlugin({
     ];
   },
 });
+
