@@ -5,6 +5,8 @@ import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
 import { historyPlugin } from './history';
 import { listItemPlugin } from './list-item';
+import { BlockquotePlugin } from './blockquote';
+import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 
 
   export interface ToolbarItem {
@@ -64,7 +66,9 @@ export class PluginManager {
         Object.assign(nodes, plugin.nodes);
       }
       return nodes;
-    }, {});
+    }, {
+      blockquote: new BlockquotePlugin().nodes.blockquote,
+    });
     console.log("PluginManager: All collected nodes:", nodes);
     return nodes;
   }
@@ -77,6 +81,7 @@ export class PluginManager {
       console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
     });
+    toolbarItemMap.set(blockquoteToolbarItem.id, blockquoteToolbarItem);
     console.log(`PluginManager: Collected toolbar items:`, toolbarItemMap);
     return toolbarItemMap;
   }

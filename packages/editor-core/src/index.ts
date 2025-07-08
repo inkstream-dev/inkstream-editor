@@ -20,6 +20,7 @@ import { orderedListPlugin } from './plugins/ordered-list';
 import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
+import { BlockquotePlugin } from './plugins/blockquote';
 import { headingPlugin } from '../../heading/src/heading';
 
 // Define a more comprehensive schema for a rich text editor
@@ -45,7 +46,6 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       },
     },
     blockquote: { content: "block+", group: "block", toDOM() { return ["blockquote", 0]; } },
-    horizontal_rule: { group: "block", toDOM() { return ["hr"]; } },
     heading: {
       attrs: { level: { default: 1 } },
       content: "inline*",
@@ -108,6 +108,8 @@ const buildInputRules = (schema: Schema) => {
 
   // Rule for blockquotes (e.g., > Quote)
   rules.push(wrappingInputRule(/^>\s$/, schema.nodes.blockquote));
+
+  
 
   // Rule for code blocks (e.g., ``` Code)
   rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
@@ -178,6 +180,8 @@ const pluginLoader = {
   history: () => historyPlugin,
   listItem: () => listItemPlugin,
   heading: () => headingPlugin,
+  blockquote: () => new BlockquotePlugin(),
+  
 };
 
 // Register all plugins with the manager
