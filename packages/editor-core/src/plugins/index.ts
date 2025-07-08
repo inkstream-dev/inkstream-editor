@@ -26,7 +26,7 @@ export interface Plugin {
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema, openImageModal?: () => void) => ToolbarItem[]; // Optional method for toolbar items
+  getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
 }
 
 
@@ -74,17 +74,13 @@ export class PluginManager {
     return nodes;
   }
 
-  getToolbarItems(schema: Schema, openImageModal?: () => void): Map<string, ToolbarItem> {
+  getToolbarItems(schema: Schema): Map<string, ToolbarItem> {
     console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
       let items: ToolbarItem[] = [];
       if (plugin.getToolbarItems) {
-        if (plugin.name === 'image') {
-          items = (plugin.getToolbarItems as (schema: Schema, openImageModal?: () => void) => ToolbarItem[])(schema, openImageModal);
-        } else {
-          items = (plugin.getToolbarItems as (schema: Schema) => ToolbarItem[])(schema);
-        }
+        items = plugin.getToolbarItems(schema);
       }
       console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
