@@ -8,6 +8,7 @@ import { listItemPlugin } from './list-item';
 import { BlockquotePlugin } from './blockquote';
 import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 import { textColorPlugin } from './textColor';
+import { highlightPlugin } from './highlight';
 
 
 export interface ToolbarItem {

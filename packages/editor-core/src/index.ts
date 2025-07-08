@@ -25,6 +25,7 @@ import { BlockquotePlugin } from './plugins/blockquote';
 import { headingPlugin } from '../../heading/src/heading';
 import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
+import { highlightPlugin } from './plugins/highlight';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -186,6 +187,7 @@ const pluginLoader = {
   blockquote: () => new BlockquotePlugin(),
   horizontalLine: () => horizontalLinePlugin,
   textColor: () => textColorPlugin,
+  highlight: () => highlightPlugin,
 };
 
 // Register all plugins with the manager
