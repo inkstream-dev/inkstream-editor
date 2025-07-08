@@ -19,7 +19,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
   };
 
   const renderToolbarItem = (item: ToolbarItem) => {
-    if (item.type === 'dropdown' && item.children) {
+    if (item.type === 'color-picker') {
+      return (
+        <input
+          key={item.id}
+          type="color"
+          className="inkstream-toolbar-color-picker"
+          title={item.tooltip}
+          onChange={(e) => {
+            if (item.onColorChange && editorState && editorDispatch) {
+              const command = item.onColorChange(e.target.value);
+              command(editorState, editorDispatch);
+            }
+          }}
+        />
+      );
+    } else if (item.type === 'dropdown' && item.children) {
       return (
         <div key={item.id} className="inkstream-toolbar-dropdown">
           <button

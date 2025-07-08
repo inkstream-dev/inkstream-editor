@@ -111,7 +111,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
       orderedToolbarItems = Array.from(allToolbarItems.values());
     }
 
-    console.log("Toolbar items collected:", orderedToolbarItems);
+    // console.log("Toolbar items collected:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);
 
     // Cleanup function for EditorView when component unmounts
