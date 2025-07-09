@@ -26,6 +26,7 @@ import { headingPlugin } from '../../heading/src/heading';
 import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
 import { highlightPlugin } from './plugins/highlight';
+import { codeBlockPlugin } from './plugins/codeBlock';
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -56,7 +57,6 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       group: "block",
       toDOM(node) { return ["h" + node.attrs.level, 0]; },
     },
-    code_block: { content: "text*", marks: "", group: "block", toDOM() { return ["pre", ["code", 0]]; } },
     text: { inline: true, group: "inline", toDOM(node) { return node.text || ""; } },
     hard_break: { inline: true, group: "inline", selectable: false, toDOM() { return ["br"]; } },
 
@@ -188,6 +188,7 @@ const pluginLoader = {
   horizontalLine: () => horizontalLinePlugin,
   textColor: () => textColorPlugin,
   highlight: () => highlightPlugin,
+  codeBlockPlugin: () => codeBlockPlugin,
 };
 
 // Register all plugins with the manager

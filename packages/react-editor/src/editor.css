@@ -14,6 +14,7 @@
 .inkstream-editor .ProseMirror {
   min-height: 100%; /* Ensure ProseMirror content fills the container */
   outline: none; /* Remove default outline */
+  white-space: pre-wrap;
 }
 
 .inkstream-toolbar {
@@ -128,4 +129,13 @@ blockquote {
   right: -5px;
   cursor: se-resize;
   z-index: 10;
+}
+
+.inkstream-code-block {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  overflow-x: auto;
 }
