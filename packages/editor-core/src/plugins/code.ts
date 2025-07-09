@@ -12,6 +12,26 @@ export const toggleCode: Command = (state: EditorState, dispatch?: (tr: Transact
   return toggleMark(state.schema.marks.code)(state, dispatch);
 };
 
+export const setCode: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+  const { from, to } = state.selection;
+  const markType = state.schema.marks.code;
+  if (!markType) {
+    return false;
+  }
+  if (dispatch) {
+    dispatch(state.tr.addMark(from, to, markType.create()));
+  }
+  return true;
+};
+
+export const unsetCode: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+  const markType = state.schema.marks.code;
+  if (!markType) {
+    return false;
+  }
+  return toggleMark(markType)(state, dispatch);
+};
+
 export const isCodeActive = (state: EditorState) => {
   const { from, to } = state.selection;
   return state.doc.rangeHasMark(from, to, state.schema.marks.code);
@@ -23,31 +43,33 @@ export const codePlugin = createPlugin({
     code: {
       parseDOM: [{ tag: 'code' }],
       toDOM() { return ['code', 0]; },
+      excludes: '_',
+      code: true,
     },
   },
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+    return [];
+  },
+  getInputRules: (schema: Schema): InputRule[] => {
+    return [
+      new InputRule(/(^|[^`])`([^`]+)`(?!`)/, (state, match, start, end) => {
+        const tr = state.tr;
+        if (match[2]) {
+          const textStart = start + match[0].indexOf(match[2]);
+          const textEnd = textStart + match[2].length;
+          tr.delete(textStart - 1, textEnd + 1); // Delete backticks
+          tr.addMark(textStart - 1, textEnd - 1, schema.marks.code.create());
+        }
+        return tr;
+      }),
+    ];
+  },
+  getKeymap: (schema: Schema): { [key: string]: any } => {
     const keys: { [key: string]: Command } = {
       'Mod-e': toggleCode,
       'Mod-`': toggleCode,
     };
-
-    return [
-      keymap(keys),
-      inputRules({
-        rules: [
-          new InputRule(/`([^`]+)`$/, (state, match, start, end) => {
-            const tr = state.tr;
-            if (match[1]) {
-              const textStart = start + match[0].indexOf(match[1]);
-              const textEnd = textStart + match[1].length;
-              tr.delete(textStart - 1, textEnd + 1); // Delete backticks
-              tr.addMark(textStart - 1, textEnd - 1, schema.marks.code.create());
-            }
-            return tr;
-          }),
-        ],
-      }),
-    ];
+    return keys;
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [

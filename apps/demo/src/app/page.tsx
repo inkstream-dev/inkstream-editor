@@ -7,7 +7,27 @@ export default function Home() {
       <RichTextEditor 
         initialContent="<p>Hello world</p>" 
         plugins={["bold", "underline", "italic", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "undo"]}
-        toolbarLayout={["undo", "redo", "heading", "bold", "italic", "underline", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "image", "textColor", "highlight", "listItem", "blockquote", "horizontalLine"]}
+        toolbarLayout={[
+          "undo", 
+          "redo", 
+          "heading", 
+          "bold", 
+          "italic", 
+          "underline", 
+          "strike", 
+          "alignLeft", 
+          "indent", 
+          "bulletList", 
+          "orderedList", 
+          "code", 
+          "image", 
+          "textColor", 
+          "highlight", 
+          "listItem", 
+          "blockquote", 
+          "horizontalLine", 
+          "codeBlock"
+        ]}
       />
     </main>
   );

@@ -1,6 +1,7 @@
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
 import { ToolbarItem, Plugin } from './index';
+import { InputRule } from 'prosemirror-inputrules';
 
 export interface PluginConfig {
   name: string;
@@ -8,6 +9,8 @@ export interface PluginConfig {
   marks?: { [key: string]: any };
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
   getToolbarItems?: (schema: Schema) => ToolbarItem[];
+  getInputRules?: (schema: Schema) => InputRule[];
+  getKeymap?: (schema: Schema) => { [key: string]: any };
 }
 
 export function createPlugin(config: PluginConfig): Plugin {
@@ -17,5 +20,7 @@ export function createPlugin(config: PluginConfig): Plugin {
     marks: config.marks,
     getProseMirrorPlugins: config.getProseMirrorPlugins || (() => []),
     getToolbarItems: config.getToolbarItems || (() => []),
+    getInputRules: config.getInputRules || (() => []),
+    getKeymap: config.getKeymap || (() => ({})),
   };
 }

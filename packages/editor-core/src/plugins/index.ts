@@ -1,5 +1,6 @@
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
+import { InputRule } from 'prosemirror-inputrules';
 import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
@@ -9,6 +10,7 @@ import { BlockquotePlugin } from './blockquote';
 import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 import { textColorPlugin } from './textColor';
 import { highlightPlugin } from './highlight';
+import { codeBlockPlugin } from './codeBlock';
 
 
 export interface ToolbarItem {
@@ -28,8 +30,10 @@ export interface Plugin {
   name: string;
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
-  getProseMirrorPlugins: (schema: Schema) => ProseMirrorPlugin[];
+  getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
   getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
+  getInputRules?: (schema: Schema) => InputRule[];
+  getKeymap?: (schema: Schema) => { [key: string]: any };
 }
 
 
@@ -104,5 +108,9 @@ export class PluginManager {
 
   getPlugin(name: string): Plugin | undefined {
     return this.pluginRegistry.get(name);
+  }
+
+  getPlugins(): Plugin[] {
+    return Array.from(this.pluginRegistry.values());
   }
 }

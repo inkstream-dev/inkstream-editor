@@ -147,11 +147,19 @@ const buildInputRules = (schema: Schema) => {
 };
 
 // Keymap
-const buildKeymap = (schema: Schema) => {
+const buildKeymap = (schema: Schema, manager: PluginManager) => {
   const keys: { [key: string]: any } = {};
 
   // Add base keymap commands
   Object.assign(keys, baseKeymap);
+
+  // Add keymaps from plugins
+  manager.getPlugins().forEach(plugin => {
+    const keymap = plugin.getKeymap?.(schema);
+    if (keymap) {
+      Object.assign(keys, keymap);
+    }
+  });
 
   // Add keybinding for hard breaks (Shift-Enter)
   keys["Shift-Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
@@ -202,7 +210,7 @@ export const inkstreamPlugins = (manager: PluginManager) => {
   return [
     ...manager.getProseMirrorPlugins(schema),
     buildInputRules(schema),
-    buildKeymap(schema),
+    buildKeymap(schema, manager),
   ];
 };
 

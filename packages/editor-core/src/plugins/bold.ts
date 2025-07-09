@@ -24,21 +24,19 @@ function markInputRule(regexp: RegExp, markType: any) {
 export const boldPlugin = createPlugin({
   name: 'bold',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
-
-    // Keymap for bold
-    const keys: { [key: string]: any } = {};
-    keys["Mod-b"] = toggleMark(schema.marks.strong);
-    plugins.push(keymap(keys));
-
-    // Input rule for bold (e.g., **text** or __text__)
+    return [];
+  },
+  getInputRules: (schema: Schema): InputRule[] => {
     const rules = [
       markInputRule(/\*\*([^*]+)\*\*$/, schema.marks.strong),
       markInputRule(/__([^_]+)__$/, schema.marks.strong),
     ];
-    plugins.push(inputRules({ rules }));
-
-    return plugins;
+    return rules;
+  },
+  getKeymap: (schema: Schema): { [key: string]: any } => {
+    const keys: { [key: string]: any } = {};
+    keys["Mod-b"] = toggleMark(schema.marks.strong);
+    return keys;
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [

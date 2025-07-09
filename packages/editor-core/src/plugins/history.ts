@@ -10,16 +10,14 @@ type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boo
 export const historyPlugin = createPlugin({
   name: 'history',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const keys: { [key: string]: Command } = {
-      'Mod-z': undo,
-      'Mod-y': redo,
-      'Mod-Shift-z': redo, // Common alternative for redo
-    };
-
-    return [
-      history(),
-      keymap(keys),
-    ];
+    return [history()];
+  },
+  getKeymap: (schema: Schema): { [key: string]: any } => {
+    const keys: { [key: string]: any } = {};
+    keys["Mod-z"] = undo;
+    keys["Mod-y"] = redo;
+    keys["Shift-Mod-z"] = redo;
+    return keys;
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [

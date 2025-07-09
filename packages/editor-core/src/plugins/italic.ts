@@ -9,14 +9,13 @@ import { TextSelection } from 'prosemirror-state';
 export const italicPlugin = createPlugin({
   name: 'italic',
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
-
+    return [];
+  },
+  getKeymap: (schema: Schema): { [key: string]: any } => {
     // Keymap for italic (Ctrl+I or Cmd+I)
     const keys: { [key: string]: any } = {};
     keys["Mod-i"] = toggleMark(schema.marks.em);
-    plugins.push(keymap(keys));
-
-    return plugins;
+    return keys;
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
