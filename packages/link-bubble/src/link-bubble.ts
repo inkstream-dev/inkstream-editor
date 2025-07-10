@@ -81,25 +81,43 @@ class LinkBubbleView {
     const { state } = view;
     const { selection } = state;
     const { from, to } = selection;
+    const { schema } = state;
 
-    const marks = state.doc.resolve(selection.from).marks();
-    const linkMark = marks.find((mark: Mark) => mark.type.name === 'link');
+    // Check if any part of the selection has a link mark
+    const hasLinkInSelection = state.doc.rangeHasMark(from, to, schema.marks.link);
 
-    if (linkMark && !selection.empty) {
-      // If a link is selected, ensure the bubble is visible and positioned correctly
-      this.bubble.style.display = 'block';
-      const start = view.coordsAtPos(from);
-      const end = view.coordsAtPos(to);
-      const left = Math.max((start.left + end.left) / 2, start.left);
-      this.bubble.style.left = `${left}px`;
-      this.bubble.style.bottom = `${start.bottom + 10}px`;
+    if (!selection.empty && hasLinkInSelection) {
+      // Find the actual link mark within the selection
+      let linkMark: Mark | undefined;
+      state.doc.nodesBetween(from, to, (node, pos) => {
+        if (linkMark) return false; // Stop if already found
+        const marks = node.marks;
+        const found = marks.find((mark: Mark) => mark.type.name === 'link');
+        if (found) {
+          linkMark = found;
+          return false; // Stop searching
+        }
+      });
 
-      const input = this.bubble.querySelector('input');
-      if (input) {
-        input.value = linkMark.attrs.href || '';
+      // If a link mark is found, ensure the bubble is visible and positioned correctly
+      if (linkMark) {
+        this.bubble.style.display = 'block';
+        const start = view.coordsAtPos(from);
+        const end = view.coordsAtPos(to);
+        const left = Math.max((start.left + end.left) / 2, start.left);
+        this.bubble.style.left = `${left}px`;
+        this.bubble.style.bottom = `${start.bottom + 10}px`;
+
+        const input = this.bubble.querySelector('input');
+        if (input) {
+          input.value = linkMark.attrs.href || '';
+        }
+      } else {
+        // This case should ideally not be reached if hasLinkInSelection is true, but as a fallback, hide if no specific link mark is found within the range.
+        this.bubble.style.display = 'none';
       }
-    } else if (this.bubble.style.display !== 'none') {
-      // If no link is selected or selection is empty, and the bubble is currently visible, hide it.
+    } else {
+      // Hide the bubble if no link is selected or selection is empty
       this.bubble.style.display = 'none';
     }
   }
