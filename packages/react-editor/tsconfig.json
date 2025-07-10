@@ -14,7 +14,15 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@inkstream/editor-core": [
+        "../editor-core/src"
+      ],
+      "@inkstream/link-bubble": [
+        "../link-bubble/src"
+      ]
+    }
   },
   "include": [
     "src",

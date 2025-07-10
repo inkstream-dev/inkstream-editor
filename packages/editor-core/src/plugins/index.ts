@@ -1,5 +1,6 @@
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 import { InputRule } from 'prosemirror-inputrules';
 import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
@@ -17,7 +18,7 @@ export interface ToolbarItem {
   id: string;
   icon: string; // Or a React component, for now a string
   tooltip: string;
-  command?: (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+  command?: (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => boolean;
   onClick?: () => void;
   isActive?: (state: EditorState) => boolean;
   isVisible?: (state: EditorState) => boolean;

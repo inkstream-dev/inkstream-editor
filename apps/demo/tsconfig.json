@@ -28,6 +28,9 @@
       ],
       "@inkstream/react-editor": [
         "../../packages/react-editor/src"
+      ],
+      "@inkstream/link-bubble": [
+        "../../packages/link-bubble/src"
       ]
     },
     "plugins": [

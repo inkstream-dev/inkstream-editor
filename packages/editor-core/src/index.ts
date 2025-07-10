@@ -27,6 +27,8 @@ import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
 import { highlightPlugin } from './plugins/highlight';
 import { codeBlockPlugin } from './plugins/codeBlock';
+import { LinkBubbleWrapperPlugin } from './plugins/link-bubble-wrapper';
+
 
 // Define a more comprehensive schema for a rich text editor
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -197,11 +199,15 @@ const pluginLoader = {
   textColor: () => textColorPlugin,
   highlight: () => highlightPlugin,
   codeBlockPlugin: () => codeBlockPlugin,
+  linkBubble: () => new LinkBubbleWrapperPlugin(),
 };
 
 // Register all plugins with the manager
-Object.values(pluginLoader).forEach(plugin => {
-  pluginManager.registerPlugin(plugin());
+Object.values(pluginLoader).forEach(pluginFactory => {
+  const loadedPlugin = pluginFactory();
+  if (loadedPlugin) {
+    pluginManager.registerPlugin(loadedPlugin);
+  }
 });
 
 export const inkstreamPlugins = (manager: PluginManager) => {

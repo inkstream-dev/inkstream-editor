@@ -5,6 +5,7 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
 import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins, ToolbarItem } from '@inkstream/editor-core';
+import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 import { ImageNodeView } from './ImageNodeView';
@@ -16,7 +17,7 @@ interface RichTextEditorProps {
   toolbarLayout?: string[]; // Optional: Array of toolbar item IDs in desired order
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins, toolbarLayout }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins = [], toolbarLayout = ["link"] }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
@@ -96,6 +97,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
 
     // Get all available toolbar items
     const allToolbarItems = pluginManager.getToolbarItems(schema);
+    allToolbarItems.set('link', getLinkBubbleToolbarItem(schema));
     let orderedToolbarItems: ToolbarItem[] = [];
 
     if (toolbarLayout && toolbarLayout.length > 0) {
@@ -112,6 +114,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     }
 
     // console.log("Toolbar items collected:", orderedToolbarItems);
+    console.log("Ordered Toolbar Items:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);
 
     // Cleanup function for EditorView when component unmounts
