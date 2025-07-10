@@ -1,10 +1,11 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { Schema, Mark, Node } from 'prosemirror-model';
+import { Schema, Mark, Node as ProseMirrorNode } from 'prosemirror-model';
 import { ToolbarItem } from '../../editor-core/src/plugins';
 
 export const linkBubblePlugin = new Plugin({
   view(editorView) {
+    console.log("linkBubblePlugin view method called.");
     return new LinkBubbleView(editorView);
   },
 });
@@ -15,33 +16,31 @@ export const getLinkBubbleToolbarItem = (schema: Schema): ToolbarItem => {
     icon: '🔗',
     tooltip: 'Link',
     command: (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
-      console.log("Link toolbar command executed.");
       if (view) {
-        const { selection } = state;
-        // Always show the bubble when the command is explicitly called (e.g., from toolbar click)
-        // The LinkBubbleView's update method will handle hiding it if the selection changes to an unlinked state.
-        console.log("Attempting to find parentNode:", view.dom.parentNode);
-        const bubble = view.dom.parentNode?.querySelector('.link-bubble') as HTMLDivElement;
-        console.log("Bubble element found:", bubble);
+        const editorWrapper = view.dom.parentNode?.parentNode as HTMLDivElement;
+        const bubble = editorWrapper?.querySelector('.link-dropdown') as HTMLDivElement;
         if (bubble) {
-          console.log("Setting bubble display to block.");
+          const toolbar = editorWrapper?.querySelector('.inkstream-toolbar') as HTMLDivElement;
+          if (toolbar) {
+            const linkButton = toolbar.querySelector('button[title="Link"]') as HTMLButtonElement; // Find the specific link button
+            if (linkButton) {
+              const linkButtonRect = linkButton.getBoundingClientRect();
+              const editorWrapperRect = editorWrapper.getBoundingClientRect();
+              bubble.style.top = `${linkButtonRect.bottom - editorWrapperRect.top + 5}px`; // 5px below the link button
+              bubble.style.left = `${linkButtonRect.left - editorWrapperRect.left}px`;
+            }
+          }
+
           bubble.style.display = 'block';
-          const start = view.coordsAtPos(selection.from);
-          const end = view.coordsAtPos(selection.to);
-          const left = Math.max((start.left + end.left) / 2, start.left);
-          bubble.style.left = `${left}px`;
-          bubble.style.bottom = `${start.bottom + 10}px`;
 
           const input = bubble.querySelector('input');
           if (input) {
+            const { selection } = state;
             const marks = state.doc.resolve(selection.from).marks();
             const linkMark = marks.find((mark: Mark) => mark.type.name === 'link');
             input.value = linkMark?.attrs.href || '';
             input.focus();
           }
-
-        } else {
-          console.log("Bubble element not found.");
         }
       }
       return true;
@@ -60,19 +59,29 @@ class LinkBubbleView {
   constructor(editorView: EditorView) {
     this.view = editorView;
     this.bubble = document.createElement('div');
-    this.bubble.className = 'link-bubble';
+    this.bubble.className = 'link-dropdown';
     this.bubble.innerHTML = `
       <input type="text" placeholder="Enter link..." />
       <button class="visit">Visit</button>
       <button class="delete">Delete</button>
     `;
+    this.bubble.style.background = 'white';
+    this.bubble.style.border = '1px solid #ccc';
+    this.bubble.style.padding = '8px';
+    this.bubble.style.borderRadius = '4px';
+    this.bubble.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    this.bubble.style.zIndex = '1000';
+    this.bubble.style.visibility = 'visible';
+    this.bubble.style.opacity = '1';
     this.bubble.style.position = 'absolute';
     this.bubble.style.display = 'none';
-    this.view.dom.parentNode?.appendChild(this.bubble);
+    this.view.dom.parentNode?.parentNode?.appendChild(this.bubble);
 
     this.bubble.querySelector('input')?.addEventListener('keydown', this.handleKeyDown.bind(this));
     this.bubble.querySelector('.visit')?.addEventListener('click', this.handleVisit.bind(this));
     this.bubble.querySelector('.delete')?.addEventListener('click', this.handleDelete.bind(this));
+
+    this.view.dom.parentNode?.parentNode?.addEventListener('click', this.handleDocumentClick.bind(this));
 
     this.update(editorView, undefined);
   }
@@ -83,47 +92,41 @@ class LinkBubbleView {
     const { from, to } = selection;
     const { schema } = state;
 
-    // Check if any part of the selection has a link mark
     const hasLinkInSelection = state.doc.rangeHasMark(from, to, schema.marks.link);
 
     if (!selection.empty && hasLinkInSelection) {
-      // Find the actual link mark within the selection
       let linkMark: Mark | undefined;
-      state.doc.nodesBetween(from, to, (node, pos) => {
-        if (linkMark) return false; // Stop if already found
+      state.doc.nodesBetween(from, to, (node: ProseMirrorNode, pos) => {
+        if (linkMark) return false;
         const marks = node.marks;
         const found = marks.find((mark: Mark) => mark.type.name === 'link');
         if (found) {
           linkMark = found;
-          return false; // Stop searching
+          return false;
         }
       });
 
-      // If a link mark is found, ensure the bubble is visible and positioned correctly
       if (linkMark) {
         this.bubble.style.display = 'block';
-        const start = view.coordsAtPos(from);
-        const end = view.coordsAtPos(to);
-        const left = Math.max((start.left + end.left) / 2, start.left);
-        this.bubble.style.left = `${left}px`;
-        this.bubble.style.bottom = `${start.bottom + 10}px`;
-
         const input = this.bubble.querySelector('input');
         if (input) {
           input.value = linkMark.attrs.href || '';
         }
-      } else {
-        // This case should ideally not be reached if hasLinkInSelection is true, but as a fallback, hide if no specific link mark is found within the range.
+      } else if (this.bubble.style.display === 'block') {
+        // If bubble is already visible, but no link is found in selection, hide it.
         this.bubble.style.display = 'none';
+        console.log("Update method: Hiding bubble (no link found in selection, but was visible).");
       }
-    } else {
-      // Hide the bubble if no link is selected or selection is empty
+    } else if (this.bubble.style.display === 'block') {
+      // If selection is empty or no link in selection, and bubble is visible, hide it.
       this.bubble.style.display = 'none';
+      console.log("Update method: Hiding bubble (no selection or no link in selection, but was visible).");
     }
   }
 
   destroy() {
     this.bubble.remove();
+    document.removeEventListener('click', this.handleDocumentClick.bind(this));
   }
 
   private handleKeyDown(event: KeyboardEvent) {
@@ -156,5 +159,15 @@ class LinkBubbleView {
 
     dispatch(state.tr.removeMark(from, to, state.schema.marks.link));
     this.bubble.style.display = 'none';
+  }
+
+  private handleDocumentClick(event: MouseEvent) {
+    console.log("handleDocumentClick triggered. Target:", event.target);
+    console.log("Bubble contains target:", this.bubble.contains(event.target as Node));
+    console.log("View DOM contains target:", this.view.dom.contains(event.target as Node));
+    if (this.bubble.style.display === 'block' && !this.bubble.contains(event.target as Node) && !this.view.dom.contains(event.target as Node)) {
+      this.bubble.style.display = 'none';
+      console.log("handleDocumentClick: Hiding bubble.");
+    }
   }
 }

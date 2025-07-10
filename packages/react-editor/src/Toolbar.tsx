@@ -53,7 +53,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
       return (
         <button
           key={item.id}
-          onClick={() => item.onClick ? item.onClick() : (item.command && executeCommand(item.command))}
+          onClick={(e) => {
+            item.onClick ? item.onClick() : (item.command && executeCommand(item.command));
+          }}
           className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
           disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || (!item.command && !item.onClick)}
           title={item.tooltip}

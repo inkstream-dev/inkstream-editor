@@ -44,7 +44,6 @@ export class PluginManager {
   private pluginRegistry: Map<string, Plugin> = new Map();
 
   registerPlugin(plugin: Plugin) {
-    //console.log(`PluginManager: Registering plugin: ${plugin.name}`);
     this.plugins.push(plugin);
     this.pluginRegistry.set(plugin.name, plugin);
     // console.log(`PluginManager: After registration, plugins count: ${this.plugins.length}`);

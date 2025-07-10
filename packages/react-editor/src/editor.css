@@ -1,8 +1,20 @@
+.link-dropdown {
+  position: absolute;
+  display: none; /* Hidden by default, controlled by JS */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
 .inkstream-editor-wrapper {
   border: 1px solid #ccc;
   min-height: 200px;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .inkstream-editor {
