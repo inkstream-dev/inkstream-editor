@@ -10,13 +10,16 @@ export default function Home() {
         toolbarLayout={[
           "undo", 
           "redo", 
+          "|",
           "heading", 
           "bold", 
           "italic", 
           "underline", 
           "strike", 
-          "alignLeft", 
+          "|",
           "indent", 
+          "outdent", 
+          "|",
           "bulletList", 
           "orderedList", 
           "code", 
@@ -24,11 +27,13 @@ export default function Home() {
           "image", 
           "textColor", 
           "highlight", 
+          "|",
           "listItem", 
           "blockquote", 
           "horizontalLine", 
           "codeBlock",
-          "link"
+          "link",
+          "alignLeft",
         ]}
       />
     </main>

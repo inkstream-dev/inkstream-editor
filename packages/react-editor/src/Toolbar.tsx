@@ -19,9 +19,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     }
   };
 
-  const renderToolbarItem = (item: ToolbarItem | string) => {
+  const renderToolbarItem = (item: ToolbarItem | string, index: number) => {
     if (typeof item === 'string' && item === '|') {
-      return <div key="separator" className="inkstream-toolbar-separator" />;
+      return <div key={`separator-${index}`} className="inkstream-toolbar-separator" />;
     } else if (typeof item === 'object') {
       if (item.type === 'color-picker') {
         return (
@@ -48,7 +48,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
               {item.icon}
             </button>
             <div className="inkstream-toolbar-dropdown-content">
-              {item.children.map(child => renderToolbarItem(child))}
+              {item.children.map(child => renderToolbarItem(child, index))}
             </div>
           </div>
         );
@@ -69,13 +69,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
       }
     } else {
       // This case handles the separator string '|'
-      return <div key={item} className="inkstream-toolbar-separator" />;
+      return <div key={`separator-${index}`} className="inkstream-toolbar-separator" />;
     }
   };
 
   return (
     <div className="inkstream-toolbar">
-      {toolbarItems.map(renderToolbarItem)}
+      {toolbarItems.map((item, index) => renderToolbarItem(item, index))}
     </div>
   );
 };

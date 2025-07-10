@@ -34,7 +34,7 @@ export const headingPlugin = createPlugin({
         children: [
           {
             id: 'paragraph',
-            icon: 'P',
+            icon: 'Paragraph',
             tooltip: 'Paragraph',
             command: setBlockType(schema.nodes.paragraph),
             isActive: (state: EditorState) => {
