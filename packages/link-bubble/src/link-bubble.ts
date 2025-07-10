@@ -65,14 +65,6 @@ class LinkBubbleView {
       <button class="visit">Visit</button>
       <button class="delete">Delete</button>
     `;
-    this.bubble.style.background = 'white';
-    this.bubble.style.border = '1px solid #ccc';
-    this.bubble.style.padding = '8px';
-    this.bubble.style.borderRadius = '4px';
-    this.bubble.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-    this.bubble.style.zIndex = '1000';
-    this.bubble.style.visibility = 'visible';
-    this.bubble.style.opacity = '1';
     this.bubble.style.position = 'absolute';
     this.bubble.style.display = 'none';
     this.view.dom.parentNode?.parentNode?.appendChild(this.bubble);

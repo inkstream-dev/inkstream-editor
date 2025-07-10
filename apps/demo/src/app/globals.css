@@ -2,4 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+.link-dropdown {
+  @apply bg-white border border-gray-300 p-2 rounded shadow-md z-50;
+}
+
 
