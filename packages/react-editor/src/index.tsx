@@ -103,9 +103,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     if (toolbarLayout && toolbarLayout.length > 0) {
       // If a layout is provided, use it to order the items
       for (const itemId of toolbarLayout) {
-        const item = allToolbarItems.get(itemId);
-        if (item) {
-          orderedToolbarItems.push(item);
+        if (itemId === '|') {
+          orderedToolbarItems.push(itemId); // Add separator directly
+        } else {
+          const item = allToolbarItems.get(itemId);
+          if (item) {
+            orderedToolbarItems.push(item);
+          }
         }
       }
     } else {
@@ -113,6 +117,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
       orderedToolbarItems = Array.from(allToolbarItems.values());
     }
 
+    // console.log("Toolbar items collected:", orderedToolbarItems);
     // console.log("Toolbar items collected:", orderedToolbarItems);
     console.log("Ordered Toolbar Items:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);

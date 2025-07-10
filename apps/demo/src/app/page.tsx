@@ -20,6 +20,7 @@ export default function Home() {
           "bulletList", 
           "orderedList", 
           "code", 
+          "|",
           "image", 
           "textColor", 
           "highlight", 

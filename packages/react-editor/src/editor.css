@@ -60,6 +60,13 @@
   border-color: #888;
 }
 
+.inkstream-toolbar-separator {
+  width: 1px;
+  height: 28px; /* Temporary: Added for debugging visibility */
+  background-color: #ccc;
+  margin: 0 5px;
+}
+
 .inkstream-toolbar-dropdown {
   position: relative;
   display: inline-block;

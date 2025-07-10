@@ -7,7 +7,7 @@ interface ToolbarProps {
   editorState: EditorState | null;
   editorDispatch: ((tr: Transaction) => void) | null;
   editorView: EditorView | null;
-  toolbarItems: ToolbarItem[];
+  toolbarItems: (ToolbarItem | string)[];
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems }) => {
@@ -19,50 +19,57 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     }
   };
 
-  const renderToolbarItem = (item: ToolbarItem) => {
-    if (item.type === 'color-picker') {
-      return (
-        <input
-          key={item.id}
-          type="color"
-          className="inkstream-toolbar-color-picker"
-          title={item.tooltip}
-          onChange={(e) => {
-            if (item.onColorChange && editorState && editorDispatch) {
-              const command = item.onColorChange(e.target.value);
-              command(editorState, editorDispatch);
-            }
-          }}
-        />
-      );
-    } else if (item.type === 'dropdown' && item.children) {
-      return (
-        <div key={item.id} className="inkstream-toolbar-dropdown">
+  const renderToolbarItem = (item: ToolbarItem | string) => {
+    if (typeof item === 'string' && item === '|') {
+      return <div key="separator" className="inkstream-toolbar-separator" />;
+    } else if (typeof item === 'object') {
+      if (item.type === 'color-picker') {
+        return (
+          <input
+            key={item.id}
+            type="color"
+            className="inkstream-toolbar-color-picker"
+            title={item.tooltip}
+            onChange={(e) => {
+              if (item.onColorChange && editorState && editorDispatch) {
+                const command = item.onColorChange(e.target.value);
+                command(editorState, editorDispatch);
+              }
+            }}
+          />
+        );
+      } else if (item.type === 'dropdown' && item.children) {
+        return (
+          <div key={item.id} className="inkstream-toolbar-dropdown">
+            <button
+              className="inkstream-toolbar-button"
+              title={item.tooltip}
+            >
+              {item.icon}
+            </button>
+            <div className="inkstream-toolbar-dropdown-content">
+              {item.children.map(child => renderToolbarItem(child))}
+            </div>
+          </div>
+        );
+      } else {
+        return (
           <button
-            className="inkstream-toolbar-button"
+            key={item.id}
+            onClick={(e) => {
+              item.onClick ? item.onClick() : (item.command && executeCommand(item.command));
+            }}
+            className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
+            disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || (!item.command && !item.onClick)}
             title={item.tooltip}
           >
             {item.icon}
           </button>
-          <div className="inkstream-toolbar-dropdown-content">
-            {item.children.map(child => renderToolbarItem(child))}
-          </div>
-        </div>
-      );
+        );
+      }
     } else {
-      return (
-        <button
-          key={item.id}
-          onClick={(e) => {
-            item.onClick ? item.onClick() : (item.command && executeCommand(item.command));
-          }}
-          className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
-          disabled={!editorState || !editorDispatch || !editorView || (item.isVisible && editorState && !item.isVisible(editorState)) || (!item.command && !item.onClick)}
-          title={item.tooltip}
-        >
-          {item.icon}
-        </button>
-      );
+      // This case handles the separator string '|'
+      return <div key={item} className="inkstream-toolbar-separator" />;
     }
   };
 
