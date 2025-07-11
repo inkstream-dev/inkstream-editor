@@ -73,7 +73,7 @@ class LinkBubbleView {
     this.bubble.querySelector('.visit')?.addEventListener('click', this.handleVisit.bind(this));
     this.bubble.querySelector('.delete')?.addEventListener('click', this.handleDelete.bind(this));
 
-    this.view.dom.parentNode?.parentNode?.addEventListener('click', this.handleDocumentClick.bind(this));
+    this.view.dom.parentNode?.parentNode?.addEventListener('click', this.handleDocumentClick.bind(this) as EventListener);
 
     this.update(editorView, undefined);
   }
