@@ -21,7 +21,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
-  const [toolbarItems, setToolbarItems] = useState<ToolbarItem[]>([]); // State for toolbar items
+  type ToolbarItemOrSeparator = ToolbarItem | string;
+
+  const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]); // State for toolbar items
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
@@ -98,7 +100,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     // Get all available toolbar items
     const allToolbarItems = pluginManager.getToolbarItems(schema);
     allToolbarItems.set('link', getLinkBubbleToolbarItem(schema));
-    let orderedToolbarItems: ToolbarItem[] = [];
+    let orderedToolbarItems: ToolbarItemOrSeparator[] = [];
 
     if (toolbarLayout && toolbarLayout.length > 0) {
       // If a layout is provided, use it to order the items
