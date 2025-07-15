@@ -42,16 +42,6 @@ export const orderedListPlugin = createPlugin({
                 return ['ol', 0];
             },
         },
-        list_item: {
-            content: 'paragraph block*',
-            parseDOM: [{
-                tag: 'li'
-            }],
-            toDOM() {
-                return ['li', 0];
-            },
-            defining: true,
-        },
     },
     getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
         const listItemType = schema.nodes.list_item;
