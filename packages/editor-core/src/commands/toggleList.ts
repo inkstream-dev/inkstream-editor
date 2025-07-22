@@ -19,6 +19,38 @@ export const toggleList = (listTypeOrName: string | NodeType, itemTypeOrName: st
 
     // Scenario 1: If already in the target list type, toggle off (lift)
     if (parentList && parentList.node.type === listType) {
+      // First, try to lift the list item.
+      // If it can't be lifted, it means it's a top-level list item.
+      if (liftListItem(itemType)(state, dispatch)) {
+        return true;
+      }
+
+      // If lifting didn't work, try to convert it to a paragraph.
+      // This is the action that effectively "removes" the list.
+      const { $from, $to } = selection;
+      const range = $from.blockRange($to);
+      if (range && dispatch) {
+        const paragraph = state.schema.nodes.paragraph;
+        if (paragraph) {
+          const mapping = tr.mapping;
+          tr.setBlockType(range.start, range.end, paragraph);
+          const from = mapping.map(range.start);
+          const to = mapping.map(range.end);
+          tr.doc.nodesBetween(from, to, (node, pos) => {
+            if (node.type === listType) {
+              const $pos = tr.doc.resolve(pos);
+              const listRange = $pos.blockRange();
+              if (listRange) {
+                tr.setBlockType(listRange.start, listRange.end, paragraph);
+              }
+            }
+          });
+          dispatch(tr.scrollIntoView());
+          return true;
+        }
+      }
+
+      // Fallback to original liftListItem if conversion is not possible
       return liftListItem(itemType)(state, dispatch);
     }
 
