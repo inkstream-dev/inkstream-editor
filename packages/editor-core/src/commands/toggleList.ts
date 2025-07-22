@@ -17,53 +17,33 @@ export const toggleList = (listTypeOrName: string | NodeType, itemTypeOrName: st
     const { selection, tr } = state;
     const parentList = findParentNode(node => isList(node.type.name))(selection);
 
-    // If already in the target list type, toggle off (lift)
+    // Scenario 1: If already in the target list type, toggle off (lift)
     if (parentList && parentList.node.type === listType) {
       return liftListItem(itemType)(state, dispatch);
     }
 
-    // If in a different list type, or not in any list, we either convert or create.
-    // The strategy is to first lift (if in a list), then wrap.
-    let currentTr = tr;
-    let changed = false;
-
-    // Attempt to lift first. This will lift out of any existing list.
-    // If it applies, `currentTr` will be updated with the lift steps.
-    const liftCommand = liftListItem(itemType);
-    if (liftCommand(state, (tempTr) => {
-        currentTr = tempTr;
-        changed = true;
-    })) {
-        // If lifting happened, `currentTr` now contains the lift steps.
-        // We need to apply the wrap command on the state *after* the lift.
-        // The `wrapInList` command will create a new transaction.
-        // We then need to append its steps to `currentTr`.
+    // Scenario 2: If in a different list type, convert it
+    if (parentList && parentList.node.type !== listType) {
+      // First, lift out of the current list
+      let currentTr = tr;
+      const liftCommand = liftListItem(itemType);
+      if (liftCommand(state, (tempTr) => { currentTr = tempTr; })) {
+        // Then, wrap into the new list type
         const stateAfterLift = state.apply(currentTr);
         const wrapCommand = wrapInList(listType);
         if (wrapCommand(stateAfterLift, (tempTr) => {
-            tempTr.steps.forEach(step => {
-                currentTr = currentTr.step(step);
-            });
-            changed = true;
+          tempTr.steps.forEach(step => { currentTr = currentTr.step(step); });
         })) {
-            // Handled by wrapInList
+          if (dispatch) {
+            dispatch(currentTr);
+          }
+          return true;
         }
-    } else {
-        // If no lifting happened (e.g., not in a list), just try to wrap.
-        const wrapCommand = wrapInList(listType);
-        if (wrapCommand(state, (tempTr) => {
-            currentTr = tempTr;
-            changed = true;
-        })) {
-            // Handled by wrapInList
-        }
+      }
+      return false;
     }
 
-    if (changed && dispatch) {
-        dispatch(currentTr);
-        return true;
-    }
-
-    return false;
+    // Scenario 3: If not in any list, toggle on (wrap)
+    return wrapInList(listType)(state, dispatch);
   };
 };
