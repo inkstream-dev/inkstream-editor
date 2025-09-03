@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@inkstream/font-family": "workspace:*",
     "@inkstream/heading": "workspace:*",
     "@inkstream/react-editor": "workspace:*",
     "next": "15.3.5",

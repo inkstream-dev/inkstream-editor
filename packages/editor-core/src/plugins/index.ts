@@ -32,7 +32,7 @@ export interface Plugin {
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema) => ToolbarItem[]; // Optional method for toolbar items
+  getToolbarItems?: (schema: Schema, options?: any) => ToolbarItem[]; // Optional method for toolbar items
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
 }
@@ -81,13 +81,14 @@ export class PluginManager {
     return nodes;
   }
 
-  getToolbarItems(schema: Schema): Map<string, ToolbarItem> {
+  getToolbarItems(schema: Schema, pluginOptions: { [key: string]: any } = {}): Map<string, ToolbarItem> {
     //console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
       let items: ToolbarItem[] = [];
       if (plugin.getToolbarItems) {
-        items = plugin.getToolbarItems(schema);
+        const options = pluginOptions[plugin.name] || {};
+        items = plugin.getToolbarItems(schema, options);
       }
       //console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));

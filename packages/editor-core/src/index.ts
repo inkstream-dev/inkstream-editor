@@ -28,6 +28,7 @@ import { textColorPlugin } from './plugins/textColor';
 import { highlightPlugin } from './plugins/highlight';
 import { codeBlockPlugin } from './plugins/codeBlock';
 import { LinkBubbleWrapperPlugin } from './plugins/link-bubble-wrapper';
+import { fontFamilyPlugin } from '../../font-family/src/font-family';
 
 
 import { inkstreamSchema } from './schema';
@@ -128,6 +129,7 @@ const pluginLoader = {
   highlight: () => highlightPlugin,
   codeBlockPlugin: () => codeBlockPlugin,
   linkBubble: () => new LinkBubbleWrapperPlugin(),
+  fontFamily: () => fontFamilyPlugin,
 };
 
 // Register all plugins with the manager
