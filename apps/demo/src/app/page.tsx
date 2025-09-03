@@ -6,12 +6,18 @@ export default function Home() {
       <h1>Inkstream Demo</h1>
       <RichTextEditor 
         initialContent="<p>Hello world</p>" 
-        plugins={["bold", "underline", "italic", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "undo", "link", "heading"]}
+        plugins={["bold", "underline", "italic", "strike", "alignLeft", "indent", "bulletList", "orderedList", "code", "undo", "link", "heading", "fontFamily"]}
+        pluginOptions={{
+          fontFamily: {
+            fontFamilies: ['Arial', 'Georgia', 'Helvetica', 'Tahoma', 'Times New Roman', 'Verdana']
+          }
+        }}
         toolbarLayout={[
           "undo", 
           "redo", 
           "|",
-          "heading", 
+          "heading",
+          "fontFamily", 
           "bold", 
           "italic", 
           "underline", 

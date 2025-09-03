@@ -21,6 +21,9 @@ importers:
 
   apps/demo:
     dependencies:
+      '@inkstream/font-family':
+        specifier: workspace:*
+        version: link:../../packages/font-family
       '@inkstream/heading':
         specifier: workspace:*
         version: link:../../packages/heading
@@ -128,6 +131,37 @@ importers:
       eslint-config-turbo:
         specifier: ^1.11.3
         version: 1.13.4(eslint@8.57.1)
+
+  packages/font-family:
+    dependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      prosemirror-commands:
+        specifier: ^1.5.2
+        version: 1.7.1
+      prosemirror-keymap:
+        specifier: ^1.2.2
+        version: 1.2.3
+      prosemirror-model:
+        specifier: ^1.19.0
+        version: 1.25.1
+      prosemirror-state:
+        specifier: ^1.4.0
+        version: 1.4.3
+    devDependencies:
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.6
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.8.3
 
   packages/heading:
     dependencies:

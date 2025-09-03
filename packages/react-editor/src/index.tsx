@@ -13,11 +13,12 @@ import { createRoot } from 'react-dom/client';
 
 interface RichTextEditorProps {
   initialContent: string;
-  plugins?: string[]; // Now accepts an array of plugin names (strings)
-  toolbarLayout?: string[]; // Optional: Array of toolbar item IDs in desired order
+  plugins?: string[];
+  pluginOptions?: { [key: string]: any };
+  toolbarLayout?: string[];
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins = [], toolbarLayout = ["link"] }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins = [], pluginOptions = {}, toolbarLayout = [] }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
@@ -98,7 +99,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     setCurrentEditorState(state);
 
     // Get all available toolbar items
-    const allToolbarItems = pluginManager.getToolbarItems(schema);
+    const allToolbarItems = pluginManager.getToolbarItems(schema, pluginOptions);
     allToolbarItems.set('link', getLinkBubbleToolbarItem(schema));
     let orderedToolbarItems: ToolbarItemOrSeparator[] = [];
 
