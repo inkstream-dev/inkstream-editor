@@ -1,7 +1,7 @@
 import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { keymap } from 'prosemirror-keymap';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction, TextSelection } from 'prosemirror-state';
 import { InputRule, textblockTypeInputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
 import { exitCode, chainCommands, newlineInCode } from 'prosemirror-commands';
@@ -55,7 +55,22 @@ export const codeBlockPlugin = createPlugin({
         tooltip: 'Code Block',
         command: (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           if (dispatch) {
-            dispatch(state.tr.replaceSelectionWith(schema.nodes.code_block.create()).scrollIntoView());
+            const { selection, schema } = state;
+            const { from, to } = selection;
+
+            let codeBlock;
+            let textContent = '';
+
+            if (selection.empty) {
+              codeBlock = schema.nodes.code_block.create();
+            } else {
+              textContent = state.doc.textBetween(from, to, '\n');
+              codeBlock = schema.nodes.code_block.create(null, schema.text(textContent));
+            }
+
+            const tr = state.tr.replaceSelectionWith(codeBlock);
+            const newSelection = TextSelection.create(tr.doc, from + 1, from + 1 + textContent.length);
+            dispatch(tr.setSelection(newSelection).scrollIntoView());
           }
           return true;
         },
