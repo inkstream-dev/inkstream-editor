@@ -22,12 +22,18 @@ export default function Home() {
           "italic", 
           "underline", 
           "strike", 
+          "link",
           "|",
           "indent", 
           "outdent", 
           "|",
+           "alignLeft",
+          "alignCenter",
+          "alignRight",
+          "|",
           "bulletList", 
           "orderedList", 
+          "codeBlock",
           "code", 
           "|",
           "image", 
@@ -37,9 +43,6 @@ export default function Home() {
           "listItem", 
           "blockquote", 
           "horizontalLine", 
-          "codeBlock",
-          "link",
-          "alignLeft",
         ]}
       />
     </main>
