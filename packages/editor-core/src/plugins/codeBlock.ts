@@ -6,6 +6,21 @@ import { InputRule, textblockTypeInputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
 import { exitCode, chainCommands, newlineInCode } from 'prosemirror-commands';
 
+const turnIntoCodeBlockOnEnter = (state: EditorState, dispatch?: (tr: Transaction) => void): boolean => {
+  const { $from } = state.selection;
+  const node = $from.parent;
+  if (node.type.name !== 'paragraph' || node.textContent !== '```') {
+      return false;
+  }
+  if (dispatch) {
+      const { schema } = state;
+      const codeBlock = schema.nodes.code_block.create();
+      const tr = state.tr.replaceWith($from.before(), $from.after(), codeBlock);
+      dispatch(tr.scrollIntoView());
+  }
+  return true;
+};
+
 export const codeBlockPlugin = createPlugin({
   name: 'codeBlock',
   nodes: {
@@ -22,7 +37,7 @@ export const codeBlockPlugin = createPlugin({
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
     return [
       keymap({
-        "Enter": newlineInCode,
+        "Enter": chainCommands(turnIntoCodeBlockOnEnter, newlineInCode),
         "Shift-Enter": exitCode,
       }),
     ];
@@ -49,4 +64,3 @@ export const codeBlockPlugin = createPlugin({
     ];
   },
 });
-
