@@ -4,7 +4,7 @@ import { keymap } from 'prosemirror-keymap';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
 import { InputRule, textblockTypeInputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
-import { exitCode } from 'prosemirror-commands';
+import { exitCode, chainCommands, newlineInCode } from 'prosemirror-commands';
 
 export const codeBlockPlugin = createPlugin({
   name: 'codeBlock',
@@ -20,26 +20,17 @@ export const codeBlockPlugin = createPlugin({
     },
   },
   getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    return [];
+    return [
+      keymap({
+        "Enter": newlineInCode,
+        "Shift-Enter": exitCode,
+      }),
+    ];
   },
   getInputRules: (schema: Schema): InputRule[] => {
     return [
-      textblockTypeInputRule(/^```\s$/, schema.nodes.code_block, (match) => { console.log("Code block input rule matched!"); return {}; }),
+      textblockTypeInputRule(/^```\s$/, schema.nodes.code_block),
     ];
-  },
-  getKeymap: (schema: Schema): { [key: string]: any } => {
-    const keys: { [key: string]: any } = {};
-    keys["Shift-Enter"] = exitCode;
-    keys["Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-      if (state.selection.$head.parent.type === schema.nodes.code_block) {
-        if (dispatch) {
-          dispatch(state.tr.insertText("\n"));
-        }
-        return true;
-      }
-      return false;
-    };
-    return keys;
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
