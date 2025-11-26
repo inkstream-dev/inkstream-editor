@@ -26,6 +26,7 @@
     "prosemirror-view": "^1.32.2",
     "prosemirror-state": "^1.4.0",
     "prosemirror-model": "^1.19.0",
-    "prosemirror-commands": "^1.5.2"
+    "prosemirror-commands": "^1.5.2",
+    "prosemirror-inputrules": "^1.2.2"
   }
 }
