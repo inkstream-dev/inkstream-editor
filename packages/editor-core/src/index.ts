@@ -14,6 +14,8 @@ import { underlinePlugin } from './plugins/underline';
 import { italicPlugin } from './plugins/italic';
 import { strikePlugin } from './plugins/strike';
 import { alignLeftPlugin } from './plugins/align-left';
+import { alignCenterPlugin } from './plugins/align-center';
+import { alignRightPlugin } from './plugins/align-right';
 import { imagePlugin } from './plugins/image';
 import { indentPlugin } from './plugins/indent';
 import { bulletListPlugin } from './plugins/bullet-list';
@@ -115,6 +117,8 @@ const pluginLoader = {
   italic: () => italicPlugin,
   strike: () => strikePlugin,
   alignLeft: () => alignLeftPlugin,
+  alignCenter: () => alignCenterPlugin,
+  alignRight: () => alignRightPlugin,
   image: () => imagePlugin,
   indent: () => indentPlugin,
   bulletList: () => bulletListPlugin,

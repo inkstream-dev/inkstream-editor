@@ -4,30 +4,30 @@ import { EditorState } from 'prosemirror-state';
 import { ToolbarItem } from './index';
 import { setAlignment } from '../commands/alignment';
 
-export const alignLeftPlugin = createPlugin({
-  name: 'alignLeft',
+export const alignRightPlugin = createPlugin({
+  name: 'alignRight',
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
       {
-        id: 'alignLeft',
-        icon: 'Left',
-        tooltip: 'Align Left',
-        command: setAlignment('left'),
+        id: 'alignRight',
+        icon: 'Right',
+        tooltip: 'Align Right',
+        command: setAlignment('right'),
         isActive: (state: EditorState) => {
           const { selection, doc } = state;
           const { from, to } = selection;
-          let allLeftAligned = true;
+          let allRightAligned = true;
           let atLeastOneBlock = false;
           doc.nodesBetween(from, to, (node) => {
             if (node.isBlock && node.type.spec.attrs && node.type.spec.attrs.align !== undefined) {
               atLeastOneBlock = true;
-              if (node.attrs.align !== 'left') {
-                allLeftAligned = false;
+              if (node.attrs.align !== 'right') {
+                allRightAligned = false;
                 return false;
               }
             }
           });
-          return atLeastOneBlock && allLeftAligned;
+          return atLeastOneBlock && allRightAligned;
         },
       },
     ];
