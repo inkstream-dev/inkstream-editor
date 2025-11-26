@@ -4,7 +4,7 @@ import { keymap } from 'prosemirror-keymap';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction, TextSelection } from 'prosemirror-state';
 import { InputRule, textblockTypeInputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
-import { exitCode, chainCommands, newlineInCode } from 'prosemirror-commands';
+import { exitCode, chainCommands, newlineInCode, setBlockType } from 'prosemirror-commands';
 
 const turnIntoCodeBlockOnEnter = (state: EditorState, dispatch?: (tr: Transaction) => void): boolean => {
   const { $from } = state.selection;
@@ -54,8 +54,12 @@ export const codeBlockPlugin = createPlugin({
         icon: '{;}', // Placeholder icon
         tooltip: 'Code Block',
         command: (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-          if (dispatch) {
-            const { selection, schema } = state;
+          const { schema, selection } = state;
+          const isActive = selection.$from.parent.type === schema.nodes.code_block;
+
+          if (isActive) {
+            return setBlockType(schema.nodes.paragraph)(state, dispatch);
+          } else {
             const { from, to } = selection;
 
             let codeBlock;
@@ -70,9 +74,11 @@ export const codeBlockPlugin = createPlugin({
 
             const tr = state.tr.replaceSelectionWith(codeBlock);
             const newSelection = TextSelection.create(tr.doc, from + 1, from + 1 + textContent.length);
-            dispatch(tr.setSelection(newSelection).scrollIntoView());
+            if (dispatch) {
+              dispatch(tr.setSelection(newSelection).scrollIntoView());
+            }
+            return true;
           }
-          return true;
         },
         isActive: (state: EditorState) => state.selection.$from.parent.type === schema.nodes.code_block,
       },
