@@ -22,12 +22,34 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
         return ["p", attrs, 0];
       },
     },
-    blockquote: { content: "block+", group: "block", toDOM() { return ["blockquote", 0]; } },
+    blockquote: {
+      content: "block+",
+      group: "block",
+      attrs: {
+        align: { default: null },
+      },
+      toDOM(node) {
+        const attrs: { [key: string]: string } = {};
+        if (node.attrs.align) {
+          attrs.style = `text-align: ${node.attrs.align}`;
+        }
+        return ["blockquote", attrs, 0];
+      }
+    },
     heading: {
-      attrs: { level: { default: 1 } },
+      attrs: {
+        level: { default: 1 },
+        align: { default: null },
+      },
       content: "inline*",
       group: "block",
-      toDOM(node) { return ["h" + node.attrs.level, 0]; },
+      toDOM(node) {
+        const domAttrs: { [key: string]: string } = {};
+        if (node.attrs.align) {
+          domAttrs.style = `text-align: ${node.attrs.align}`;
+        }
+        return ["h" + node.attrs.level, domAttrs, 0];
+      },
     },
     text: { inline: true, group: "inline", toDOM(node) { return node.text || ""; } },
     hard_break: { inline: true, group: "inline", selectable: false, toDOM() { return ["br"]; } },
