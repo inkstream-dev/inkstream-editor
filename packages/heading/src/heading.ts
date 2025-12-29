@@ -9,17 +9,12 @@ import { ToolbarItem } from '../../editor-core/src/plugins/index';
 export const headingPlugin = createPlugin({
   name: 'heading',
 
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
-
-    // Keymap for heading (e.g., Ctrl-Alt-1 for H1)
+  getKeymap: (schema: Schema): { [key: string]: any } => {
     const keys: { [key: string]: any } = {};
     if (schema.nodes.heading) {
       keys['Ctrl-Alt-1'] = setBlockType(schema.nodes.heading, { level: 1 });
     }
-    plugins.push(keymap(keys));
-
-    return plugins;
+    return keys;
   },
 
   getToolbarItems: (schema: Schema): ToolbarItem[] => {

@@ -35,6 +35,7 @@ import { fontFamilyPlugin } from '../../font-family/src/font-family';
 
 import { inkstreamSchema } from './schema';
 export { inkstreamSchema };
+export * from './license';
 
 // Input rules
 const buildInputRules = (schema: Schema) => {
@@ -155,3 +156,4 @@ export const inkstreamPlugins = (plugins: Plugin[]) => {
 
 export type { Plugin, ToolbarItem };
 export { PluginManager };
+export { createPlugin } from './plugins/plugin-factory';

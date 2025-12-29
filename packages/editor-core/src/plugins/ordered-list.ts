@@ -43,18 +43,17 @@ export const orderedListPlugin = createPlugin({
             },
         },
     },
-    getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-        const listItemType = schema.nodes.list_item;
-        const keys: { [key: string]: Command } = {
-            'Shift-Control-7': toggleOrderedList,
-            'Mod-[': liftListItem(listItemType),
-            'Mod-]': sinkListItem(listItemType),
-            'Shift-Enter': (state, dispatch) => {
-                dispatch?.(state.tr.replaceSelectionWith(state.schema.nodes.hard_break.create()).scrollIntoView());
-                return true;
-            },
-        };
-        return [keymap(keys),
+    getKeymap: (schema: Schema): { [key: string]: any } => {
+    const listItemType = schema.nodes.list_item;
+    return {
+      'Shift-Control-9': toggleOrderedList,
+      'Mod-[': liftListItem(listItemType),
+      'Mod-]': sinkListItem(listItemType),
+    };
+  },
+
+  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+    return [
         inputRules({
             rules: [new InputRule(/^(\d+)\.\s$/, (state, match, start, end) => {
                 let tr = state.tr.delete(start, end);

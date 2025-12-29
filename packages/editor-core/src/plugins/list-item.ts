@@ -26,19 +26,9 @@ export const listItemPlugin = createPlugin({
       defining: true,
     },
   },
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+  getKeymap: (schema: Schema): { [key: string]: any } => {
     const listItemType = schema.nodes.list_item;
-    const keys: { [key: string]: Command } = {
-      'Enter': (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-        const listItemType = state.schema.nodes.list_item;
-        if (splitListItem(listItemType)(state, dispatch)) {
-          return true;
-        }
-        if (liftListItem(listItemType)(state, dispatch)) {
-          return true;
-        }
-        return false;
-      },
+    return {
       'Tab': (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         return sinkListItem(listItemType)(state, dispatch);
       },
@@ -46,6 +36,5 @@ export const listItemPlugin = createPlugin({
         return liftListItem(listItemType)(state, dispatch);
       },
     };
-    return [keymap(keys)];
   },
 });

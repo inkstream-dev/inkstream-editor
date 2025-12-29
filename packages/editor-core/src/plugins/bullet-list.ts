@@ -50,19 +50,17 @@ export const bulletListPlugin = createPlugin({
       defining: true,
     },
   },
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+  getKeymap: (schema: Schema): { [key: string]: any } => {
     const listItemType = schema.nodes.list_item;
-    const keys: { [key: string]: Command } = {
+    return {
       'Shift-Control-8': toggleBulletList,
       'Mod-[': liftListItem(listItemType),
       'Mod-]': sinkListItem(listItemType),
-      'Shift-Enter': (state, dispatch) => {
-        dispatch?.(state.tr.replaceSelectionWith(state.schema.nodes.hard_break.create()).scrollIntoView());
-        return true;
-      },
-      
     };
-    return [keymap(keys), inputRules({
+  },
+
+  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
+    return [inputRules({
       rules: [
         new InputRule(/^(-|\*)\s$/, (state, match, start, end) => {
             let tr = state.tr.delete(start, end);

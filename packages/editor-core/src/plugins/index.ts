@@ -12,6 +12,7 @@ import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 import { textColorPlugin } from './textColor';
 import { highlightPlugin } from './highlight';
 import { codeBlockPlugin } from './codeBlock';
+import { PluginTier } from '../license';
 
 
 export interface ToolbarItem {
@@ -29,6 +30,8 @@ export interface ToolbarItem {
 
 export interface Plugin {
   name: string;
+  tier?: PluginTier; // Plugin tier - defaults to 'free' if not specified
+  description?: string; // Description of the plugin
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];

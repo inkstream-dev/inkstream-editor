@@ -5,6 +5,8 @@ import { linkBubblePlugin, getLinkBubbleToolbarItem } from '@inkstream/link-bubb
 
 export class LinkBubbleWrapperPlugin implements Plugin {
   name = 'linkBubble';
+  tier = 'free' as const;
+  description = 'Link editing bubble menu';
 
   getProseMirrorPlugins(schema: Schema): ProseMirrorPlugin[] {
     console.log("LinkBubbleWrapperPlugin: getProseMirrorPlugins called.");
