@@ -1,13 +1,37 @@
 "use client";
 
-import { RichTextEditor } from "@inkstream/react-editor";
-import { availablePlugins } from "@inkstream/editor-core";
-import { proPlugins } from "@inkstream/pro-plugins";
+import { RichTextEditor, useLazyPlugins } from "@inkstream/react-editor";
+import { availablePlugins, Plugin } from "@inkstream/editor-core";
 import { useState, useMemo } from "react";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState<string>("");
   const [currentTier, setCurrentTier] = useState<string>("free");
+
+  // Define lazy plugins config once - stable reference prevents infinite loops
+  const lazyPluginsConfig = useMemo(() => [
+    {
+      loader: () => import("@inkstream/pro-plugins").then(m => ({ table: m.proPlugins.table })),
+      requiredTier: 'pro' as const,
+      pluginKey: 'table',
+    },
+    {
+      loader: () => import("@inkstream/pro-plugins").then(m => ({ advancedExport: m.proPlugins.advancedExport })),
+      requiredTier: 'pro' as const,
+      pluginKey: 'advancedExport',
+    },
+    {
+      loader: () => import("@inkstream/pro-plugins").then(m => ({ aiAssistant: m.proPlugins.aiAssistant })),
+      requiredTier: 'premium' as const,
+      pluginKey: 'aiAssistant',
+    },
+  ], []); // Empty deps - create once
+
+  // Lazy load pro plugins based on license
+  const { loadedPlugins: proPluginsLoaded, isLoading: isLoadingProPlugins } = useLazyPlugins({
+    licenseKey,
+    lazyPlugins: lazyPluginsConfig,
+  });
 
   // Memoize plugins to prevent recreation on every render
   const allPlugins = useMemo(() => {
@@ -33,13 +57,10 @@ export default function Home() {
       availablePlugins.horizontalLine,
       availablePlugins.history,
       availablePlugins.linkBubble,
-      // PRO features
-      proPlugins.table,
-      proPlugins.advancedExport,
-      // PREMIUM features
-      proPlugins.aiAssistant,
+      // Add dynamically loaded pro plugins
+      ...proPluginsLoaded,
     ];
-  }, []); // Empty deps - create once
+  }, [proPluginsLoaded]); // Recreate when pro plugins are loaded
 
   const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const key = e.target.value;
@@ -90,6 +111,11 @@ export default function Home() {
                 }`}>
                   {currentTier.toUpperCase()}
                 </span>
+                {isLoadingProPlugins && (
+                  <span className="ml-2 text-xs text-gray-500">
+                    (Loading pro features...)
+                  </span>
+                )}
               </p>
               <div className="text-xs text-gray-500 space-y-1">
                 <p>💡 <strong>Free:</strong> Basic formatting, lists, images</p>

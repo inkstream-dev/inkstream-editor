@@ -304,3 +304,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     </div>
   );
 };
+
+// Export the lazy loading hook
+export { useLazyPlugins } from './useLazyPlugins';
