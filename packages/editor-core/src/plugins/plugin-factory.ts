@@ -2,9 +2,12 @@ import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
 import { ToolbarItem, Plugin } from './index';
 import { InputRule } from 'prosemirror-inputrules';
+import { PluginTier } from '../license';
 
 export interface PluginConfig {
   name: string;
+  tier?: PluginTier; // Plugin tier - defaults to 'free'
+  description?: string; // Plugin description
   nodes?: { [key: string]: any };
   marks?: { [key: string]: any };
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
@@ -16,6 +19,8 @@ export interface PluginConfig {
 export function createPlugin(config: PluginConfig): Plugin {
   return {
     name: config.name,
+    tier: config.tier || 'free', // Default to free
+    description: config.description,
     nodes: config.nodes,
     marks: config.marks,
     getProseMirrorPlugins: config.getProseMirrorPlugins || (() => []),

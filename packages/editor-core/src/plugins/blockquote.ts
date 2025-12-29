@@ -5,6 +5,8 @@ import { Plugin, ToolbarItem } from './index';
 
 export class BlockquotePlugin implements Plugin {
   name = 'blockquote';
+  tier = 'free' as const;
+  description = 'Blockquote support';
 
   nodes = {
     blockquote: {
