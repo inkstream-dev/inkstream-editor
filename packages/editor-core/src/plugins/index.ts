@@ -32,7 +32,7 @@ export interface Plugin {
   nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
   marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema, options?: any) => ToolbarItem[]; // Optional method for toolbar items
+  getToolbarItems?: (schema: Schema, options?: any) => ToolbarItem[]; // Optional method for toolbar items with options
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
 }

@@ -8,7 +8,7 @@ export interface PluginConfig {
   nodes?: { [key: string]: any };
   marks?: { [key: string]: any };
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema) => ToolbarItem[];
+  getToolbarItems?: (schema: Schema, options?: any) => ToolbarItem[]; // Accept optional options parameter
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
 }

@@ -108,43 +108,42 @@ const buildKeymap = (schema: Schema, manager: PluginManager) => {
   return keymap(keys);
 };
 
-export const pluginManager = new PluginManager();
-
-// Centralized plugin loader for dynamic imports
-const pluginLoader = {
-  bold: () => boldPlugin,
-  underline: () => underlinePlugin,
-  italic: () => italicPlugin,
-  strike: () => strikePlugin,
-  alignLeft: () => alignLeftPlugin,
-  alignCenter: () => alignCenterPlugin,
-  alignRight: () => alignRightPlugin,
-  image: () => imagePlugin,
-  indent: () => indentPlugin,
-  bulletList: () => bulletListPlugin,
-  orderedList: () => orderedListPlugin,
-  code: () => codePlugin,
-  history: () => historyPlugin,
-  listItem: () => listItemPlugin,
-  heading: () => headingPlugin,
-  blockquote: () => new BlockquotePlugin(),
-  horizontalLine: () => horizontalLinePlugin,
-  textColor: () => textColorPlugin,
-  highlight: () => highlightPlugin,
-  codeBlockPlugin: () => codeBlockPlugin,
-  linkBubble: () => new LinkBubbleWrapperPlugin(),
-  fontFamily: () => fontFamilyPlugin,
+// Export all available plugins for consumers to use
+export const availablePlugins = {
+  bold: boldPlugin,
+  underline: underlinePlugin,
+  italic: italicPlugin,
+  strike: strikePlugin,
+  alignLeft: alignLeftPlugin,
+  alignCenter: alignCenterPlugin,
+  alignRight: alignRightPlugin,
+  image: imagePlugin,
+  indent: indentPlugin,
+  bulletList: bulletListPlugin,
+  orderedList: orderedListPlugin,
+  code: codePlugin,
+  history: historyPlugin,
+  listItem: listItemPlugin,
+  heading: headingPlugin,
+  blockquote: new BlockquotePlugin(),
+  horizontalLine: horizontalLinePlugin,
+  textColor: textColorPlugin,
+  highlight: highlightPlugin,
+  codeBlock: codeBlockPlugin,
+  linkBubble: new LinkBubbleWrapperPlugin(),
+  fontFamily: fontFamilyPlugin,
 };
 
-// Register all plugins with the manager
-Object.values(pluginLoader).forEach(pluginFactory => {
-  const loadedPlugin = pluginFactory();
-  if (loadedPlugin) {
-    pluginManager.registerPlugin(loadedPlugin);
-  }
-});
-
-export const inkstreamPlugins = (manager: PluginManager) => {
+/**
+ * Creates ProseMirror plugins from a given array of Inkstream plugins
+ * @param plugins - Array of Plugin instances to use
+ * @returns Array of ProseMirror plugins configured with the schema
+ */
+export const inkstreamPlugins = (plugins: Plugin[]) => {
+  // Create a plugin manager instance for this specific set of plugins
+  const manager = new PluginManager();
+  plugins.forEach(plugin => manager.registerPlugin(plugin));
+  
   const schema = inkstreamSchema(manager);
 
   return [
@@ -155,4 +154,4 @@ export const inkstreamPlugins = (manager: PluginManager) => {
 };
 
 export type { Plugin, ToolbarItem };
-export { pluginLoader };
+export { PluginManager };
