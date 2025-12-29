@@ -118,13 +118,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   type ToolbarItemOrSeparator = ToolbarItem | string;
 
   const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]); // State for toolbar items
-  const [licenseManager] = useState(() => new LicenseManager(licenseKey)); // Create license manager
-  const isInitializedRef = useRef(false); // Prevent double initialization in StrictMode
   
-  // Use useState with lazy initialization to ensure plugins are created only once
-  const [pluginState] = useState(() => {
-    console.log('=== CREATING PLUGIN STATE (should only happen once) ===');
-    // Filter plugins based on license tier
+  // Update license manager when licenseKey changes
+  const licenseManager = useMemo(() => new LicenseManager(licenseKey), [licenseKey]);
+  
+  // Filter and validate plugins based on current license - recalculates when plugins or licenseKey changes
+  const validatedPlugins = useMemo(() => {
     const validated = plugins.filter(plugin => {
       const pluginTier = plugin.tier || 'free';
       const canUse = licenseManager.canUsePlugin(pluginTier);
@@ -139,11 +138,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       
       return true;
     });
+    
+    console.log(`License tier: ${licenseManager.getTier()}, Validated plugins:`, validated.map(p => p.name));
+    return validated;
+  }, [plugins, licenseKey, licenseManager, onLicenseError]);
+  
+  // Create plugin state - recalculates when validatedPlugins change
+  const pluginState = useMemo(() => {
+    console.log('=== CREATING/UPDATING PLUGIN STATE ===');
 
     // Create plugin manager and register all plugins
     const manager = new PluginManager();
-    console.log('Registering plugins:', validated.map(p => p.name));
-    validated.forEach(plugin => manager.registerPlugin(plugin));
+    console.log('Registering plugins:', validatedPlugins.map(p => p.name));
+    validatedPlugins.forEach(plugin => manager.registerPlugin(plugin));
     console.log('Manager has plugins:', manager.getPlugins().map(p => p.name));
     
     // Create schema from the manager
@@ -159,32 +166,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     console.log('=== PLUGIN STATE CREATED ===');
     console.log('Total plugins:', pmPlugins.length);
-    console.log('Plugin details:', pmPlugins.map((p: any) => {
-      if (p.spec && p.spec.key) {
-        return `Plugin with key: ${p.spec.key}`;
-      }
-      return p.constructor.name || 'Unknown plugin';
-    }));
-    
-    // Check for duplicate keyed plugins
-    const keyedPlugins = pmPlugins.filter((p: any) => p.spec && p.spec.key);
-    const keys = keyedPlugins.map((p: any) => p.spec.key);
-    const uniqueKeys = new Set(keys);
-    console.log('Keyed plugins:', keys);
-    console.log('Unique keys:', Array.from(uniqueKeys));
-    if (keys.length !== uniqueKeys.size) {
-      console.error('DUPLICATE KEYS DETECTED!', keys);
-    }
 
     return {
-      validatedPlugins: validated,
+      validatedPlugins,
       pluginManager: manager,
       schema: editorSchema,
       proseMirrorPlugins: pmPlugins,
     };
-  });
+  }, [validatedPlugins]);
 
-  const { validatedPlugins, pluginManager, schema, proseMirrorPlugins } = pluginState;
+  const { pluginManager, schema, proseMirrorPlugins } = pluginState;
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
@@ -197,13 +188,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, []); // This callback is stable and won't change
 
   useEffect(() => {
-    if (!editorRef.current || isInitializedRef.current) {
-      console.log('useEffect: Skipping initialization (already initialized or no ref)');
+    if (!editorRef.current) {
+      console.log('useEffect: Skipping initialization (no ref)');
       return;
     }
-
-    // Mark as initialized immediately to prevent double initialization
-    isInitializedRef.current = true;
 
     console.log("=== INITIALIZING EDITORVIEW ===");
     console.log(`Loaded ${validatedPlugins.length} out of ${plugins.length} plugins (license tier: ${licenseManager.getTier()})`);
@@ -293,18 +281,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     console.log("Ordered Toolbar Items:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);
 
-    // Cleanup function for EditorView when component unmounts
+    // Cleanup function for EditorView when component unmounts or plugins change
     return () => {
       if (editorViewRef.current) {
-        console.log("Destroying EditorView on unmount...");
+        console.log("Destroying EditorView...");
         editorViewRef.current.destroy();
         editorViewRef.current = null;
         setCurrentEditorState(null);
       }
-      // Reset initialization flag on unmount
-      isInitializedRef.current = false;
     };
-  }, []); // Empty dependency array - only run on mount/unmount
+  }, [schema, proseMirrorPlugins, pluginManager, validatedPlugins, plugins, licenseManager, initialContent, handleDispatchTransaction, pluginOptions, toolbarLayout]); // Reinitialize when plugins or license changes
 
   return (
     <div className="inkstream-editor-wrapper">
