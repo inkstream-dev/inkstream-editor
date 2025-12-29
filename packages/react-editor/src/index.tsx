@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser } from 'prosemirror-model';
-import { inkstreamSchema, pluginManager, Plugin, pluginLoader, inkstreamPlugins, ToolbarItem } from '@inkstream/editor-core';
+import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem } from '@inkstream/editor-core';
 import { inputRules } from 'prosemirror-inputrules';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
@@ -14,12 +14,17 @@ import { createRoot } from 'react-dom/client';
 
 interface RichTextEditorProps {
   initialContent: string;
-  plugins?: string[];
+  plugins?: Plugin[];  // Now accepts Plugin instances instead of string IDs
   pluginOptions?: { [key: string]: any };
   toolbarLayout?: string[];
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, plugins = [], pluginOptions = {}, toolbarLayout = [] }) => {
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+  initialContent, 
+  plugins = Object.values(availablePlugins),  // Default to all available plugins
+  pluginOptions = {}, 
+  toolbarLayout = [] 
+}) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
@@ -49,7 +54,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     }
 
     console.log("Initializing EditorView...");
-    // Use the globally exported pluginManager instance
+    // Create an instance-based plugin manager for this editor
+    const pluginManager = new PluginManager();
+    plugins.forEach(plugin => pluginManager.registerPlugin(plugin));
 
     const schema = inkstreamSchema(pluginManager);
     const parser = DOMParser.fromSchema(schema);
@@ -59,7 +66,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
     const state = EditorState.create({
       schema: schema,
       doc: doc,
-      plugins: inkstreamPlugins(pluginManager),
+      plugins: inkstreamPlugins(plugins),
     });
 
     const view = new EditorView(editorRef.current, {
@@ -135,7 +142,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, 
         setCurrentEditorState(null);
       }
     };
-  }, [initialContent, handleDispatchTransaction, toolbarLayout]); // Add toolbarLayout to dependency array
+  }, [initialContent, handleDispatchTransaction, plugins, toolbarLayout]); // Add plugins to dependency array
 
   return (
     <div className="inkstream-editor-wrapper">

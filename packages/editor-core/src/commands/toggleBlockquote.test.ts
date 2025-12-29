@@ -1,9 +1,10 @@
 import { EditorState } from 'prosemirror-state';
 import { toggleBlockquote } from './toggleBlockquote';
-import { inkstreamSchema } from '../schema';
-import { pluginManager } from '../index';
+import { inkstreamSchema, PluginManager, availablePlugins } from '../index';
 
 describe('toggleBlockquote', () => {
+  const pluginManager = new PluginManager();
+  Object.values(availablePlugins).forEach(plugin => pluginManager.registerPlugin(plugin));
   const schema = inkstreamSchema(pluginManager);
   const { nodes, marks } = schema.spec;
 
