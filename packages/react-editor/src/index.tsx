@@ -253,6 +253,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     editorViewRef.current = view;
     setCurrentEditorState(state);
+    
+    // Expose editor view globally for table dialog
+    (window as any).__inkstreamEditorView__ = view;
 
     // Get all available toolbar items
     const allToolbarItems = pluginManager.getToolbarItems(schema, pluginOptions);
@@ -305,5 +308,5 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   );
 };
 
-// Export the lazy loading hook
+export * from './EditorWithTableDialog';
 export { useLazyPlugins } from './useLazyPlugins';

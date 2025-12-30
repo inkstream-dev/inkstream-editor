@@ -2,19 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.headingPlugin = void 0;
 const plugin_factory_1 = require("../../editor-core/src/plugins/plugin-factory");
-const prosemirror_keymap_1 = require("prosemirror-keymap");
 const prosemirror_commands_1 = require("prosemirror-commands");
 exports.headingPlugin = (0, plugin_factory_1.createPlugin)({
     name: 'heading',
-    getProseMirrorPlugins: (schema) => {
-        const plugins = [];
-        // Keymap for heading (e.g., Ctrl-Alt-1 for H1)
+    getKeymap: (schema) => {
         const keys = {};
         if (schema.nodes.heading) {
             keys['Ctrl-Alt-1'] = (0, prosemirror_commands_1.setBlockType)(schema.nodes.heading, { level: 1 });
         }
-        plugins.push((0, prosemirror_keymap_1.keymap)(keys));
-        return plugins;
+        return keys;
     },
     getToolbarItems: (schema) => {
         const items = [];

@@ -4,7 +4,6 @@ exports.orderedListPlugin = exports.isOrderedListActive = exports.toggleOrderedL
 const toggleList_1 = require("../commands/toggleList");
 const plugin_factory_1 = require("./plugin-factory");
 const prosemirror_schema_list_1 = require("prosemirror-schema-list");
-const prosemirror_keymap_1 = require("prosemirror-keymap");
 const prosemirror_inputrules_1 = require("prosemirror-inputrules");
 const toggleOrderedList = (state, dispatch) => {
     const orderedListType = state.schema.nodes.ordered_list;
@@ -41,18 +40,16 @@ exports.orderedListPlugin = (0, plugin_factory_1.createPlugin)({
             },
         },
     },
-    getProseMirrorPlugins: (schema) => {
+    getKeymap: (schema) => {
         const listItemType = schema.nodes.list_item;
-        const keys = {
-            'Shift-Control-7': exports.toggleOrderedList,
+        return {
+            'Shift-Control-9': exports.toggleOrderedList,
             'Mod-[': (0, prosemirror_schema_list_1.liftListItem)(listItemType),
             'Mod-]': (0, prosemirror_schema_list_1.sinkListItem)(listItemType),
-            'Shift-Enter': (state, dispatch) => {
-                dispatch?.(state.tr.replaceSelectionWith(state.schema.nodes.hard_break.create()).scrollIntoView());
-                return true;
-            },
         };
-        return [(0, prosemirror_keymap_1.keymap)(keys),
+    },
+    getProseMirrorPlugins: (schema) => {
+        return [
             (0, prosemirror_inputrules_1.inputRules)({
                 rules: [new prosemirror_inputrules_1.InputRule(/^(\d+)\.\s$/, (state, match, start, end) => {
                         let tr = state.tr.delete(start, end);
