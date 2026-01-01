@@ -1,12 +1,24 @@
 "use client";
 
-import { RichTextEditor, useLazyPlugins } from "@inkstream/react-editor";
+import { EditorWithTableDialog, useLazyPlugins } from "@inkstream/react-editor";
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 export default function Home() {
-  const [licenseKey, setLicenseKey] = useState<string>("");
-  const [currentTier, setCurrentTier] = useState<string>("free");
+  const [licenseKey, setLicenseKey] = useState<string>("INKSTREAM-PRO-ABC123");
+  const [currentTier, setCurrentTier] = useState<string>("pro");
+
+  // Inject table styles when component mounts
+  useEffect(() => {
+    // Dynamically import and inject table styles from pro-plugins
+    import("@inkstream/pro-plugins").then((module) => {
+      if (module.injectTableStyles) {
+        module.injectTableStyles();
+      }
+    }).catch(err => {
+      console.warn('Could not load table styles:', err);
+    });
+  }, []);
 
   // Define lazy plugins config once - stable reference prevents infinite loops
   const lazyPluginsConfig = useMemo(() => [
@@ -132,7 +144,7 @@ export default function Home() {
 
         {/* Editor */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <RichTextEditor 
+          <EditorWithTableDialog 
             key="inkstream-editor-instance" 
             initialContent="<p>Try out the editor! Your tier determines which features you can use.</p>" 
             plugins={allPlugins}
