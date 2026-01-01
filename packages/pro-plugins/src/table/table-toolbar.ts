@@ -14,6 +14,8 @@ import {
   deleteTableCmd,
   isInTable,
   insertTable,
+  setCellAlignment,
+  setCellBackground,
 } from './table-commands';
 
 // This will be set by the react-editor when the dialog is available
@@ -113,6 +115,88 @@ export function getTableToolbarItems(schema: Schema): ToolbarItem[] {
         icon: '⊞',
         tooltip: 'Split Cell',
         command: splitCellCmd,
+      },
+      {
+        id: 'cellAlignment',
+        icon: '⚏',
+        tooltip: 'Cell Alignment',
+        type: 'dropdown',
+        children: [
+          {
+            id: 'alignLeft',
+            icon: '⬅ Left',
+            tooltip: 'Align Left',
+            command: setCellAlignment('left'),
+          },
+          {
+            id: 'alignCenter',
+            icon: '↔ Center',
+            tooltip: 'Align Center',
+            command: setCellAlignment('center'),
+          },
+          {
+            id: 'alignRight',
+            icon: '➡ Right',
+            tooltip: 'Align Right',
+            command: setCellAlignment('right'),
+          },
+        ],
+      },
+      {
+        id: 'cellBackground',
+        icon: '🎨',
+        tooltip: 'Cell Background',
+        type: 'dropdown',
+        children: [
+          {
+            id: 'bgNone',
+            icon: '⬜ None',
+            tooltip: 'No Background',
+            command: setCellBackground(null),
+          },
+          {
+            id: 'bgYellow',
+            icon: '🟨 Yellow',
+            tooltip: 'Yellow Background',
+            command: setCellBackground('#fff3cd'),
+          },
+          {
+            id: 'bgGreen',
+            icon: '🟩 Green',
+            tooltip: 'Green Background',
+            command: setCellBackground('#d1e7dd'),
+          },
+          {
+            id: 'bgBlue',
+            icon: '🟦 Blue',
+            tooltip: 'Blue Background',
+            command: setCellBackground('#cfe2ff'),
+          },
+          {
+            id: 'bgRed',
+            icon: '🟥 Red',
+            tooltip: 'Red Background',
+            command: setCellBackground('#f8d7da'),
+          },
+          {
+            id: 'bgPurple',
+            icon: '🟪 Purple',
+            tooltip: 'Purple Background',
+            command: setCellBackground('#e2d9f3'),
+          },
+          {
+            id: 'bgOrange',
+            icon: '🟧 Orange',
+            tooltip: 'Orange Background',
+            command: setCellBackground('#ffe5d0'),
+          },
+          {
+            id: 'bgGray',
+            icon: '⬛ Gray',
+            tooltip: 'Gray Background',
+            command: setCellBackground('#e9ecef'),
+          },
+        ],
       },
       {
         id: 'toggleHeaderRow',

@@ -253,6 +253,24 @@ export const TABLE_STYLES = `
   background-color: #f5f5f5;
 }
 
+/* Allow inline background colors to override header background */
+.${TABLE_CSS_CLASSES.table} th[style*="background-color"],
+.ProseMirror .tableWrapper > table th[style*="background-color"] {
+  background-color: var(--cell-bg-color, #f5f5f5);
+}
+
+/* Support for merged cells */
+.${TABLE_CSS_CLASSES.table} td[colspan],
+.${TABLE_CSS_CLASSES.table} td[rowspan],
+.${TABLE_CSS_CLASSES.table} th[colspan],
+.${TABLE_CSS_CLASSES.table} th[rowspan],
+.ProseMirror .tableWrapper > table td[colspan],
+.ProseMirror .tableWrapper > table td[rowspan],
+.ProseMirror .tableWrapper > table th[colspan],
+.ProseMirror .tableWrapper > table th[rowspan] {
+  background-clip: padding-box;
+}
+
 .${TABLE_CSS_CLASSES.table} .${TABLE_CSS_CLASSES.selectedCell}:after {
   z-index: 2;
   position: absolute;

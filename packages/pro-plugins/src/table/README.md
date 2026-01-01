@@ -60,12 +60,34 @@ Full-featured table support for Inkstream editor with custom dialog-based insert
 - Full transaction support for all table operations
 - History tracking for insertions, deletions, and modifications
 
+#### 10. **Cell Merging and Splitting**
+- **Merge Cells**: Combine multiple selected cells into a single cell
+- **Split Cell**: Split a merged cell back into individual cells
+- Works with both row and column spans
+- Maintains content during merge/split operations
+
+#### 11. **Cell Text Alignment**
+- **Align Left**: Left-align text in selected cells
+- **Align Center**: Center-align text in selected cells
+- **Align Right**: Right-align text in selected cells
+- Applies to both regular cells and header cells
+
+#### 12. **Cell Background Colors**
+- Pre-defined color palette with 7 colors + none option
+- Colors: Yellow, Green, Blue, Red, Purple, Orange, Gray
+- Applies to individual cells or selected cell ranges
+- Works with both regular cells and header cells
+- Background colors override default header styling
+
 ### 🚧 Planned Features (Not Yet Implemented)
 
-1. **Merge Cells** - Combine adjacent cells into a single cell
-2. **Split Cells** - Split merged cells back into individual cells
-3. **Cell Alignment** - Configure text alignment within cells (left, center, right)
-4. **Cell Background Colors** - Apply custom background colors to individual cells
+*All major features have been implemented!*
+
+Future enhancements could include:
+- Custom color picker for cell backgrounds
+- Vertical text alignment
+- Cell borders customization
+- Table captions
 
 ## Usage
 
@@ -135,6 +157,16 @@ When **inside** a table:
   - ← Col - Add Column Before
   - → Col - Add Column After
   - ✕ Col - Delete Column
+  - ⊡ Merge Cells - Combine selected cells
+  - ⊞ Split Cell - Split merged cell
+  - ⚏ Cell Alignment - Submenu with:
+    - ⬅ Left - Align left
+    - ↔ Center - Align center
+    - ➡ Right - Align right
+  - 🎨 Cell Background - Submenu with color options:
+    - ⬜ None - Remove background
+    - 🟨 Yellow, 🟩 Green, 🟦 Blue, 🟥 Red
+    - 🟪 Purple, 🟧 Orange, ⬛ Gray
   - ⌃ Header - Toggle Header Row
   - ✕ Table - Delete Table
 
@@ -291,11 +323,10 @@ The table plugin supports all modern browsers:
 
 ## Known Limitations
 
-1. Cell merging/splitting is not yet implemented
-2. Cell alignment customization is not yet implemented
-3. Cell background color customization is not yet implemented
+1. Nested tables are not supported
+2. Custom color picker for backgrounds is not available (pre-defined colors only)
+3. Vertical text alignment is not configurable
 4. Table captions are not supported
-5. Nested tables are not supported
 
 ## Troubleshooting
 
@@ -338,6 +369,13 @@ To add new table features:
 4. Update this README with the new features
 
 ## Changelog
+
+### v1.1.0 (January 2026)
+- ✨ Added cell merging and splitting functionality
+- ✨ Added cell text alignment (left, center, right)
+- ✨ Added cell background colors (7 pre-defined colors)
+- 🎨 Enhanced toolbar with alignment and color submenus
+- 📝 Updated documentation with new features
 
 ### v1.0.0 (December 2025)
 - Initial release
