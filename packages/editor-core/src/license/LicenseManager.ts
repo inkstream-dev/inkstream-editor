@@ -13,6 +13,25 @@ export class LicenseManager {
   }
 
   /**
+   * Checks whether a license key matches the expected format.
+   * This is a CLIENT-SIDE check for UX only (e.g., show an error before hitting
+   * the server). It must NEVER be used to grant access to paid features.
+   */
+  static isValidKeyFormat(key: string): boolean {
+    return /^INKSTREAM-(FREE|PRO|PREMIUM)-[A-Z0-9]+$/i.test(key);
+  }
+
+  /**
+   * Pure tier-access check. Use this instead of instantiating LicenseManager
+   * when the validated tier is already known (e.g., returned by the server).
+   */
+  static canTierAccess(userTier: LicenseTier, requiredTier: PluginTier): boolean {
+    if (userTier === 'premium') return true;
+    if (userTier === 'pro') return requiredTier === 'free' || requiredTier === 'pro';
+    return requiredTier === 'free';
+  }
+
+  /**
    * Set or update the license key
    */
   setLicenseKey(key: string): void {

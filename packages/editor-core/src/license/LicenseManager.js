@@ -12,6 +12,21 @@ class LicenseManager {
         }
     }
     /**
+     * Checks whether a license key matches the expected format.
+     * CLIENT-SIDE UX check only — never use to grant paid feature access.
+     */
+    static isValidKeyFormat(key) {
+        return /^INKSTREAM-(FREE|PRO|PREMIUM)-[A-Z0-9]+$/i.test(key);
+    }
+    /**
+     * Pure tier-access check using a server-validated tier.
+     */
+    static canTierAccess(userTier, requiredTier) {
+        if (userTier === 'premium') return true;
+        if (userTier === 'pro') return requiredTier === 'free' || requiredTier === 'pro';
+        return requiredTier === 'free';
+    }
+    /**
      * Set or update the license key
      */
     setLicenseKey(key) {
@@ -33,9 +48,6 @@ class LicenseManager {
      * In production, this would call your licensing API
      */
     validateLicenseKey(key) {
-        // For demo purposes, we'll use a simple pattern:
-        // Format: INKSTREAM-{TIER}-{RANDOM}
-        // Example: INKSTREAM-PRO-ABC123, INKSTREAM-PREMIUM-XYZ789
         const pattern = /^INKSTREAM-(FREE|PRO|PREMIUM)-[A-Z0-9]+$/i;
         const match = key.match(pattern);
         if (!match) {
@@ -46,15 +58,10 @@ class LicenseManager {
             };
         }
         const tier = match[1].toLowerCase();
-        // In production, you would:
-        // 1. Call your licensing API to validate the key
-        // 2. Check expiration date
-        // 3. Verify the key hasn't been revoked
-        // 4. Check usage limits, etc.
         return {
             isValid: true,
             tier,
-            expiresAt: undefined, // Would come from API
+            expiresAt: undefined,
         };
     }
     /**
@@ -68,15 +75,12 @@ class LicenseManager {
      */
     canUsePlugin(pluginTier) {
         const currentTier = this.getTier();
-        // Free tier can only use free plugins
         if (currentTier === 'free') {
             return pluginTier === 'free';
         }
-        // Pro tier can use free and pro plugins
         if (currentTier === 'pro') {
             return pluginTier === 'free' || pluginTier === 'pro';
         }
-        // Premium tier can use all plugins
         if (currentTier === 'premium') {
             return true;
         }
@@ -87,12 +91,11 @@ class LicenseManager {
      */
     isValid() {
         if (!this.licenseKey) {
-            return true; // Free tier is always valid
+            return true;
         }
         if (!this.licenseKey.isValid) {
             return false;
         }
-        // Check expiration
         if (this.licenseKey.expiresAt) {
             return new Date() < this.licenseKey.expiresAt;
         }

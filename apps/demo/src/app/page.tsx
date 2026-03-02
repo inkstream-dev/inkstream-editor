@@ -1,16 +1,23 @@
 "use client";
 
-import { EditorWithTableDialog, useLazyPlugins } from "@inkstream/react-editor";
+import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
 import { useState, useMemo, useEffect } from "react";
 
+const VALIDATION_ENDPOINT = "/api/validate-license";
+
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState<string>("INKSTREAM-PRO-ABC123");
-  const [currentTier, setCurrentTier] = useState<string>("pro");
+
+  // Validate the license key against the server. The returned `tier` is the
+  // authoritative value — no feature unlocks from the key string alone.
+  const { tier: validatedTier, isValidating, error: licenseError } = useLicenseValidation({
+    licenseKey,
+    validationEndpoint: VALIDATION_ENDPOINT,
+  });
 
   // Inject table styles when component mounts
   useEffect(() => {
-    // Dynamically import and inject table styles from pro-plugins
     import("@inkstream/pro-plugins").then((module) => {
       if (module.injectTableStyles) {
         module.injectTableStyles();
@@ -37,15 +44,14 @@ export default function Home() {
       requiredTier: 'premium' as const,
       pluginKey: 'aiAssistant',
     },
-  ], []); // Empty deps - create once
+  ], []);
 
-  // Lazy load pro plugins based on license
+  // Lazy load pro plugins using the server-validated tier
   const { loadedPlugins: proPluginsLoaded, isLoading: isLoadingProPlugins } = useLazyPlugins({
-    licenseKey,
+    validatedTier,
     lazyPlugins: lazyPluginsConfig,
   });
 
-  // Memoize plugins to prevent recreation on every render
   const allPlugins = useMemo(() => {
     return [
       availablePlugins.bold,
@@ -69,26 +75,11 @@ export default function Home() {
       availablePlugins.horizontalLine,
       availablePlugins.history,
       availablePlugins.linkBubble,
-      // Add dynamically loaded pro plugins
       ...proPluginsLoaded,
     ];
-  }, [proPluginsLoaded]); // Recreate when pro plugins are loaded
+  }, [proPluginsLoaded]);
 
-  const handleLicenseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const key = e.target.value;
-    setLicenseKey(key);
-    
-    // Determine tier from key format
-    if (key.startsWith("INKSTREAM-PREMIUM-")) {
-      setCurrentTier("premium");
-    } else if (key.startsWith("INKSTREAM-PRO-")) {
-      setCurrentTier("pro");
-    } else {
-      setCurrentTier("free");
-    }
-  };
-
-  const handleLicenseError = (plugin: any, requiredTier: string) => {
+  const handleLicenseError = (plugin: Plugin, requiredTier: string) => {
     console.warn(`License required: Plugin "${plugin.name}" needs ${requiredTier} tier`);
   };
 
@@ -109,24 +100,28 @@ export default function Home() {
             <input
               type="text"
               value={licenseKey}
-              onChange={handleLicenseChange}
+              onChange={e => setLicenseKey(e.target.value)}
               placeholder="Enter license key (e.g., INKSTREAM-PRO-ABC123)"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="mt-4 text-left">
               <p className="text-sm text-gray-600 mb-2">
-                <strong>Current Tier:</strong>{" "}
+                <strong>Validated Tier:</strong>{" "}
                 <span className={`font-bold ${
-                  currentTier === "premium" ? "text-purple-600" :
-                  currentTier === "pro" ? "text-blue-600" :
+                  validatedTier === "premium" ? "text-purple-600" :
+                  validatedTier === "pro" ? "text-blue-600" :
                   "text-green-600"
                 }`}>
-                  {currentTier.toUpperCase()}
+                  {validatedTier.toUpperCase()}
                 </span>
+                {isValidating && (
+                  <span className="ml-2 text-xs text-gray-400">(Validating…)</span>
+                )}
                 {isLoadingProPlugins && (
-                  <span className="ml-2 text-xs text-gray-500">
-                    (Loading pro features...)
-                  </span>
+                  <span className="ml-2 text-xs text-gray-500">(Loading pro features…)</span>
+                )}
+                {licenseError && (
+                  <span className="ml-2 text-xs text-red-500">{licenseError}</span>
                 )}
               </p>
               <div className="text-xs text-gray-500 space-y-1">
@@ -149,6 +144,7 @@ export default function Home() {
             initialContent="<p>Try out the editor! Your tier determines which features you can use.</p>" 
             plugins={allPlugins}
             licenseKey={licenseKey}
+            licenseValidationEndpoint={VALIDATION_ENDPOINT}
             onLicenseError={handleLicenseError}
             pluginOptions={{
               fontFamily: {
@@ -185,11 +181,9 @@ export default function Home() {
               "blockquote", 
               "horizontalLine",
               "|",
-              // Pro features - Unified table button
               "table",
               "export",
               "|",
-              // Premium features
               "aiAssistant",
             ]}
           />

@@ -27,3 +27,14 @@ export interface LicenseValidationResult {
   reason?: string;
   expiresAt?: Date;
 }
+
+/**
+ * Response shape returned by the server-side license validation endpoint.
+ * The client trusts this response as the authoritative tier source.
+ */
+export interface ServerValidationResponse {
+  isValid: boolean;
+  tier: LicenseTier;
+  expiresAt?: string | null;
+  reason?: string;
+}

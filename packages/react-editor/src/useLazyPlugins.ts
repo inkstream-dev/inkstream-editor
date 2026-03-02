@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plugin } from '@inkstream/editor-core';
+import { Plugin, LicenseTier } from '@inkstream/editor-core';
 
 type PluginLoader = () => Promise<{ default: Plugin } | { [key: string]: Plugin }>;
 
@@ -10,6 +10,16 @@ interface LazyPluginConfig {
 }
 
 interface UseLazyPluginsOptions {
+  /**
+   * The server-validated tier returned by `useLicenseValidation`.
+   * This is the authoritative source for which plugins to load.
+   * If not provided, defaults to 'free' — no paid plugins will load.
+   */
+  validatedTier?: LicenseTier;
+  /**
+   * @deprecated Pass `validatedTier` from `useLicenseValidation` instead.
+   * Kept for backward compatibility only. Has no effect on tier resolution.
+   */
   licenseKey?: string;
   lazyPlugins?: LazyPluginConfig[];
 }
@@ -20,54 +30,41 @@ interface UseLazyPluginsResult {
   error: Error | null;
 }
 
+const canLoadTier = (requiredTier: 'pro' | 'premium', currentTier: LicenseTier): boolean => {
+  if (requiredTier === 'premium') return currentTier === 'premium';
+  if (requiredTier === 'pro') return currentTier === 'pro' || currentTier === 'premium';
+  return true;
+};
+
 /**
- * Hook to lazy load plugins based on license tier
- * This enables code splitting - pro plugin code is only loaded when needed
+ * Lazy-loads plugins based on a server-validated tier.
+ * Pro plugin code is only downloaded when the server has confirmed the license.
  */
 export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsResult {
-  const { licenseKey = '', lazyPlugins = [] } = options;
+  // Use server-validated tier only. Default to 'free' — no bypass via licenseKey format.
+  const effectiveTier: LicenseTier = options.validatedTier ?? 'free';
+  const lazyPlugins = options.lazyPlugins ?? [];
+
   const [loadedPlugins, setLoadedPlugins] = useState<Plugin[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const loadedTierRef = useRef<string>(''); // Track last loaded tier to prevent re-loading
 
-  // Determine tier from license key
-  const getTier = (key: string): 'free' | 'pro' | 'premium' => {
-    if (key.startsWith('INKSTREAM-PREMIUM-')) {
-      return 'premium';
-    } else if (key.startsWith('INKSTREAM-PRO-')) {
-      return 'pro';
-    }
-    return 'free';
-  };
-
-  const canLoadTier = (requiredTier: 'pro' | 'premium', currentTier: 'free' | 'pro' | 'premium'): boolean => {
-    if (requiredTier === 'pro') {
-      return currentTier === 'pro' || currentTier === 'premium';
-    }
-    if (requiredTier === 'premium') {
-      return currentTier === 'premium';
-    }
-    return true;
-  };
-
   useEffect(() => {
     const loadPlugins = async () => {
-      const currentTier = getTier(licenseKey);
-      
       // Skip if we already loaded plugins for this tier
-      if (loadedTierRef.current === currentTier) {
+      if (loadedTierRef.current === effectiveTier) {
         return;
       }
       
       // Filter plugins that should be loaded for current tier
       const pluginsToLoad = lazyPlugins.filter(config => 
-        canLoadTier(config.requiredTier, currentTier)
+        canLoadTier(config.requiredTier, effectiveTier)
       );
 
       if (pluginsToLoad.length === 0) {
         setLoadedPlugins([]);
-        loadedTierRef.current = currentTier;
+        loadedTierRef.current = effectiveTier;
         return;
       }
 
@@ -75,7 +72,7 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
       setError(null);
 
       try {
-        console.log(`[useLazyPlugins] Loading ${pluginsToLoad.length} plugins for tier: ${currentTier}`);
+        console.log(`[useLazyPlugins] Loading ${pluginsToLoad.length} plugins for tier: ${effectiveTier}`);
         
         // Load all plugins in parallel
         const results = await Promise.all(
@@ -109,7 +106,7 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
 
         console.log(`[useLazyPlugins] Successfully loaded ${results.length} plugins`);
         setLoadedPlugins(results);
-        loadedTierRef.current = currentTier; // Mark this tier as loaded
+        loadedTierRef.current = effectiveTier;
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to load plugins');
         console.error('[useLazyPlugins] Error loading plugins:', error);
@@ -121,7 +118,7 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
     };
 
     loadPlugins();
-  }, [licenseKey]); // Only depend on licenseKey, not lazyPlugins array
+  }, [effectiveTier]); // Depend on server-validated tier, not raw licenseKey
 
   return { loadedPlugins, isLoading, error };
 }

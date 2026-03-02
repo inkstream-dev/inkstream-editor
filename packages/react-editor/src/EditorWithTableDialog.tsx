@@ -17,6 +17,7 @@ export interface EditorWithTableDialogProps {
   pluginOptions?: { [key: string]: any };
   toolbarLayout?: string[];
   licenseKey?: string;
+  licenseValidationEndpoint?: string;
   onLicenseError?: (plugin: any, tier: string) => void;
 }
 
