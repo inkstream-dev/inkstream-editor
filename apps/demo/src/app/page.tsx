@@ -27,20 +27,24 @@ export default function Home() {
     });
   }, []);
 
-  // Define lazy plugins config once - stable reference prevents infinite loops
+  // Define lazy plugins config once — loaders receive the server-validated tier
+  // so they can call createProPlugins(tier) and get properly guarded instances.
   const lazyPluginsConfig = useMemo(() => [
     {
-      loader: () => import("@inkstream/pro-plugins").then(m => ({ table: m.proPlugins.table })),
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream/pro-plugins').then(m => ({ table: m.createProPlugins(tier).table })),
       requiredTier: 'pro' as const,
       pluginKey: 'table',
     },
     {
-      loader: () => import("@inkstream/pro-plugins").then(m => ({ advancedExport: m.proPlugins.advancedExport })),
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream/pro-plugins').then(m => ({ advancedExport: m.createProPlugins(tier).advancedExport })),
       requiredTier: 'pro' as const,
       pluginKey: 'advancedExport',
     },
     {
-      loader: () => import("@inkstream/pro-plugins").then(m => ({ aiAssistant: m.proPlugins.aiAssistant })),
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream/pro-plugins').then(m => ({ aiAssistant: m.createProPlugins(tier).aiAssistant })),
       requiredTier: 'premium' as const,
       pluginKey: 'aiAssistant',
     },

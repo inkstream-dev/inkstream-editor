@@ -1,21 +1,30 @@
 {
   "name": "@inkstream/pro-plugins",
   "version": "0.0.0",
+  "description": "Pro and Premium plugins for Inkstream editor — private package, requires a paid license",
   "main": "./dist/pro-plugins/src/index.js",
   "types": "./dist/pro-plugins/src/index.d.ts",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": false,
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "lint": "eslint .",
     "build": "tsc"
   },
   "keywords": [
     "editor",
+    "inkstream",
     "pro",
-    "premium"
+    "premium",
+    "private"
   ],
   "author": "",
   "files": [
-    "dist"
+    "dist",
+    "DISTRIBUTION.md"
   ],
   "devDependencies": {
     "@inkstream/eslint-config": "workspace:*",
