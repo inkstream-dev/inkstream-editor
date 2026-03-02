@@ -7,8 +7,6 @@ import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';
 import { historyPlugin } from './history';
 import { listItemPlugin } from './list-item';
-import { BlockquotePlugin } from './blockquote';
-import { blockquoteToolbarItem } from './blockquote-toolbar-item';
 import { textColorPlugin } from './textColor';
 import { highlightPlugin } from './highlight';
 import { codeBlockPlugin } from './codeBlock';
@@ -71,21 +69,16 @@ export class PluginManager {
   }
 
   getNodes(): { [key: string]: any } {
-    //console.log("PluginManager: Getting nodes.");
     const nodes = this.plugins.reduce((nodes, plugin) => {
       if (plugin.nodes) {
         Object.assign(nodes, plugin.nodes);
       }
       return nodes;
-    }, {
-      blockquote: new BlockquotePlugin().nodes.blockquote,
-    });
-    //console.log("PluginManager: All collected nodes:", nodes);
+    }, {} as { [key: string]: any });
     return nodes;
   }
 
   getToolbarItems(schema: Schema, pluginOptions: { [key: string]: any } = {}): Map<string, ToolbarItem> {
-    //console.log(`PluginManager: Collecting toolbar items. Current plugins count: ${this.plugins.length}`);
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
       let items: ToolbarItem[] = [];
@@ -93,11 +86,8 @@ export class PluginManager {
         const options = pluginOptions[plugin.name] || {};
         items = plugin.getToolbarItems(schema, options);
       }
-      //console.log(`PluginManager: Plugin ${plugin.name} returned toolbar items:`, items);
       items.forEach(item => toolbarItemMap.set(item.id, item));
     });
-    toolbarItemMap.set(blockquoteToolbarItem.id, blockquoteToolbarItem);
-    //console.log(`PluginManager: Collected toolbar items:`, toolbarItemMap);
     return toolbarItemMap;
   }
 

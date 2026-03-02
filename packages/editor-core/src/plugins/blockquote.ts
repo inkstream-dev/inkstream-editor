@@ -1,14 +1,11 @@
-import { Node, Schema } from 'prosemirror-model';
+import { createPlugin } from './plugin-factory';
+import { toggleBlockquote } from '../commands/toggleBlockquote';
 
-import { Plugin as ProseMirrorPlugin } from 'prosemirror-state';
-import { Plugin, ToolbarItem } from './index';
-
-export class BlockquotePlugin implements Plugin {
-  name = 'blockquote';
-  tier = 'free' as const;
-  description = 'Blockquote support';
-
-  nodes = {
+export const blockquotePlugin = createPlugin({
+  name: 'blockquote',
+  tier: 'free',
+  description: 'Blockquote support',
+  nodes: {
     blockquote: {
       content: 'block+',
       group: 'block',
@@ -17,13 +14,18 @@ export class BlockquotePlugin implements Plugin {
         return ['blockquote', 0];
       },
     },
-  };
-
-  getProseMirrorPlugins(schema: Schema): ProseMirrorPlugin[] {
-    return [];
-  }
-
-  getToolbarItems(schema: Schema): ToolbarItem[] {
-    return [];
-  }
-}
+  },
+  getToolbarItems: (schema) => [
+    {
+      id: 'blockquote',
+      icon: '" "',
+      tooltip: 'Blockquote',
+      command: (state, dispatch) => toggleBlockquote(state, dispatch),
+      isActive: (state) => {
+        const { $from, to } = state.selection;
+        if (to > $from.end()) return false;
+        return $from.parent.type.name === 'blockquote';
+      },
+    },
+  ],
+});

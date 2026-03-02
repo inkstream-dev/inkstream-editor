@@ -1,6 +1,6 @@
 import { Schema } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { ToolbarItem } from '@inkstream/editor-core';
+import { ToolbarItem, tableDialogBridge } from '@inkstream/editor-core';
 import {
   addColumnBeforeCmd,
   addColumnAfterCmd,
@@ -18,25 +18,6 @@ import {
   setCellBackground,
 } from './table-commands';
 
-// This will be set by the react-editor when the dialog is available
-let showTableDialog: (() => void) | null = null;
-
-export function setTableDialogHandler(handler: (() => void) | null) {
-  console.log('[TABLE TOOLBAR] setTableDialogHandler called with:', handler ? 'function' : 'null');
-  showTableDialog = handler;
-  console.log('[TABLE TOOLBAR] showTableDialog is now:', showTableDialog ? 'set' : 'null');
-  
-  // Also populate the global registry for EditorWithTableDialog
-  if (typeof window !== 'undefined') {
-    if (!(window as any).__inkstreamTableDialogRegistry__) {
-      (window as any).__inkstreamTableDialogRegistry__ = {};
-    }
-    (window as any).__inkstreamTableDialogRegistry__.setHandler = setTableDialogHandler;
-    (window as any).__inkstreamTableDialogRegistry__.insertTable = insertTable;
-    console.log('[TABLE TOOLBAR] Global registry updated');
-  }
-}
-
 export function getTableToolbarItems(schema: Schema): ToolbarItem[] {
   const items: ToolbarItem[] = [];
 
@@ -53,14 +34,10 @@ export function getTableToolbarItems(schema: Schema): ToolbarItem[] {
         icon: '⊞ Insert Table',
         tooltip: 'Insert Table',
         command: (state, dispatch, view) => {
-          console.log('[TABLE TOOLBAR] Insert Table button clicked');
-          console.log('[TABLE TOOLBAR] showTableDialog is:', showTableDialog);
-          if (showTableDialog) {
-            console.log('[TABLE TOOLBAR] Calling showTableDialog()');
-            showTableDialog();
+          if (tableDialogBridge.openDialog) {
+            tableDialogBridge.openDialog();
             return true;
           }
-          console.log('[TABLE TOOLBAR] showTableDialog is null, cannot open dialog');
           return false;
         },
         isVisible: (state: EditorState) => !isInTable(state),

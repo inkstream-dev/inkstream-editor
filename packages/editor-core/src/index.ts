@@ -23,7 +23,7 @@ import { orderedListPlugin } from './plugins/ordered-list';
 import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
-import { BlockquotePlugin } from './plugins/blockquote';
+import { blockquotePlugin } from './plugins/blockquote';
 
 import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
@@ -36,51 +36,55 @@ import { inkstreamSchema } from './schema';
 export { inkstreamSchema };
 export * from './license';
 
-// Input rules
-const buildInputRules = (schema: Schema) => {
+// Input rules — exported for reuse by react-editor
+export const buildInputRules = (schema: Schema) => {
   const rules = smartQuotes.concat(ellipsis, emDash);
 
   // Rule for headings (e.g., # Heading)
-  rules.push(textblockTypeInputRule(/^#+\s$/, schema.nodes.heading, (match) => ({ level: match[0].length - 1 })));
+  if (schema.nodes.heading) {
+    rules.push(textblockTypeInputRule(/^#+\s$/, schema.nodes.heading, (match) => ({ level: match[0].length - 1 })));
+  }
 
   // Rule for blockquotes (e.g., > Quote)
-  rules.push(wrappingInputRule(/^>\s$/, schema.nodes.blockquote));
-
-  
+  if (schema.nodes.blockquote) {
+    rules.push(wrappingInputRule(/^>\s$/, schema.nodes.blockquote));
+  }
 
   // Rule for code blocks (e.g., ``` Code)
-  rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
+  if (schema.nodes.code_block) {
+    rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
+  }
 
   // Rules for bold
-  rules.push(new InputRule(/\*\*([^*]+)\*\*$/, (state, match, start, end) => {
-    const tr = state.tr;
-    if (match[1]) {
-      const textStart = start + match[0].indexOf(match[1]);
-      const textEnd = textStart + match[1].length;
-      tr.delete(textStart, textEnd);
-      tr.addMark(textStart, textEnd, schema.marks.strong.create());
-    }
-    return tr;
-  }));
+  if (schema.marks.strong) {
+    rules.push(new InputRule(/\*\*([^*]+)\*\*$/, (state, match, start, end) => {
+      const tr = state.tr;
+      if (match[1]) {
+        const textStart = start + match[0].indexOf(match[1]);
+        const textEnd = textStart + match[1].length;
+        tr.delete(textStart, textEnd);
+        tr.addMark(textStart, textEnd, schema.marks.strong.create());
+      }
+      return tr;
+    }));
 
-  rules.push(new InputRule(/__([^_]+)__$/, (state, match, start, end) => {
-    const tr = state.tr;
-    if (match[1]) {
-      const textStart = start + match[0].indexOf(match[1]);
-      const textEnd = textStart + match[1].length;
-      tr.delete(textStart, textEnd);
-      tr.addMark(textStart, textEnd, schema.marks.strong.create());
-    }
-    return tr;
-  }));
+    rules.push(new InputRule(/__([^_]+)__$/, (state, match, start, end) => {
+      const tr = state.tr;
+      if (match[1]) {
+        const textStart = start + match[0].indexOf(match[1]);
+        const textEnd = textStart + match[1].length;
+        tr.delete(textStart, textEnd);
+        tr.addMark(textStart, textEnd, schema.marks.strong.create());
+      }
+      return tr;
+    }));
+  }
 
-  return inputRules({
-    rules,
-  });
+  return inputRules({ rules });
 };
 
-// Keymap
-const buildKeymap = (schema: Schema, manager: PluginManager) => {
+// Keymap — exported for reuse by react-editor
+export const buildKeymap = (schema: Schema, manager: PluginManager) => {
   const keys: { [key: string]: any } = {};
 
   // Add base keymap commands
@@ -88,22 +92,26 @@ const buildKeymap = (schema: Schema, manager: PluginManager) => {
 
   // Add keymaps from plugins
   manager.getPlugins().forEach(plugin => {
-    const keymap = plugin.getKeymap?.(schema);
-    if (keymap) {
-      Object.assign(keys, keymap);
+    const pluginKeymap = plugin.getKeymap?.(schema);
+    if (pluginKeymap) {
+      Object.assign(keys, pluginKeymap);
     }
   });
 
   // Add keybinding for hard breaks (Shift-Enter)
-  keys["Shift-Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-    if (dispatch) {
-      dispatch(state.tr.replaceSelectionWith(schema.nodes.hard_break.create()).scrollIntoView());
-    }
-    return true;
-  };
+  if (schema.nodes.hard_break) {
+    keys["Shift-Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+      if (dispatch) {
+        dispatch(state.tr.replaceSelectionWith(schema.nodes.hard_break.create()).scrollIntoView());
+      }
+      return true;
+    };
+  }
 
-  // Add keybinding for creating a new paragraph (Enter)
-  keys["Enter"] = chainCommands(splitListItem(schema.nodes.list_item), liftListItem(schema.nodes.list_item), splitBlock);
+  // Add keybinding for list items (Enter)
+  if (schema.nodes.list_item) {
+    keys["Enter"] = chainCommands(splitListItem(schema.nodes.list_item), liftListItem(schema.nodes.list_item), splitBlock);
+  }
 
   return keymap(keys);
 };
@@ -124,7 +132,7 @@ export const availablePlugins = {
   code: codePlugin,
   history: historyPlugin,
   listItem: listItemPlugin,
-  blockquote: new BlockquotePlugin(),
+  blockquote: blockquotePlugin,
   horizontalLine: horizontalLinePlugin,
   textColor: textColorPlugin,
   highlight: highlightPlugin,
@@ -153,3 +161,4 @@ export const inkstreamPlugins = (plugins: Plugin[]) => {
 export type { Plugin, ToolbarItem };
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
+export { tableDialogBridge } from './tableDialogBridge';

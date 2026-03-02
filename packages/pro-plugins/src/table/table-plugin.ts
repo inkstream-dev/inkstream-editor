@@ -1,22 +1,14 @@
-import { createPlugin } from '@inkstream/editor-core';
+import { createPlugin, tableDialogBridge } from '@inkstream/editor-core';
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin } from 'prosemirror-state';
 import { columnResizing, tableEditing, fixTables } from 'prosemirror-tables';
 import { keymap } from 'prosemirror-keymap';
 import { getTableNodes, TABLE_STYLES } from './table-schema';
-import { getTableToolbarItems, setTableDialogHandler } from './table-toolbar';
+import { getTableToolbarItems } from './table-toolbar';
 import { goToNextCellCmd, goToPreviousCellCmd, insertTable } from './table-commands';
 
-// Initialize the global registry when this module loads
-if (typeof window !== 'undefined') {
-  console.log('[TABLE PLUGIN] Initializing global registry');
-  if (!(window as any).__inkstreamTableDialogRegistry__) {
-    (window as any).__inkstreamTableDialogRegistry__ = {};
-  }
-  (window as any).__inkstreamTableDialogRegistry__.setHandler = setTableDialogHandler;
-  (window as any).__inkstreamTableDialogRegistry__.insertTable = insertTable;
-  console.log('[TABLE PLUGIN] Global registry initialized:', (window as any).__inkstreamTableDialogRegistry__);
-}
+// Register insertTable command in the bridge when this module loads
+tableDialogBridge.insertTable = insertTable;
 
 /**
  * Table Plugin - PRO FEATURE
