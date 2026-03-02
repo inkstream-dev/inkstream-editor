@@ -24,13 +24,12 @@ import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
 import { BlockquotePlugin } from './plugins/blockquote';
-import { headingPlugin } from '../../heading/src/heading';
+
 import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
 import { highlightPlugin } from './plugins/highlight';
 import { codeBlockPlugin } from './plugins/codeBlock';
-import { LinkBubbleWrapperPlugin } from './plugins/link-bubble-wrapper';
-import { fontFamilyPlugin } from '../../font-family/src/font-family';
+
 
 
 import { inkstreamSchema } from './schema';
@@ -125,14 +124,11 @@ export const availablePlugins = {
   code: codePlugin,
   history: historyPlugin,
   listItem: listItemPlugin,
-  heading: headingPlugin,
   blockquote: new BlockquotePlugin(),
   horizontalLine: horizontalLinePlugin,
   textColor: textColorPlugin,
   highlight: highlightPlugin,
   codeBlock: codeBlockPlugin,
-  linkBubble: new LinkBubbleWrapperPlugin(),
-  fontFamily: fontFamilyPlugin,
 };
 
 /**

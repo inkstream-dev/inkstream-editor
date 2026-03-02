@@ -22,7 +22,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream/editor-core": "workspace:*"
+    "@inkstream/editor-core": "workspace:*",
+    "@inkstream/link-bubble": "workspace:*"
   },
   "peerDependencies": {
     "prosemirror-view": "^1.32.2",

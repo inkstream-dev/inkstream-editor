@@ -1,7 +1,7 @@
-import { createPlugin } from '../../editor-core/src/plugins/plugin-factory';
+import { createPlugin } from '@inkstream/editor-core';
 import { Schema, Mark, MarkType } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
-import { ToolbarItem } from '../../editor-core/src/plugins/index';
+import { ToolbarItem } from '@inkstream/editor-core';
 import { applyFontFamily } from './commands';
 
 export const fontFamilyPlugin = createPlugin({

@@ -1,10 +1,10 @@
 
-import { createPlugin } from '../../editor-core/src/plugins/plugin-factory';
+import { createPlugin } from '@inkstream/editor-core';
 import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { setBlockType } from 'prosemirror-commands';
-import { ToolbarItem } from '../../editor-core/src/plugins/index';
+import { ToolbarItem } from '@inkstream/editor-core';
 
 export const headingPlugin = createPlugin({
   name: 'heading',

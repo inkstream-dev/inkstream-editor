@@ -2,6 +2,8 @@
 
 import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
+import { headingPlugin } from "@inkstream/heading";
+import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
 import { useState, useMemo, useEffect } from "react";
 
 const VALIDATION_ENDPOINT = "/api/validate-license";
@@ -63,7 +65,7 @@ export default function Home() {
       availablePlugins.underline,
       availablePlugins.strike,
       availablePlugins.code,
-      availablePlugins.heading,
+      headingPlugin,
       availablePlugins.alignLeft,
       availablePlugins.alignCenter,
       availablePlugins.alignRight,
@@ -78,7 +80,7 @@ export default function Home() {
       availablePlugins.highlight,
       availablePlugins.horizontalLine,
       availablePlugins.history,
-      availablePlugins.linkBubble,
+      linkBubbleWrapperPlugin,
       ...proPluginsLoaded,
     ];
   }, [proPluginsLoaded]);

@@ -1,7 +1,7 @@
 import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Schema, Mark, Node as ProseMirrorNode } from 'prosemirror-model';
-import { ToolbarItem } from '../../editor-core/src/plugins';
+import { ToolbarItem } from '@inkstream/editor-core';
 
 export const linkBubblePlugin = new Plugin({
   view(editorView) {
