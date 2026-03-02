@@ -40,175 +40,224 @@ export function setTableDialogHandler(handler: (() => void) | null) {
 export function getTableToolbarItems(schema: Schema): ToolbarItem[] {
   const items: ToolbarItem[] = [];
 
-  // Insert Table button (visible when NOT in a table)
+  // Single unified Table button (always visible)
   items.push({
-    id: 'insertTable',
-    icon: '⊞',
-    tooltip: 'Insert Table',
-    command: (state, dispatch, view) => {
-      console.log('[TABLE TOOLBAR] Insert Table button clicked');
-      console.log('[TABLE TOOLBAR] showTableDialog is:', showTableDialog);
-      // Trigger the dialog if available
-      if (showTableDialog) {
-        console.log('[TABLE TOOLBAR] Calling showTableDialog()');
-        showTableDialog();
-        return true;
-      }
-      console.log('[TABLE TOOLBAR] showTableDialog is null, cannot open dialog');
-      return false;
-    },
-    isVisible: (state: EditorState) => !isInTable(state),
-  });
-
-  // Table Actions dropdown (visible only when inside a table)
-  items.push({
-    id: 'tableActions',
-    icon: '≡',
-    tooltip: 'Table Actions',
+    id: 'table',
+    icon: '⊞ Table',
+    tooltip: 'Table',
     type: 'dropdown',
-    isVisible: (state: EditorState) => isInTable(state),
     children: [
+      // Insert Table Section
       {
-        id: 'addRowBefore',
-        icon: '↑ Row',
-        tooltip: 'Add Row Above',
-        command: addRowBeforeCmd,
+        id: 'insertTable',
+        icon: '⊞ Insert Table',
+        tooltip: 'Insert Table',
+        command: (state, dispatch, view) => {
+          console.log('[TABLE TOOLBAR] Insert Table button clicked');
+          console.log('[TABLE TOOLBAR] showTableDialog is:', showTableDialog);
+          if (showTableDialog) {
+            console.log('[TABLE TOOLBAR] Calling showTableDialog()');
+            showTableDialog();
+            return true;
+          }
+          console.log('[TABLE TOOLBAR] showTableDialog is null, cannot open dialog');
+          return false;
+        },
+        isVisible: (state: EditorState) => !isInTable(state),
       },
+      // Row Actions Section
       {
-        id: 'addRowAfter',
-        icon: '↓ Row',
-        tooltip: 'Add Row Below',
-        command: addRowAfterCmd,
-      },
-      {
-        id: 'deleteRow',
-        icon: '✕ Row',
-        tooltip: 'Delete Row',
-        command: deleteRowCmd,
-      },
-      {
-        id: 'addColumnBefore',
-        icon: '← Col',
-        tooltip: 'Add Column Before',
-        command: addColumnBeforeCmd,
-      },
-      {
-        id: 'addColumnAfter',
-        icon: '→ Col',
-        tooltip: 'Add Column After',
-        command: addColumnAfterCmd,
-      },
-      {
-        id: 'deleteColumn',
-        icon: '✕ Col',
-        tooltip: 'Delete Column',
-        command: deleteColumnCmd,
-      },
-      {
-        id: 'mergeCells',
-        icon: '⊡',
-        tooltip: 'Merge Cells',
-        command: mergeCellsCmd,
-      },
-      {
-        id: 'splitCell',
-        icon: '⊞',
-        tooltip: 'Split Cell',
-        command: splitCellCmd,
-      },
-      {
-        id: 'cellAlignment',
-        icon: '⚏',
-        tooltip: 'Cell Alignment',
+        id: 'rowActions',
+        icon: '━ Row Actions',
+        tooltip: 'Row Actions',
         type: 'dropdown',
+        isVisible: (state: EditorState) => isInTable(state),
         children: [
           {
-            id: 'alignLeft',
-            icon: '⬅ Left',
-            tooltip: 'Align Left',
-            command: setCellAlignment('left'),
+            id: 'addRowBefore',
+            icon: '↑ Add Row Above',
+            tooltip: 'Add Row Above',
+            command: addRowBeforeCmd,
           },
           {
-            id: 'alignCenter',
-            icon: '↔ Center',
-            tooltip: 'Align Center',
-            command: setCellAlignment('center'),
+            id: 'addRowAfter',
+            icon: '↓ Add Row Below',
+            tooltip: 'Add Row Below',
+            command: addRowAfterCmd,
           },
           {
-            id: 'alignRight',
-            icon: '➡ Right',
-            tooltip: 'Align Right',
-            command: setCellAlignment('right'),
+            id: 'deleteRow',
+            icon: '✕ Delete Row',
+            tooltip: 'Delete Row',
+            command: deleteRowCmd,
           },
         ],
       },
+      // Column Actions Section
       {
-        id: 'cellBackground',
-        icon: '🎨',
-        tooltip: 'Cell Background',
+        id: 'columnActions',
+        icon: '┃ Column Actions',
+        tooltip: 'Column Actions',
         type: 'dropdown',
+        isVisible: (state: EditorState) => isInTable(state),
         children: [
           {
-            id: 'bgNone',
-            icon: '⬜ None',
-            tooltip: 'No Background',
-            command: setCellBackground(null),
+            id: 'addColumnBefore',
+            icon: '← Add Column Before',
+            tooltip: 'Add Column Before',
+            command: addColumnBeforeCmd,
           },
           {
-            id: 'bgYellow',
-            icon: '🟨 Yellow',
-            tooltip: 'Yellow Background',
-            command: setCellBackground('#fff3cd'),
+            id: 'addColumnAfter',
+            icon: '→ Add Column After',
+            tooltip: 'Add Column After',
+            command: addColumnAfterCmd,
           },
           {
-            id: 'bgGreen',
-            icon: '🟩 Green',
-            tooltip: 'Green Background',
-            command: setCellBackground('#d1e7dd'),
-          },
-          {
-            id: 'bgBlue',
-            icon: '🟦 Blue',
-            tooltip: 'Blue Background',
-            command: setCellBackground('#cfe2ff'),
-          },
-          {
-            id: 'bgRed',
-            icon: '🟥 Red',
-            tooltip: 'Red Background',
-            command: setCellBackground('#f8d7da'),
-          },
-          {
-            id: 'bgPurple',
-            icon: '🟪 Purple',
-            tooltip: 'Purple Background',
-            command: setCellBackground('#e2d9f3'),
-          },
-          {
-            id: 'bgOrange',
-            icon: '🟧 Orange',
-            tooltip: 'Orange Background',
-            command: setCellBackground('#ffe5d0'),
-          },
-          {
-            id: 'bgGray',
-            icon: '⬛ Gray',
-            tooltip: 'Gray Background',
-            command: setCellBackground('#e9ecef'),
+            id: 'deleteColumn',
+            icon: '✕ Delete Column',
+            tooltip: 'Delete Column',
+            command: deleteColumnCmd,
           },
         ],
       },
+      // Cell Actions Section
       {
-        id: 'toggleHeaderRow',
-        icon: '⌃ Header',
-        tooltip: 'Toggle Header Row',
-        command: toggleHeaderRowCmd,
+        id: 'cellActions',
+        icon: '◫ Cell Actions',
+        tooltip: 'Cell Actions',
+        type: 'dropdown',
+        isVisible: (state: EditorState) => isInTable(state),
+        children: [
+          {
+            id: 'mergeCells',
+            icon: '⊡ Merge Cells',
+            tooltip: 'Merge Selected Cells',
+            command: mergeCellsCmd,
+          },
+          {
+            id: 'splitCell',
+            icon: '⊞ Split Cell',
+            tooltip: 'Split Merged Cell',
+            command: splitCellCmd,
+          },
+        ],
       },
+      // Cell Styling Section
       {
-        id: 'deleteTable',
-        icon: '✕ Table',
-        tooltip: 'Delete Table',
-        command: deleteTableCmd,
+        id: 'cellStyling',
+        icon: '🎨 Cell Styling',
+        tooltip: 'Cell Styling',
+        type: 'dropdown',
+        isVisible: (state: EditorState) => isInTable(state),
+        children: [
+          // Alignment submenu
+          {
+            id: 'cellAlignment',
+            icon: '⚏ Alignment',
+            tooltip: 'Text Alignment',
+            type: 'dropdown',
+            children: [
+              {
+                id: 'alignLeft',
+                icon: '⬅ Left',
+                tooltip: 'Align Left',
+                command: setCellAlignment('left'),
+              },
+              {
+                id: 'alignCenter',
+                icon: '↔ Center',
+                tooltip: 'Align Center',
+                command: setCellAlignment('center'),
+              },
+              {
+                id: 'alignRight',
+                icon: '➡ Right',
+                tooltip: 'Align Right',
+                command: setCellAlignment('right'),
+              },
+            ],
+          },
+          // Background color submenu
+          {
+            id: 'cellBackground',
+            icon: '🎨 Background',
+            tooltip: 'Cell Background Color',
+            type: 'dropdown',
+            children: [
+              {
+                id: 'bgNone',
+                icon: '⬜ None',
+                tooltip: 'Remove Background',
+                command: setCellBackground(null),
+              },
+              {
+                id: 'bgYellow',
+                icon: '🟨 Yellow',
+                tooltip: 'Yellow',
+                command: setCellBackground('#fff3cd'),
+              },
+              {
+                id: 'bgGreen',
+                icon: '🟩 Green',
+                tooltip: 'Green',
+                command: setCellBackground('#d1e7dd'),
+              },
+              {
+                id: 'bgBlue',
+                icon: '🟦 Blue',
+                tooltip: 'Blue',
+                command: setCellBackground('#cfe2ff'),
+              },
+              {
+                id: 'bgRed',
+                icon: '🟥 Red',
+                tooltip: 'Red',
+                command: setCellBackground('#f8d7da'),
+              },
+              {
+                id: 'bgPurple',
+                icon: '🟪 Purple',
+                tooltip: 'Purple',
+                command: setCellBackground('#e2d9f3'),
+              },
+              {
+                id: 'bgOrange',
+                icon: '🟧 Orange',
+                tooltip: 'Orange',
+                command: setCellBackground('#ffe5d0'),
+              },
+              {
+                id: 'bgGray',
+                icon: '⬛ Gray',
+                tooltip: 'Gray',
+                command: setCellBackground('#e9ecef'),
+              },
+            ],
+          },
+        ],
+      },
+      // Table Options Section
+      {
+        id: 'tableOptions',
+        icon: '⚙ Table Options',
+        tooltip: 'Table Options',
+        type: 'dropdown',
+        isVisible: (state: EditorState) => isInTable(state),
+        children: [
+          {
+            id: 'toggleHeaderRow',
+            icon: '⌃ Toggle Header Row',
+            tooltip: 'Toggle Header Row',
+            command: toggleHeaderRowCmd,
+          },
+          {
+            id: 'deleteTable',
+            icon: '✕ Delete Table',
+            tooltip: 'Delete Entire Table',
+            command: deleteTableCmd,
+          },
+        ],
       },
     ],
   });
