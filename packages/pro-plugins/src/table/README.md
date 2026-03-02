@@ -146,29 +146,48 @@ The table plugin integrates with `EditorWithTableDialog` component which provide
 
 ### Toolbar Buttons
 
-When **not** in a table:
-- **Insert Table (⊞)**: Opens dialog to insert a new table
+The table plugin provides a **single unified Table button (⊞)** that organizes all table functionality into a well-structured dropdown menu.
 
-When **inside** a table:
-- **Table Actions (≡)**: Dropdown menu with:
-  - ↑ Row - Add Row Above
-  - ↓ Row - Add Row Below
-  - ✕ Row - Delete Row
-  - ← Col - Add Column Before
-  - → Col - Add Column After
-  - ✕ Col - Delete Column
-  - ⊡ Merge Cells - Combine selected cells
-  - ⊞ Split Cell - Split merged cell
-  - ⚏ Cell Alignment - Submenu with:
-    - ⬅ Left - Align left
-    - ↔ Center - Align center
-    - ➡ Right - Align right
-  - 🎨 Cell Background - Submenu with color options:
-    - ⬜ None - Remove background
-    - 🟨 Yellow, 🟩 Green, 🟦 Blue, 🟥 Red
-    - 🟪 Purple, 🟧 Orange, ⬛ Gray
-  - ⌃ Header - Toggle Header Row
-  - ✕ Table - Delete Table
+#### When NOT in a table:
+- **Insert Table (⊞)** - Opens dialog to create a new table
+
+#### When inside a table:
+
+The Table button reveals an organized dropdown with five logical sections:
+
+**1. Row Actions (━)**
+- ↑ Row Above - Add a new row above the current position
+- ↓ Row Below - Add a new row below the current position
+- ✕ Delete Row - Remove the current row
+
+**2. Column Actions (┃)**
+- ← Col Before - Add a new column before the current position
+- → Col After - Add a new column after the current position
+- ✕ Delete Column - Remove the current column
+
+**3. Cell Actions (◫)**
+- ⊡ Merge - Combine selected cells into one
+- ⊞ Split - Split a merged cell back to individual cells
+
+**4. Cell Styling (🎨)**
+- ⚏ Alignment - Nested submenu with:
+  - ⬅ Left - Align text left
+  - ↔ Center - Center text
+  - ➡ Right - Align text right
+- 🎨 Background - Nested submenu with 8 color options:
+  - ⬜ None - Remove background
+  - 🟨 Yellow, 🟩 Green, 🟦 Blue, 🟥 Red
+  - 🟪 Purple, 🟧 Orange, ⬛ Gray
+
+**5. Table Options (⚙)**
+- ⌃ Header Row - Toggle header row on/off
+- ✕ Delete Table - Remove the entire table
+
+**UI Features:**
+- Click outside dropdown or press ESC to close
+- Nested dropdowns open on hover
+- Proper z-index layering prevents UI conflicts
+- Professional appearance similar to Notion/Google Docs
 
 ### Keyboard Shortcuts
 
@@ -369,6 +388,15 @@ To add new table features:
 4. Update this README with the new features
 
 ## Changelog
+
+### v1.2.0 (January 2026)
+- 🎨 **Major UI Redesign**: Unified single Table button replacing multiple buttons
+- 🏗️ **Organized Dropdown Structure**: Five logical sections (Rows, Columns, Cells, Styling, Options)
+- 🎯 **Professional UX**: Click-to-open dropdowns with ESC/outside-click to close
+- ⚡ **Nested Menus**: Alignment and Background submenus with hover activation
+- 🛡️ **Fixed UI Conflicts**: Proper z-index layering prevents overlap with other toolbar elements
+- 📱 **Better Responsive**: Dropdown positioning adapts to nested levels
+- ✨ **Enhanced Accessibility**: Keyboard navigation support (ESC to close)
 
 ### v1.1.0 (January 2026)
 - ✨ Added cell merging and splitting functionality

@@ -185,9 +185,8 @@ export default function Home() {
               "blockquote", 
               "horizontalLine",
               "|",
-              // Pro features
-              "insertTable",
-              "tableActions",
+              // Pro features - Unified table button
+              "table",
               "export",
               "|",
               // Premium features
