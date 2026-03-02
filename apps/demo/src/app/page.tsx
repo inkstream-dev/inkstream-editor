@@ -4,55 +4,48 @@ import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@in
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
 import { headingPlugin } from "@inkstream/heading";
 import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+
+// ---------------------------------------------------------------------------
+// PRO PLUGINS — External injection
+// ---------------------------------------------------------------------------
+// The @inkstream/pro-plugins package is NOT bundled with the public repo.
+// It is distributed privately via GitHub Packages (requires a paid license).
+//
+// To enable pro features in your app:
+//   1. Obtain a license key from https://inkstream.dev
+//   2. Configure GitHub Packages in your .npmrc:
+//        @inkstream:registry=https://npm.pkg.github.com
+//        //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+//   3. Install the package:
+//        npm install @inkstream/pro-plugins
+//   4. Replace the lazyPluginsConfig below with the real loaders, e.g.:
+//        loader: (tier) => import('@inkstream/pro-plugins')
+//          .then(m => ({ table: m.createProPlugins(tier).table }))
+// ---------------------------------------------------------------------------
 
 const VALIDATION_ENDPOINT = "/api/validate-license";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState<string>("INKSTREAM-PRO-ABC123");
 
-  // Validate the license key against the server. The returned `tier` is the
-  // authoritative value — no feature unlocks from the key string alone.
   const { tier: validatedTier, isValidating, error: licenseError } = useLicenseValidation({
     licenseKey,
     validationEndpoint: VALIDATION_ENDPOINT,
   });
 
-  // Inject table styles when component mounts
-  useEffect(() => {
-    import("@inkstream/pro-plugins").then((module) => {
-      if (module.injectTableStyles) {
-        module.injectTableStyles();
-      }
-    }).catch(err => {
-      console.warn('Could not load table styles:', err);
-    });
-  }, []);
-
-  // Define lazy plugins config once — loaders receive the server-validated tier
-  // so they can call createProPlugins(tier) and get properly guarded instances.
+  // Pro plugin loaders — replace with real @inkstream/pro-plugins loaders
+  // once the package is installed from GitHub Packages.
   const lazyPluginsConfig = useMemo(() => [
-    {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
-        import('@inkstream/pro-plugins').then(m => ({ table: m.createProPlugins(tier).table })),
-      requiredTier: 'pro' as const,
-      pluginKey: 'table',
-    },
-    {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
-        import('@inkstream/pro-plugins').then(m => ({ advancedExport: m.createProPlugins(tier).advancedExport })),
-      requiredTier: 'pro' as const,
-      pluginKey: 'advancedExport',
-    },
-    {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
-        import('@inkstream/pro-plugins').then(m => ({ aiAssistant: m.createProPlugins(tier).aiAssistant })),
-      requiredTier: 'premium' as const,
-      pluginKey: 'aiAssistant',
-    },
+    // Example (uncomment after installing @inkstream/pro-plugins):
+    // {
+    //   loader: (tier) => import('@inkstream/pro-plugins')
+    //     .then(m => ({ table: m.createProPlugins(tier).table })),
+    //   requiredTier: 'pro' as const,
+    //   pluginKey: 'table',
+    // },
   ], []);
 
-  // Lazy load pro plugins using the server-validated tier
   const { loadedPlugins: proPluginsLoaded, isLoading: isLoadingProPlugins } = useLazyPlugins({
     validatedTier,
     lazyPlugins: lazyPluginsConfig,
@@ -98,7 +91,6 @@ export default function Home() {
             Test the freemium model with different license tiers
           </p>
           
-          {/* License Key Input */}
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
             <label className="block text-left mb-2 font-semibold">
               License Key (Optional)
@@ -132,18 +124,15 @@ export default function Home() {
               </p>
               <div className="text-xs text-gray-500 space-y-1">
                 <p>💡 <strong>Free:</strong> Basic formatting, lists, images</p>
-                <p>💼 <strong>Pro:</strong> + Tables, Advanced Export</p>
-                <p>✨ <strong>Premium:</strong> + AI Writing Assistant</p>
+                <p>💼 <strong>Pro:</strong> + Tables, Advanced Export (requires @inkstream/pro-plugins)</p>
+                <p>✨ <strong>Premium:</strong> + AI Writing Assistant (requires @inkstream/pro-plugins)</p>
                 <hr className="my-2" />
-                <p className="text-xs">Test keys:</p>
-                <p>• INKSTREAM-PRO-ABC123</p>
-                <p>• INKSTREAM-PREMIUM-XYZ789</p>
+                <p className="text-xs">Test keys: INKSTREAM-PRO-ABC123 · INKSTREAM-PREMIUM-XYZ789</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Editor */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <EditorWithTableDialog 
             key="inkstream-editor-instance" 
@@ -158,39 +147,13 @@ export default function Home() {
               }
             }}
             toolbarLayout={[
-              "undo", 
-              "redo", 
-              "|",
-              "heading",
-              "bold", 
-              "italic", 
-              "underline", 
-              "strike", 
-              "link",
-              "|",
-              "indent", 
-              "outdent", 
-              "|",
-              "alignLeft",
-              "alignCenter",
-              "alignRight",
-              "|",
-              "bulletList", 
-              "orderedList", 
-              "codeBlock",
-              "code", 
-              "|",
-              "image", 
-              "textColor", 
-              "highlight", 
-              "|",
-              "blockquote", 
-              "horizontalLine",
-              "|",
-              "table",
-              "export",
-              "|",
-              "aiAssistant",
+              "undo", "redo", "|",
+              "heading", "bold", "italic", "underline", "strike", "link", "|",
+              "indent", "outdent", "|",
+              "alignLeft", "alignCenter", "alignRight", "|",
+              "bulletList", "orderedList", "codeBlock", "code", "|",
+              "image", "textColor", "highlight", "|",
+              "blockquote", "horizontalLine",
             ]}
           />
         </div>
@@ -198,3 +161,4 @@ export default function Home() {
     </main>
   );
 }
+

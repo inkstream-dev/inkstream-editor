@@ -12,7 +12,6 @@
     "@inkstream/font-family": "workspace:*",
     "@inkstream/heading": "workspace:*",
     "@inkstream/link-bubble": "workspace:*",
-    "@inkstream/pro-plugins": "workspace:*",
     "@inkstream/react-editor": "workspace:*",
     "next": "15.3.5",
     "prosemirror-commands": "^1.5.2",
