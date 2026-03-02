@@ -1,7 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plugin, LicenseTier } from '@inkstream/editor-core';
 
-type PluginLoader = () => Promise<{ default: Plugin } | { [key: string]: Plugin }>;
+/**
+ * A plugin loader function that receives the server-validated tier so it can
+ * call `createProPlugins(tier)` and return a properly guarded plugin instance.
+ *
+ * The tier is passed by `useLazyPlugins` — consumers should forward it to
+ * `createProPlugins` inside their loader:
+ *
+ * @example
+ * ```ts
+ * loader: (tier) => import('@inkstream/pro-plugins')
+ *   .then(m => ({ table: m.createProPlugins(tier).table }))
+ * ```
+ */
+type PluginLoader = (tier: LicenseTier) => Promise<{ default: Plugin } | { [key: string]: Plugin }>;
 
 interface LazyPluginConfig {
   loader: PluginLoader;
@@ -78,7 +91,8 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
         const results = await Promise.all(
           pluginsToLoad.map(async (config) => {
             try {
-              const module = await config.loader();
+              // Pass the validated tier so the loader can call createProPlugins(tier)
+              const module = await config.loader(effectiveTier);
               
               // Handle default export or named export
               if ('default' in module) {
