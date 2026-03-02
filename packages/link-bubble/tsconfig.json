@@ -13,13 +13,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@inkstream/editor-core": [
-        "../editor-core/src"
-      ]
-    }
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src",

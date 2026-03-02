@@ -37,6 +37,9 @@ importers:
       '@inkstream/heading':
         specifier: workspace:*
         version: link:../../packages/heading
+      '@inkstream/link-bubble':
+        specifier: workspace:*
+        version: link:../../packages/link-bubble
       '@inkstream/pro-plugins':
         specifier: workspace:*
         version: link:../../packages/pro-plugins
@@ -316,6 +319,9 @@ importers:
       '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
+      '@inkstream/link-bubble':
+        specifier: workspace:*
+        version: link:../link-bubble
       prosemirror-commands:
         specifier: 1.7.1
         version: 1.7.1

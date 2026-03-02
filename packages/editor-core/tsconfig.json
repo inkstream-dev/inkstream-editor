@@ -12,12 +12,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@inkstream/link-bubble": [
-        "../link-bubble/src"
-      ]
-    }
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src"
