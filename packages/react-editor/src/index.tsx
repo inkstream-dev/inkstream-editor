@@ -3,98 +3,14 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { DOMParser, Schema } from 'prosemirror-model';
-import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager } from '@inkstream/editor-core';
-import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap, splitBlock, chainCommands } from 'prosemirror-commands';
-import { splitListItem, liftListItem } from 'prosemirror-schema-list';
+import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
+import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream/editor-core';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 import { ImageNodeView } from './ImageNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
 import { createRoot } from 'react-dom/client';
-
-// Build input rules for the schema
-const buildInputRules = (schema: Schema) => {
-  const rules = smartQuotes.concat(ellipsis, emDash);
-
-  // Rule for headings (e.g., # Heading)
-  if (schema.nodes.heading) {
-    rules.push(textblockTypeInputRule(/^#+\s$/, schema.nodes.heading, (match) => ({ level: match[0].length - 1 })));
-  }
-
-  // Rule for blockquotes (e.g., > Quote)
-  if (schema.nodes.blockquote) {
-    rules.push(wrappingInputRule(/^>\s$/, schema.nodes.blockquote));
-  }
-
-  // Rule for code blocks (e.g., ``` Code)
-  if (schema.nodes.code_block) {
-    rules.push(textblockTypeInputRule(/^```\s$/, schema.nodes.code_block));
-  }
-
-  // Rules for bold
-  if (schema.marks.strong) {
-    rules.push(new InputRule(/\*\*([^*]+)\*\*$/, (state, match, start, end) => {
-      const tr = state.tr;
-      if (match[1]) {
-        const textStart = start + match[0].indexOf(match[1]);
-        const textEnd = textStart + match[1].length;
-        tr.delete(textStart, textEnd);
-        tr.addMark(textStart, textEnd, schema.marks.strong.create());
-      }
-      return tr;
-    }));
-
-    rules.push(new InputRule(/__([^_]+)__$/, (state, match, start, end) => {
-      const tr = state.tr;
-      if (match[1]) {
-        const textStart = start + match[0].indexOf(match[1]);
-        const textEnd = textStart + match[1].length;
-        tr.delete(textStart, textEnd);
-        tr.addMark(textStart, textEnd, schema.marks.strong.create());
-      }
-      return tr;
-    }));
-  }
-
-  return inputRules({ rules });
-};
-
-// Build keymap for the schema
-const buildKeymap = (schema: Schema, manager: PluginManager) => {
-  const keys: { [key: string]: any } = {};
-
-  // Add base keymap commands
-  Object.assign(keys, baseKeymap);
-
-  // Add keymaps from plugins
-  manager.getPlugins().forEach(plugin => {
-    const pluginKeymap = plugin.getKeymap?.(schema);
-    if (pluginKeymap) {
-      Object.assign(keys, pluginKeymap);
-    }
-  });
-
-  // Add keybinding for hard breaks (Shift-Enter)
-  if (schema.nodes.hard_break) {
-    keys["Shift-Enter"] = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-      if (dispatch) {
-        dispatch(state.tr.replaceSelectionWith(schema.nodes.hard_break.create()).scrollIntoView());
-      }
-      return true;
-    };
-  }
-
-  // Add keybinding for creating a new paragraph (Enter)
-  if (schema.nodes.list_item) {
-    keys["Enter"] = chainCommands(splitListItem(schema.nodes.list_item), liftListItem(schema.nodes.list_item), splitBlock);
-  }
-
-  return keymap(keys);
-};
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -108,6 +24,13 @@ interface RichTextEditorProps {
    */
   licenseValidationEndpoint?: string;
   onLicenseError?: (plugin: Plugin, tier: string) => void; // Callback when a plugin requires a higher tier
+  /** Called with the EditorView instance once the editor is ready. */
+  onEditorReady?: (view: EditorView) => void;
+  /**
+   * Called whenever the document content changes.
+   * Receives the current content serialized as an HTML string.
+   */
+  onChange?: (html: string) => void;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
@@ -118,6 +41,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   licenseKey,
   licenseValidationEndpoint,
   onLicenseError,
+  onEditorReady,
+  onChange,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
@@ -191,8 +116,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const newState = editorViewRef.current.state.apply(transaction);
       editorViewRef.current.updateState(newState);
       setCurrentEditorState(newState);
+      if (onChange && transaction.docChanged) {
+        const div = document.createElement('div');
+        const fragment = DOMSerializer.fromSchema(newState.schema).serializeFragment(newState.doc.content);
+        div.appendChild(fragment);
+        onChange(div.innerHTML);
+      }
     }
-  }, []); // This callback is stable and won't change
+  }, [onChange]);
 
   useEffect(() => {
     if (!editorRef.current) {
@@ -260,9 +191,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     editorViewRef.current = view;
     setCurrentEditorState(state);
-    
-    // Expose editor view globally for table dialog
-    (window as any).__inkstreamEditorView__ = view;
+    onEditorReady?.(view);
 
     // Get all available toolbar items
     const allToolbarItems = pluginManager.getToolbarItems(schema, pluginOptions);
