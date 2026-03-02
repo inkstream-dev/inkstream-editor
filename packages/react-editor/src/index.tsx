@@ -13,6 +13,7 @@ import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 import { ImageNodeView } from './ImageNodeView';
+import { useLicenseValidation } from './useLicenseValidation';
 import { createRoot } from 'react-dom/client';
 
 // Build input rules for the schema
@@ -100,7 +101,12 @@ interface RichTextEditorProps {
   plugins?: Plugin[];  // Now accepts Plugin instances instead of string IDs
   pluginOptions?: { [key: string]: any };
   toolbarLayout?: string[];
-  licenseKey?: string; // Optional license key for pro/premium features
+  licenseKey?: string;
+  /**
+   * URL of your server-side license validation endpoint.
+   * Without this, the editor only ever uses free-tier plugins regardless of licenseKey.
+   */
+  licenseValidationEndpoint?: string;
   onLicenseError?: (plugin: Plugin, tier: string) => void; // Callback when a plugin requires a higher tier
 }
 
@@ -110,6 +116,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   pluginOptions = {}, 
   toolbarLayout = [],
   licenseKey,
+  licenseValidationEndpoint,
   onLicenseError,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -119,17 +126,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]); // State for toolbar items
   
-  // Update license manager when licenseKey changes
-  const licenseManager = useMemo(() => new LicenseManager(licenseKey), [licenseKey]);
+  // Server-validated tier. Always 'free' until the validation endpoint confirms otherwise.
+  const { tier: validatedTier } = useLicenseValidation({ licenseKey, validationEndpoint: licenseValidationEndpoint });
   
-  // Filter and validate plugins based on current license - recalculates when plugins or licenseKey changes
+  // Filter plugins based on server-validated tier only
   const validatedPlugins = useMemo(() => {
     const validated = plugins.filter(plugin => {
       const pluginTier = plugin.tier || 'free';
-      const canUse = licenseManager.canUsePlugin(pluginTier);
+      const canUse = LicenseManager.canTierAccess(validatedTier, pluginTier);
       
       if (!canUse) {
-        console.warn(`Plugin "${plugin.name}" requires ${pluginTier} tier but user has ${licenseManager.getTier()} tier`);
+        console.warn(`Plugin "${plugin.name}" requires ${pluginTier} tier but user has ${validatedTier} tier`);
         if (onLicenseError) {
           onLicenseError(plugin, pluginTier);
         }
@@ -139,9 +146,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       return true;
     });
     
-    console.log(`License tier: ${licenseManager.getTier()}, Validated plugins:`, validated.map(p => p.name));
+    console.log(`License tier: ${validatedTier}, Validated plugins:`, validated.map(p => p.name));
     return validated;
-  }, [plugins, licenseKey, licenseManager, onLicenseError]);
+  }, [plugins, validatedTier, onLicenseError]);
   
   // Create plugin state - recalculates when validatedPlugins change
   const pluginState = useMemo(() => {
@@ -194,7 +201,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
 
     console.log("=== INITIALIZING EDITORVIEW ===");
-    console.log(`Loaded ${validatedPlugins.length} out of ${plugins.length} plugins (license tier: ${licenseManager.getTier()})`);
+    console.log(`Loaded ${validatedPlugins.length} out of ${plugins.length} plugins (license tier: ${validatedTier})`);
     console.log('Using proseMirrorPlugins:', proseMirrorPlugins);
     
     // Parse initial content from HTML string
@@ -293,7 +300,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         setCurrentEditorState(null);
       }
     };
-  }, [schema, proseMirrorPlugins, pluginManager, validatedPlugins, plugins, licenseManager, initialContent, handleDispatchTransaction, pluginOptions, toolbarLayout]); // Reinitialize when plugins or license changes
+  }, [schema, proseMirrorPlugins, pluginManager, validatedPlugins, plugins, validatedTier, initialContent, handleDispatchTransaction, pluginOptions, toolbarLayout]); // Reinitialize when plugins or validated tier changes
 
   return (
     <div className="inkstream-editor-wrapper">
@@ -310,3 +317,5 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 export * from './EditorWithTableDialog';
 export { useLazyPlugins } from './useLazyPlugins';
+export { useLicenseValidation } from './useLicenseValidation';
+export type { UseLicenseValidationOptions, UseLicenseValidationResult } from './useLicenseValidation';
