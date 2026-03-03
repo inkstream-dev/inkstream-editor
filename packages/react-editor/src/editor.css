@@ -337,18 +337,107 @@ blockquote {
   font-family: 'Courier New', Courier, monospace;
   overflow-x: auto;
 }
-/* Color picker input used in text-color dropdown */
+/* ── Color system ─────────────────────────────────────────────────────────── */
+
+/* Section label inside dropdowns (e.g. "Recently used", "Colors") */
+.inkstream-dropdown-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9ca3af;
+  padding: 8px 12px 4px;
+  user-select: none;
+}
+
+/* Horizontal rule divider inside dropdown menus */
+.inkstream-dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 8px;
+}
+
+/* Color swatch palette grid — 8 columns, uniform circular swatches */
+.inkstream-color-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  padding: 4px 10px 8px;
+}
+
+/* Circular color swatch element (inside iconHtml) */
+.inkstream-color-swatch {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+/* Swatch buttons in color grid — compact, circular hit target */
+.inkstream-color-grid .inkstream-toolbar-button {
+  padding: 3px;
+  min-width: unset;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.inkstream-color-grid .inkstream-toolbar-button:hover {
+  background: transparent;
+  border-color: #9ca3af;
+}
+
+.inkstream-color-grid .inkstream-toolbar-button:hover .inkstream-color-swatch {
+  transform: scale(1.1);
+}
+
+/* Selected / active swatch — solid dark ring */
+.inkstream-color-grid .inkstream-toolbar-button.active {
+  background: transparent;
+  border-color: #1f2937;
+}
+
+.inkstream-color-grid .inkstream-toolbar-button.active .inkstream-color-swatch {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Active color indicator bar below the toolbar button icon */
+.inkstream-color-indicator {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 2px;
+  margin-top: 1px;
+}
+
+/* Custom color picker input — compact, well-aligned */
 .inkstream-toolbar-color-picker {
   width: 28px;
   height: 28px;
-  padding: 1px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  padding: 2px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 6px;
   cursor: pointer;
   background: none;
+  margin: 4px 10px;
+  display: block;
+  transition: border-color 140ms ease;
 }
 
-/* Compact swatch buttons inside the color grid */
+.inkstream-toolbar-color-picker:hover {
+  border-color: #6b7280;
+}
+
+/* Compact button size when inside bubble/dropdown menus */
 .inkstream-toolbar-bubble-menu .inkstream-toolbar-button,
 .inkstream-toolbar-dropdown-content .inkstream-toolbar-button {
   min-width: 26px;
@@ -356,6 +445,7 @@ blockquote {
   font-size: 13px;
   line-height: 1;
 }
+
 
 /* ── Task List ─────────────────────────────────────────────────────────── */
 .inkstream-task-list {

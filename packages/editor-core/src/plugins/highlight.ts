@@ -28,6 +28,23 @@ export const DEFAULT_HIGHLIGHT_PALETTE: HighlightColorEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// SVG icons
+// ---------------------------------------------------------------------------
+
+// Diagonal marker/highlighter pen icon
+const svgHighlight = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M9.5 2.5 L13.5 6.5 L7 13 L3.5 13 L3.5 9.5 Z"/>
+  <line x1="3.5" y1="9.5" x2="7" y2="13"/>
+  <line x1="2" y1="14.5" x2="3.5" y2="13"/>
+</svg>`;
+
+// Small X icon for remove button
+const svgRemove = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+  <line x1="2" y1="2" x2="10" y2="10"/>
+  <line x1="10" y1="2" x2="2" y2="10"/>
+</svg>`;
+
+// ---------------------------------------------------------------------------
 // Module-level last-used tracker — scoped to this plugin module only
 // ---------------------------------------------------------------------------
 let lastUsedHighlightColor: string | null = null;
@@ -145,10 +162,10 @@ export const highlightPlugin = createPlugin({
     const palette: HighlightColorEntry[] =
       options?.palette ?? DEFAULT_HIGHLIGHT_PALETTE;
 
+    // Circular color swatch via iconHtml — CSS handles shape, hover/active ring
     const swatchItems: ToolbarItem[] = palette.map(({ label, value }) => ({
       id: `highlight-swatch-${value.replace('#', '')}`,
-      icon: '■',
-      iconStyle: { color: value, filter: 'drop-shadow(0 0 1px rgba(0,0,0,0.4))' },
+      iconHtml: `<span class="inkstream-color-swatch" style="background:${value}" aria-label="${label}"></span>`,
       tooltip: label,
       command: applyOrToggleHighlight(value),
       isActive: (state: EditorState) => getActiveHighlightColor(state) === value,
@@ -157,7 +174,7 @@ export const highlightPlugin = createPlugin({
     return [
       {
         id: 'highlight',
-        icon: 'H',
+        iconHtml: svgHighlight,
         tooltip: 'Highlight',
         type: 'dropdown',
         childrenLayout: 'grid',
@@ -169,11 +186,17 @@ export const highlightPlugin = createPlugin({
 
           if (lastUsedHighlightColor) {
             items.push({
+              id: 'highlight-label-recent',
+              type: 'label',
+              label: 'Recently used',
+              tooltip: '',
+            });
+            items.push({
               id: 'highlight-last-used',
-              icon: '■',
-              iconStyle: { color: lastUsedHighlightColor, filter: 'drop-shadow(0 0 1px rgba(0,0,0,0.4))' },
+              iconHtml: `<span class="inkstream-color-swatch" style="background:${lastUsedHighlightColor}" aria-label="Last used"></span>`,
               tooltip: `Last used: ${lastUsedHighlightColor}`,
               command: applyOrToggleHighlight(lastUsedHighlightColor),
+              isActive: (state: EditorState) => getActiveHighlightColor(state) === lastUsedHighlightColor,
             });
             items.push({ id: 'highlight-sep-last', icon: '|', tooltip: '' });
           }
@@ -184,8 +207,9 @@ export const highlightPlugin = createPlugin({
 
           items.push({
             id: 'highlight-remove',
-            icon: '✕ Remove',
-            tooltip: 'Remove Highlight',
+            iconHtml: svgRemove,
+            label: 'Remove highlight',
+            tooltip: 'Remove highlight',
             command: unsetHighlight,
           });
 
@@ -193,8 +217,7 @@ export const highlightPlugin = createPlugin({
 
           items.push({
             id: 'highlight-custom',
-            icon: '🎨 Custom…',
-            tooltip: 'Custom Highlight Color',
+            tooltip: 'Custom highlight color',
             type: 'color-picker',
             onColorChange: (color: string) => applyOrToggleHighlight(color),
           });
@@ -207,4 +230,3 @@ export const highlightPlugin = createPlugin({
     ];
   },
 });
-

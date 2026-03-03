@@ -60,7 +60,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
 
   const executeCommand = (command: ToolbarItem['command']) => {
     if (editorState && editorDispatch && editorView && command) {
-      console.log("Executing command with editorView:", editorView);
       editorView.focus();
       command(editorState, editorDispatch, editorView);
       setOpenDropdown(null); // Close dropdown after command
@@ -87,7 +86,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
       typeof child === 'object' &&
       !child.id?.includes('sep') &&
       !child.id?.includes('last-used') &&
-      child.type !== 'color-picker';
+      child.type !== 'color-picker' &&
+      child.type !== 'label';
 
     const preGrid: (ToolbarItem | string)[] = [];
     const swatches: (ToolbarItem | string)[] = [];
@@ -107,7 +107,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
       <>
         {preGrid.map((child, i) => renderToolbarItem(child, i, depth))}
         {swatches.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 2, padding: '6px 8px' }}>
+          <div className="inkstream-color-grid">
             {swatches.map((child, i) => renderToolbarItem(child, i, depth))}
           </div>
         )}
@@ -122,11 +122,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     } else if (typeof item === 'object') {
       // Separator ToolbarItem convention (id contains 'sep' and no command/children)
       if (item.icon === '|') {
-        return <div key={item.id ?? `sep-${index}`} className="inkstream-toolbar-separator" />;
+        // Use horizontal divider styling when inside a dropdown (depth > 0)
+        return <div key={item.id ?? `sep-${index}`} className={depth > 0 ? 'inkstream-dropdown-divider' : 'inkstream-toolbar-separator'} />;
       }
       // Check visibility
       if (item.isVisible && editorState && !item.isVisible(editorState)) {
         return null;
+      }
+
+      if (item.type === 'label') {
+        return (
+          <div key={item.id} className="inkstream-dropdown-section-label">
+            {item.label ?? item.tooltip}
+          </div>
+        );
       }
 
       if (item.type === 'color-picker') {
@@ -181,7 +190,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                     : <span style={item.iconStyle}>{item.icon}</span>
                   }
                   {activeColor && (
-                    <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
+                    <span className="inkstream-color-indicator" style={{ background: activeColor }} />
                   )}
                 </span>
               </button>
@@ -231,7 +240,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                   : <span style={item.iconStyle}>{item.icon}</span>
                 }
                 {activeColor && (
-                  <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
+                  <span className="inkstream-color-indicator" style={{ background: activeColor }} />
                 )}
               </span>
             </button>

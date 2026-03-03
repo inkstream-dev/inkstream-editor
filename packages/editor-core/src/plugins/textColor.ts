@@ -36,6 +36,16 @@ export const DEFAULT_TEXT_COLOR_PALETTE: ColorEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// SVG icons
+// ---------------------------------------------------------------------------
+
+// Letter "A" outline — underline bar is rendered dynamically as activeColor indicator
+const svgTextColor = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3.5 12.5 L8 3 L12.5 12.5"/>
+  <line x1="5.5" y1="8.5" x2="10.5" y2="8.5"/>
+</svg>`;
+
+// ---------------------------------------------------------------------------
 // Module-level last-used tracker — scoped to this plugin module only
 // ---------------------------------------------------------------------------
 let lastUsedTextColor: string | null = null;
@@ -136,19 +146,19 @@ export const textColorPlugin = createPlugin({
     const palette: ColorEntry[] =
       options?.palette ?? DEFAULT_TEXT_COLOR_PALETTE;
 
-    // Build static palette swatch children
+    // Circular color swatch via iconHtml — CSS handles shape, size, hover/active ring
     const swatchItems: ToolbarItem[] = palette.map(({ label, value }) => ({
       id: `textColor-swatch-${value.replace('#', '')}`,
-      icon: '■',
-      iconStyle: { color: value },
+      iconHtml: `<span class="inkstream-color-swatch" style="background:${value}" aria-label="${label}"></span>`,
       tooltip: label,
       command: applyColor(value),
+      isActive: (state: EditorState) => getActiveTextColor(state) === value,
     }));
 
     return [
       {
         id: 'textColor',
-        icon: 'A',
+        iconHtml: svgTextColor,
         tooltip: 'Text Color',
         type: 'dropdown',
         childrenLayout: 'grid',
@@ -162,13 +172,19 @@ export const textColorPlugin = createPlugin({
 
           if (lastUsedTextColor) {
             items.push({
+              id: 'textColor-label-recent',
+              type: 'label',
+              label: 'Recently used',
+              tooltip: '',
+            });
+            items.push({
               id: 'textColor-last-used',
-              icon: '■',
-              iconStyle: { color: lastUsedTextColor },
+              iconHtml: `<span class="inkstream-color-swatch" style="background:${lastUsedTextColor}" aria-label="Last used"></span>`,
               tooltip: `Last used: ${lastUsedTextColor}`,
               command: applyColor(lastUsedTextColor),
+              isActive: (state: EditorState) => getActiveTextColor(state) === lastUsedTextColor,
             });
-            // Separator after last-used
+            // Separator before main palette
             items.push({ id: 'textColor-sep-last', icon: '|', tooltip: '' });
           }
 
@@ -179,8 +195,7 @@ export const textColorPlugin = createPlugin({
 
           items.push({
             id: 'textColor-custom',
-            icon: '🎨 Custom…',
-            tooltip: 'Custom Color',
+            tooltip: 'Custom color',
             type: 'color-picker',
             onColorChange: (color: string) => applyColor(color),
           });
@@ -193,3 +208,4 @@ export const textColorPlugin = createPlugin({
     ];
   },
 });
+

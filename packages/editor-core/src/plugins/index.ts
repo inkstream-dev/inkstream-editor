@@ -24,7 +24,7 @@ export interface ToolbarItem {
   /** When provided, returns false → button is rendered disabled. Use for commands
    *  that are only meaningful in certain states (e.g. undo when history is empty). */
   isEnabled?: (state: EditorState) => boolean;
-  type?: 'dropdown' | 'color-picker';
+  type?: 'dropdown' | 'color-picker' | 'label';
   children?: ToolbarItem[];
   onColorChange?: (color: string) => (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
   /** When set, rendered as raw HTML inside the icon span (allows inline SVG icons). */
