@@ -214,44 +214,114 @@ blockquote {
 }
 
 .inkstream-image-upload-area {
-  border: 2px dashed #ccc;
-  padding: 40px;
-  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  padding: 32px 24px;
+  margin: 4px 0;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  background: #f7fafc;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  min-height: 120px;
+  outline: none;
 }
 
-.inkstream-image-upload-area:hover {
-  background-color: #f0f0f0;
+.inkstream-image-upload-area:hover,
+.inkstream-image-upload-area:focus-visible {
+  border-color: #3182ce;
+  background: #ebf8ff;
+}
+
+.inkstream-image-upload-area--dragover {
+  border-color: #3182ce;
+  background: #bee3f8;
+}
+
+.inkstream-upload-icon {
+  color: #a0aec0;
+  margin-bottom: 4px;
+  transition: color 0.15s ease;
+}
+
+.inkstream-image-upload-area:hover .inkstream-upload-icon,
+.inkstream-image-upload-area--dragover .inkstream-upload-icon {
+  color: #3182ce;
+}
+
+.inkstream-upload-text {
+  margin: 0;
+  font-size: 14px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.inkstream-upload-text span {
+  color: #3182ce;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inkstream-upload-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #a0aec0;
 }
 
 .inkstream-error-message {
-  color: red;
-  margin-top: 10px;
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #e53e3e;
 }
 
+/* ── Image node wrapper ────────────────────────────────────────────────── */
 .image-node-view-wrapper {
   position: relative;
   display: inline-block;
+  line-height: 0;        /* Remove inline-block descender gap */
+  max-width: 100%;
+  vertical-align: bottom;
+  overflow: visible;     /* Allow resize handle to protrude outside bounds */
 }
 
 .image-node-view-wrapper img {
   display: block;
   max-width: 100%;
   height: auto;
+  border-radius: 2px;
+  user-select: none;
 }
 
+/* Selection ring — ProseMirror adds this class when node is selected */
+.image-node-view-wrapper.ProseMirror-selectednode img {
+  outline: 2px solid #3182ce;
+  outline-offset: 1px;
+}
+
+/* Resize handle — only visible on hover or when selected */
 .image-node-view-wrapper .resize-handle {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: #007bff;
-  border: 1px solid #fff;
+  width: 12px;
+  height: 12px;
+  background: #3182ce;
+  border: 2px solid #fff;
   border-radius: 50%;
-  bottom: -5px;
-  right: -5px;
+  bottom: -6px;
+  right: -6px;
   cursor: se-resize;
   z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.image-node-view-wrapper:hover .resize-handle,
+.image-node-view-wrapper.ProseMirror-selectednode .resize-handle {
+  opacity: 1;
 }
 
 .inkstream-code-block {

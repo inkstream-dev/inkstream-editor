@@ -1,9 +1,16 @@
 import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin } from 'prosemirror-state';
 import { ToolbarItem } from './index';
-import { Node } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
+
+// ---------------------------------------------------------------------------
+// SVG icon — landscape frame: rectangle + sun circle + mountain path
+// ---------------------------------------------------------------------------
+const svgImage = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <rect x="1.5" y="2.5" width="13" height="11" rx="1"/>
+  <circle cx="5" cy="6.5" r="1.2"/>
+  <path d="M1.5 12.5l4-5 2.5 3 2-2.5 4 4.5"/>
+</svg>`;
 
 export const imagePlugin = createPlugin({
   name: 'image',
@@ -11,51 +18,49 @@ export const imagePlugin = createPlugin({
     image: {
       inline: true,
       attrs: {
-        src: { default: null },
-        alt: { default: null },
-        title: { default: null },
-        width: { default: null },
+        src:    { default: null },
+        alt:    { default: null },
+        title:  { default: null },
+        width:  { default: null },
         height: { default: null },
       },
-      group: "inline",
+      group: 'inline',
       draggable: true,
+      selectable: true,
       parseDOM: [{
-        tag: "img[src]",
+        tag: 'img[src]',
         getAttrs: (dom: HTMLElement) => ({
-          src: dom.getAttribute("src"),
-          alt: dom.getAttribute("alt"),
-          title: dom.getAttribute("title"),
-          width: dom.getAttribute("width"),
-          height: dom.getAttribute("height"),
+          src:    dom.getAttribute('src'),
+          alt:    dom.getAttribute('alt'),
+          title:  dom.getAttribute('title'),
+          width:  dom.getAttribute('width'),
+          height: dom.getAttribute('height'),
         }),
       }],
-      toDOM(node: Node) {
+      toDOM(node: import('prosemirror-model').Node) {
         const { src, alt, title, width, height } = node.attrs;
-        const attrs: { [key: string]: any } = { src, alt, title };
-        if (width) attrs.width = width;
+        const attrs: Record<string, string | number> = {};
+        if (src)    attrs.src    = src;
+        if (alt)    attrs.alt    = alt;
+        if (title)  attrs.title  = title;
+        if (width)  attrs.width  = width;
         if (height) attrs.height = height;
-        return ["img", attrs];
+        return ['img', attrs];
       },
     },
   },
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
 
-    return plugins;
-  },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
       {
         id: 'image',
-        icon: 'Image',
+        icon: '',
+        iconHtml: svgImage,
         tooltip: 'Insert Image',
         command: (state: EditorState, dispatch) => {
-          const { schema } = state;
-          const node = schema.nodes.image.create({ width: 200, height: 200 }); // Create an empty image node with default size
+          const node = state.schema.nodes.image.create({ src: null });
           const tr = state.tr.replaceSelectionWith(node);
-          if (dispatch) {
-            dispatch(tr);
-          }
+          if (dispatch) dispatch(tr);
           return true;
         },
       },
@@ -63,11 +68,17 @@ export const imagePlugin = createPlugin({
   },
 });
 
-// Helper function to create an image node
-export const insertImage = (src: string, alt: string = '', title: string = '') =>
-  (state: any, dispatch: any) => {
-    const { schema } = state;
-    const node = schema.nodes.image.create({ src, alt, title });
-    const tr = state.tr.replaceSelectionWith(node);
-    dispatch(tr);
-  };
+// ---------------------------------------------------------------------------
+// Imperative helper — insert an image with a known URL
+// ---------------------------------------------------------------------------
+export const insertImage = (
+  src: string,
+  alt = '',
+  title = ''
+) => (state: EditorState, dispatch?: (tr: any) => void) => {
+  const node = state.schema.nodes.image.create({ src, alt, title });
+  const tr = state.tr.replaceSelectionWith(node);
+  if (dispatch) dispatch(tr);
+  return true;
+};
+

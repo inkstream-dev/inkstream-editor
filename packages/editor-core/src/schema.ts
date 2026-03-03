@@ -54,18 +54,6 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
     text: { inline: true, group: "inline", toDOM(node) { return node.text || ""; } },
     hard_break: { inline: true, group: "inline", selectable: false, toDOM() { return ["br"]; } },
 
-    // Inline nodes
-    image: {
-      inline: true,
-      attrs: {
-        src: { default: null },
-        alt: { default: null },
-        title: { default: null },
-      },
-      group: "inline",
-      draggable: true,
-      toDOM(node) { return ["img", node.attrs]; },
-    },
     ...manager.getNodes(), // Dynamically add nodes from plugins
   },
 

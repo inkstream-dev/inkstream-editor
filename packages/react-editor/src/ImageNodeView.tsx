@@ -5,162 +5,220 @@ import { EditorView } from 'prosemirror-view';
 interface ImageNodeViewProps {
   node: Node;
   view: EditorView;
-  getPos: () => number;
+  getPos: () => number | undefined;
 }
 
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+// Explicit allowlist — avoids false positives from exotic MIME types
+const ACCEPTED_MIME_TYPES = new Set([
+  'image/jpeg', 'image/png', 'image/gif',
+  'image/webp', 'image/svg+xml', 'image/avif',
+]);
+
 export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos }) => {
+  const [src, setSrc] = useState<string | null>(node.attrs.src ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [src, setSrc] = useState<string | null>(node.attrs.src);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [isResizing, setIsResizing] = useState(false);
+  // Guard against callbacks firing after unmount (FileReader, resize listeners)
+  const mountedRef = useRef(true);
+  // Stores cleanup fn for resize listeners so unmount can remove them
+  const cleanupResizeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    // Update the node's src attribute when the local src state changes
-    if (src && src !== node.attrs.src) {
-      const tr = view.state.tr.setNodeMarkup(getPos(), undefined, {
-        ...node.attrs,
-        src: src,
-      });
-      view.dispatch(tr);
-    }
-  }, [src, node.attrs, view, getPos]);
+    return () => {
+      mountedRef.current = false;
+      cleanupResizeRef.current?.();
+    };
+  }, []);
 
-  const handleFile = (file: File | null) => {
+  // Sync node attribute changes (undo/redo, external setNodeMarkup) to local state.
+  // This is separate from the upload dispatch flow to avoid circular updates.
+  useEffect(() => {
+    setSrc(node.attrs.src ?? null);
+  }, [node.attrs.src]);
+
+  // Dispatch a src update into the ProseMirror document.
+  const dispatchSrc = useCallback((newSrc: string) => {
+    const pos = getPos();
+    if (pos === undefined) return;
+    view.dispatch(
+      view.state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, src: newSrc })
+    );
+  }, [view, getPos, node.attrs]);
+
+  const handleFile = useCallback((file: File | null) => {
     if (!file) {
       setError('No file selected.');
       return;
     }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError(`File size exceeds ${MAX_FILE_SIZE_MB}MB.`);
+    if (!ACCEPTED_MIME_TYPES.has(file.type)) {
+      setError(`Unsupported type "${file.type || 'unknown'}". Use PNG, JPG, GIF, WebP, or SVG.`);
       return;
     }
-
-    if (!file.type.startsWith('image/')) {
-      setError('Only image files are allowed.');
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setError(`File exceeds the ${MAX_FILE_SIZE_MB} MB limit.`);
       return;
     }
 
     setError(null);
     const reader = new FileReader();
+
     reader.onload = (e) => {
-      if (e.target && typeof e.target.result === 'string') {
-        setSrc(e.target.result);
-      }
+      if (!mountedRef.current) return; // Component unmounted — discard result
+      const dataUrl = e.target?.result as string | undefined;
+      if (!dataUrl) return;
+      setSrc(dataUrl);      // Optimistic update: show image immediately
+      dispatchSrc(dataUrl); // Persist to ProseMirror document
     };
+
+    reader.onerror = () => {
+      if (!mountedRef.current) return;
+      setError('Failed to read file. Please try again.');
+    };
+
     reader.readAsDataURL(file);
-  };
+  }, [dispatchSrc]);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
+    setIsDragOver(false);
+    handleFile(e.dataTransfer.files?.[0] ?? null);
+  }, [handleFile]);
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-  };
+    setIsDragOver(true);
+  }, []);
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFile(e.target.files[0]);
-    }
-  };
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFile(e.target.files?.[0] ?? null);
+    // Reset so the same file can be re-selected without a second click
+    e.target.value = '';
+  }, [handleFile]);
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     if (!imgRef.current) return;
 
-    // Only allow resizing from the resize handle
-    if (!(e.target as HTMLElement).classList.contains('resize-handle')) {
-      return;
-    }
-
-    e.preventDefault();
-    setIsResizing(true);
-
     const startX = e.clientX;
-    const initialWidth = imgRef.current.width;
-    const initialHeight = imgRef.current.height;
-    const aspectRatio = initialWidth / initialHeight;
+    // Use offsetWidth/offsetHeight for CSS-rendered dimensions (not the HTML attribute)
+    const initialWidth = imgRef.current.offsetWidth;
+    const initialHeight = imgRef.current.offsetHeight;
+    // Guard against zero height (image not yet loaded) to prevent division by zero
+    const aspectRatio = initialHeight > 0 ? initialWidth / initialHeight : 1;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - startX;
-
-      let newWidth = initialWidth + dx;
-      let newHeight = newWidth / aspectRatio;
-
-      // Ensure minimum size
-      newWidth = Math.max(20, newWidth);
-      newHeight = Math.max(20, newHeight);
-
-      if (imgRef.current) {
-        imgRef.current.style.width = `${newWidth}px`;
-        imgRef.current.style.height = `${newHeight}px`;
-      }
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!imgRef.current) return;
+      const newWidth = Math.max(40, initialWidth + (ev.clientX - startX));
+      const newHeight = Math.round(newWidth / aspectRatio);
+      imgRef.current.style.width = `${newWidth}px`;
+      imgRef.current.style.height = `${newHeight}px`;
     };
 
     const onMouseUp = () => {
-      setIsResizing(false);
+      cleanup();
+      if (!imgRef.current) return;
+      const pos = getPos();
+      if (pos === undefined) return;
+      view.dispatch(
+        view.state.tr.setNodeMarkup(pos, undefined, {
+          ...node.attrs,
+          width: imgRef.current.offsetWidth,
+          height: imgRef.current.offsetHeight,
+        })
+      );
+    };
+
+    const cleanup = () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
-
-      // Update ProseMirror node attributes only after resizing is complete
-      if (imgRef.current) {
-        const tr = view.state.tr.setNodeMarkup(getPos(), undefined, {
-          ...node.attrs,
-          width: imgRef.current.width,
-          height: imgRef.current.height,
-        });
-        view.dispatch(tr);
-      }
+      cleanupResizeRef.current = null;
     };
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    // Store so unmount can remove listeners if resize is interrupted
+    cleanupResizeRef.current = cleanup;
   }, [node.attrs, view, getPos]);
 
   if (src) {
     return (
-      <div className="image-node-view-wrapper" contentEditable={false} ref={wrapperRef}>
+      <div className="image-node-view-wrapper" contentEditable={false}>
         <img
-          src={src}
-          alt={node.attrs.alt}
-          title={node.attrs.title}
           ref={imgRef}
-          width={node.attrs.width || undefined}
-          height={node.attrs.height || undefined}
+          src={src}
+          alt={node.attrs.alt ?? ''}
+          title={node.attrs.title ?? undefined}
+          width={node.attrs.width ?? undefined}
+          height={node.attrs.height ?? undefined}
+          loading="lazy"
+          draggable={false}
         />
-        <div className="resize-handle" onMouseDown={handleMouseDown}></div>
+        <div
+          className="resize-handle"
+          onMouseDown={handleResizeMouseDown}
+          aria-label="Resize image"
+        />
       </div>
     );
   }
 
   return (
     <div
-      className="inkstream-image-upload-area"
+      className={`inkstream-image-upload-area${isDragOver ? ' inkstream-image-upload-area--dragover' : ''}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onClick={() => fileInputRef.current?.click()}
-      contentEditable={false} // Prevent ProseMirror from trying to edit this div
+      contentEditable={false}
+      role="button"
+      tabIndex={0}
+      aria-label="Upload image — click or drag and drop"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
     >
-      <p>Drag & drop an image here, or click to select</p>
-      <p>(Max file size: {MAX_FILE_SIZE_MB}MB)</p>
+      <svg
+        className="inkstream-upload-icon"
+        viewBox="0 0 24 24" width="32" height="32"
+        fill="none" stroke="currentColor" strokeWidth="1.5"
+        strokeLinecap="round" strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <path d="M3 15.5l5-5.5 4 4 3-3.5 6 6.5"/>
+      </svg>
+      <p className="inkstream-upload-text">
+        Drag & drop or <span>click to upload</span>
+      </p>
+      <p className="inkstream-upload-hint">
+        PNG, JPG, GIF, WebP · Max {MAX_FILE_SIZE_MB} MB
+      </p>
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/avif"
         ref={fileInputRef}
         onChange={handleFileInputChange}
         style={{ display: 'none' }}
+        tabIndex={-1}
+        aria-hidden="true"
       />
-      {error && <p className="inkstream-error-message">{error}</p>}
+      {error && (
+        <p className="inkstream-error-message" role="alert" aria-live="assertive">
+          {error}
+        </p>
+      )}
     </div>
   );
 };
