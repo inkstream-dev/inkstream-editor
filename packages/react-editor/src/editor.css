@@ -30,6 +30,21 @@
   line-height: 1.6;
 }
 
+/* ── Superscript / Subscript ────────────────────────────────────────────── */
+/* Browser defaults for <sup>/<sub> use vertical-align:super/sub which
+   expands the parent line-height. These rules reset to a position:relative
+   approach so the characters float above/below the baseline without pushing
+   surrounding lines apart. Scoped to the editor to avoid global impact. */
+.inkstream-editor sup,
+.inkstream-editor sub {
+  font-size: 0.75em;
+  line-height: 0;       /* removed from the line-box height calculation */
+  position: relative;
+  vertical-align: baseline;
+}
+.inkstream-editor sup { top: -0.5em; }
+.inkstream-editor sub { bottom: -0.25em; }
+
 .inkstream-toolbar {
   margin-bottom: 0;
   padding: 5px;

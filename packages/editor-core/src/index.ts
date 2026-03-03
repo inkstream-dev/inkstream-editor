@@ -32,6 +32,8 @@ import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
 import { highlightPlugin } from './plugins/highlight';
 import { codeBlockPlugin } from './plugins/codeBlock';
+import { superscriptPlugin } from './plugins/superscript';
+import { subscriptPlugin } from './plugins/subscript';
 
 
 
@@ -154,6 +156,8 @@ export const availablePlugins = {
   highlight: highlightPlugin,
   codeBlock: codeBlockPlugin,
   code: codePlugin,
+  superscript: superscriptPlugin,
+  subscript: subscriptPlugin,
   history: historyPlugin,
 };
 
