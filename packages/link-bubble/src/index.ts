@@ -1,4 +1,2 @@
-import { linkBubblePlugin, getLinkBubbleToolbarItem } from './link-bubble';
-
-export { linkBubblePlugin, getLinkBubbleToolbarItem };
+export { linkBubblePlugin, getLinkBubbleToolbarItem, openLinkBubble, removeLinkAtSelection, LINK_BUBBLE_KEY } from './link-bubble';
 export { linkBubbleWrapperPlugin } from './link-bubble-wrapper';

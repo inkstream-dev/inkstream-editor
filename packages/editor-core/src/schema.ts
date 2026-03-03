@@ -74,18 +74,30 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       attrs: {
         href: { default: null },
         title: { default: null },
+        target: { default: null },
+        rel: { default: null },
       },
       inclusive: false,
       parseDOM: [
         {
           tag: "a[href]",
           getAttrs(dom) {
-            return { href: dom.getAttribute("href"), title: dom.getAttribute("title") };
+            return {
+              href: (dom as HTMLElement).getAttribute("href"),
+              title: (dom as HTMLElement).getAttribute("title"),
+              target: (dom as HTMLElement).getAttribute("target"),
+              rel: (dom as HTMLElement).getAttribute("rel"),
+            };
           },
         },
       ],
       toDOM(node) {
-        return ["a", node.attrs];
+        const attrs: Record<string, string> = {};
+        if (node.attrs.href) attrs.href = node.attrs.href;
+        if (node.attrs.title) attrs.title = node.attrs.title;
+        if (node.attrs.target) attrs.target = node.attrs.target;
+        if (node.attrs.rel) attrs.rel = node.attrs.rel;
+        return ["a", attrs];
       },
     },
     strong: { toDOM() { return ["strong", 0]; } },
