@@ -78,9 +78,27 @@ export default function Home() {
     ...proPluginsLoaded,
   ], [proPluginsLoaded]);
 
-  const handleLicenseError = (plugin: Plugin, requiredTier: string) => {
+  const handleLicenseError = useCallback((plugin: Plugin, requiredTier: string) => {
     console.warn(`License required: Plugin "${plugin.name}" needs ${requiredTier} tier`);
-  };
+  }, []);
+
+  const pluginOptions = useMemo(() => ({
+    fontFamily: {
+      fontFamilies: ['Arial', 'Georgia', 'Helvetica', 'Tahoma', 'Times New Roman', 'Verdana'],
+    },
+  }), []);
+
+  const toolbarLayout = useMemo(() => [
+    "undo", "redo", "|",
+    "heading", "bold", "italic", "underline", "strike", "link", "|",
+    "indent", "outdent", "|",
+    "alignLeft", "alignCenter", "alignRight", "|",
+    "bulletList", "orderedList", "codeBlock", "code", "|",
+    "image", "textColor", "highlight", "|",
+    "blockquote", "horizontalLine", "|",
+    "table", "export", "|",
+    "aiAssistant",
+  ], []);
 
   // Demonstrate imperative getContent() — triggered on button click
   const handleSave = useCallback(() => {
@@ -149,22 +167,8 @@ export default function Home() {
             licenseValidationEndpoint={VALIDATION_ENDPOINT}
             onLicenseError={handleLicenseError}
             onChange={setLiveHtml}
-            pluginOptions={{
-              fontFamily: {
-                fontFamilies: ['Arial', 'Georgia', 'Helvetica', 'Tahoma', 'Times New Roman', 'Verdana']
-              }
-            }}
-            toolbarLayout={[
-              "undo", "redo", "|",
-              "heading", "bold", "italic", "underline", "strike", "link", "|",
-              "indent", "outdent", "|",
-              "alignLeft", "alignCenter", "alignRight", "|",
-              "bulletList", "orderedList", "codeBlock", "code", "|",
-              "image", "textColor", "highlight", "|",
-              "blockquote", "horizontalLine", "|",
-              "table", "export", "|",
-              "aiAssistant",
-            ]}
+            pluginOptions={pluginOptions}
+            toolbarLayout={toolbarLayout}
           />
         </div>
 

@@ -109,6 +109,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const { pluginManager, schema, proseMirrorPlugins } = pluginState;
 
+  // Keep a ref so handleDispatchTransaction never needs onChange in its dep array.
+  // This prevents the chain: onChange change → new handleDispatchTransaction → useEffect re-run → editor destroyed.
+  const onChangeRef = useRef(onChange);
+  useEffect(() => { onChangeRef.current = onChange; });
+
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
   const handleDispatchTransaction = useCallback((transaction: Transaction) => {
@@ -116,14 +121,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const newState = editorViewRef.current.state.apply(transaction);
       editorViewRef.current.updateState(newState);
       setCurrentEditorState(newState);
-      if (onChange && transaction.docChanged) {
+      if (onChangeRef.current && transaction.docChanged) {
         const div = document.createElement('div');
         const fragment = DOMSerializer.fromSchema(newState.schema).serializeFragment(newState.doc.content);
         div.appendChild(fragment);
-        onChange(div.innerHTML);
+        onChangeRef.current(div.innerHTML);
       }
     }
-  }, [onChange]);
+  }, []); // stable — reads onChange via ref, not closure
 
   useEffect(() => {
     if (!editorRef.current) {
