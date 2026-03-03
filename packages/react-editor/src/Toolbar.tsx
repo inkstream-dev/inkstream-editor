@@ -270,7 +270,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
               }
             }}
             className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''} ${depth > 0 && item.label ? 'inkstream-toolbar-menu-item' : ''}`}
-            disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick)}
+            disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick) || (item.isEnabled !== undefined && editorState ? !item.isEnabled(editorState) : false)}
             title={item.tooltip}
           >
             {depth > 0 && item.label ? (

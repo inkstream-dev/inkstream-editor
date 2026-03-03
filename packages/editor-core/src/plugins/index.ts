@@ -21,6 +21,9 @@ export interface ToolbarItem {
   onClick?: () => void;
   isActive?: (state: EditorState) => boolean;
   isVisible?: (state: EditorState) => boolean;
+  /** When provided, returns false → button is rendered disabled. Use for commands
+   *  that are only meaningful in certain states (e.g. undo when history is empty). */
+  isEnabled?: (state: EditorState) => boolean;
   type?: 'dropdown' | 'color-picker';
   children?: ToolbarItem[];
   onColorChange?: (color: string) => (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
