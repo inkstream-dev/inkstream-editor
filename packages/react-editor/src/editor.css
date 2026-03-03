@@ -27,6 +27,7 @@
   min-height: 100%; /* Ensure ProseMirror content fills the container */
   outline: none; /* Remove default outline */
   white-space: pre-wrap;
+  line-height: 1.6;
 }
 
 .inkstream-toolbar {
@@ -280,18 +281,74 @@ blockquote {
   padding: 1px 0;
 }
 
+/* Wrapper is exactly one line tall so the checkbox centres on the first line of text */
 .inkstream-task-checkbox-wrapper {
   flex-shrink: 0;
-  padding-top: 3px; /* align checkbox with first line of text */
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  height: 1.6em; /* matches line-height set on .ProseMirror */
 }
 
+/* ── Custom styled checkbox ─────────────────────────────────────────────── */
 .inkstream-task-checkbox {
+  /* Override browser defaults */
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* Box model */
   width: 15px;
   height: 15px;
-  cursor: pointer;
-  accent-color: #3182ce;
+  flex-shrink: 0;
   margin: 0;
+
+  /* Visual */
+  border: 1.5px solid #cbd5e0;
+  border-radius: 4px;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+
+  /* Smooth transitions */
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+
+/* Hover state */
+.inkstream-task-checkbox:hover:not(:disabled) {
+  border-color: #3182ce;
+  background: #ebf8ff;
+}
+
+/* Focus state */
+.inkstream-task-checkbox:focus-visible {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+  border-color: #3182ce;
+}
+
+/* Checked state */
+.inkstream-task-checkbox:checked {
+  background: #3182ce;
+  border-color: #3182ce;
+}
+
+/* Checkmark via ::after */
+.inkstream-task-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1.5px;
+  width: 5px;
+  height: 8px;
+  border: 1.5px solid #ffffff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+  display: block;
+}
+
+/* Click feedback */
+.inkstream-task-checkbox:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .inkstream-task-content {
@@ -299,11 +356,14 @@ blockquote {
   min-width: 0;
 }
 
-/* Strikethrough + muted text for checked items */
+/* Strikethrough for checked items — thin line, muted color */
 .inkstream-task-item.checked .inkstream-task-content p,
 .inkstream-task-item[data-checked="true"] .inkstream-task-content p {
   text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: #9ca3af;
   color: #9ca3af;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 /* ── List Dropdown menu items (label + icon) ────────────────────────────── */

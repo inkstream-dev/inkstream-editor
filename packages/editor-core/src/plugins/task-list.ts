@@ -7,7 +7,7 @@ import {
 } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { splitListItem, liftListItem, sinkListItem } from 'prosemirror-schema-list';
+import { splitListItem } from 'prosemirror-schema-list';
 import { createPlugin } from './plugin-factory';
 import { toggleList } from '../commands/toggleList';
 
@@ -184,15 +184,8 @@ export const taskListPlugin = createPlugin({
     ];
   },
 
-  getKeymap: (schema: Schema) => {
-    const { task_item: taskItemType } = schema.nodes;
-    if (!taskItemType) return {};
-    return {
-      'Mod-Shift-9': toggleTaskList,
-      'Tab': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
-        sinkListItem(taskItemType)(state, dispatch),
-      'Shift-Tab': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
-        liftListItem(taskItemType)(state, dispatch),
-    };
+  getKeymap: (_schema: Schema) => {
+    // Shortcuts consolidated in listsPlugin to avoid keymap override conflicts.
+    return {};
   },
 });

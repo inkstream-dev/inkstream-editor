@@ -200,17 +200,23 @@ export const listsPlugin = createPlugin({
   }],
 
   getKeymap: (schema: Schema) => {
-    const { list_item: listItemType } = schema.nodes;
+    const { list_item: listItemType, task_item: taskItemType } = schema.nodes;
     if (!listItemType) return {};
     return {
       'Mod-Shift-8': toggleBulletList,
       'Mod-Shift-7': toggleOrderedList,
       'Mod-Shift-9': toggleTaskList,
-      'Mod-[': liftListItem(listItemType),
-      'Mod-]': sinkListItem(listItemType),
+      'Mod-[': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
+        (taskItemType && liftListItem(taskItemType)(state, dispatch)) ||
+        liftListItem(listItemType)(state, dispatch),
+      'Mod-]': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
+        (taskItemType && sinkListItem(taskItemType)(state, dispatch)) ||
+        sinkListItem(listItemType)(state, dispatch),
       'Tab': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
+        (taskItemType && sinkListItem(taskItemType)(state, dispatch)) ||
         sinkListItem(listItemType)(state, dispatch),
       'Shift-Tab': (state: EditorState, dispatch?: (tr: Transaction) => void) =>
+        (taskItemType && liftListItem(taskItemType)(state, dispatch)) ||
         liftListItem(listItemType)(state, dispatch),
     };
   },
