@@ -87,10 +87,10 @@ export default function Home() {
 
   const toolbarLayout = useMemo(() => [
     "undo", "redo", "|",
-    "heading", "bold", "italic", "underline", "strike", "link", "|",
+    "heading","lists", "bold", "italic", "underline", "strike", "link", "|",
     "indent", "outdent", "|",
     "alignLeft", "alignCenter", "alignRight", "alignJustify", "|",
-    "lists", "codeBlock", "code", "|",
+    "codeBlock", "code", "|",
     "image", "textColor", "highlight", "|",
     "blockquote", "horizontalLine", "|",
     "table", "export", "|",
