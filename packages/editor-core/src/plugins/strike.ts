@@ -1,45 +1,41 @@
 import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
-import { keymap } from 'prosemirror-keymap';
+import { EditorState, TextSelection } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
 import { ToolbarItem } from './index';
-import { TextSelection } from 'prosemirror-state';
+
+// ---------------------------------------------------------------------------
+// SVG icon — Strikethrough S: curved S path + horizontal strikethrough bar
+// ---------------------------------------------------------------------------
+const svgStrike = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M11.5 5.5A3.5 3.5 0 0 0 4.5 8"/>
+  <path d="M4.5 8A3.5 3.5 0 0 0 11.5 10.5"/>
+  <line x1="3" y1="8" x2="13" y2="8"/>
+</svg>`;
 
 export const strikePlugin = createPlugin({
   name: 'strike',
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
-
-    // Keymap for strike (Ctrl+Shift+S or Cmd+Shift+S)
-    const keys: { [key: string]: any } = {};
-    keys["Mod-Shift-s"] = toggleMark(schema.marks.strike);
-    plugins.push(keymap(keys));
-
-    return plugins;
+  getKeymap: (schema: Schema) => {
+    return { 'Mod-Shift-s': toggleMark(schema.marks.strike) };
   },
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
       {
         id: 'strike',
-        icon: 'S',
-        tooltip: 'Strikethrough',
+        icon: '',
+        iconHtml: svgStrike,
+        tooltip: 'Strikethrough (⌘⇧S)',
         command: toggleMark(schema.marks.strike),
         isActive: (state: EditorState) => {
           const { from, to, empty } = state.selection;
           if (empty) {
-            // Check if the mark is active at the cursor position
             if (state.selection instanceof TextSelection) {
-              const $cursor = state.selection.$cursor;
-              if ($cursor) {
-                return !!schema.marks.strike.isInSet($cursor.marks() || []);
-              }
+              const $cursor = (state.selection as TextSelection).$cursor;
+              if ($cursor) return !!schema.marks.strike.isInSet($cursor.marks() || []);
             }
             return !!schema.marks.strike.isInSet(state.storedMarks || []);
-          } else {
-            // Check if the mark is active within the selection range
-            return state.doc.rangeHasMark(from, to, schema.marks.strike);
           }
+          return state.doc.rangeHasMark(from, to, schema.marks.strike);
         },
       },
     ];

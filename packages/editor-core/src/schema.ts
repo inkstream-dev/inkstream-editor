@@ -1,4 +1,4 @@
-import { Schema } from 'prosemirror-model';
+import { Schema, Mark } from 'prosemirror-model';
 import { PluginManager } from './plugins';
 
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
@@ -100,10 +100,55 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
         return ["a", attrs];
       },
     },
-    strong: { toDOM() { return ["strong", 0]; } },
-    em: { toDOM() { return ["em", 0]; } },
-    underline: { toDOM() { return ["u", 0]; } },
-    strike: { toDOM() { return ["s", 0]; } },
+    strong: {
+      parseDOM: [
+        { tag: 'strong' },
+        // <b> is bold unless style explicitly says font-weight:normal
+        {
+          tag: 'b',
+          getAttrs: (node: Node | string) =>
+            (node as HTMLElement).style?.fontWeight !== 'normal' ? null : false,
+        },
+        // font-weight:400 means normal — clear any inherited strong mark
+        {
+          style: 'font-weight=400',
+          clearMark: (m: Mark) => m.type.name === 'strong',
+        },
+        // Match bold/bolder or 500–900
+        {
+          style: 'font-weight',
+          getAttrs: (value: Node | string) =>
+            /^(bold(er)?|[5-9]\d{2,})$/.test(value as string) ? null : false,
+        },
+      ],
+      toDOM() { return ['strong', 0]; },
+    },
+    em: {
+      parseDOM: [
+        { tag: 'em' },
+        { tag: 'i' },
+        { style: 'font-style=italic' },
+      ],
+      toDOM() { return ['em', 0]; },
+    },
+    underline: {
+      parseDOM: [
+        { tag: 'u' },
+        { style: 'text-decoration=underline' },
+        { style: 'text-decoration-line=underline' },
+      ],
+      toDOM() { return ['u', 0]; },
+    },
+    strike: {
+      parseDOM: [
+        { tag: 's' },
+        { tag: 'del' },
+        { tag: 'strike' },
+        { style: 'text-decoration=line-through' },
+        { style: 'text-decoration-line=line-through' },
+      ],
+      toDOM() { return ['s', 0]; },
+    },
     code: { toDOM() { return ["code", 0]; } },
     ...manager.getMarks(), // Dynamically add marks from plugins
   },
