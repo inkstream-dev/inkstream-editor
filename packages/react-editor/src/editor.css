@@ -274,6 +274,7 @@ blockquote {
   margin: 0;
 }
 
+/* Row: checkbox column + content column */
 .inkstream-task-item {
   display: flex;
   align-items: flex-start;
@@ -281,58 +282,63 @@ blockquote {
   padding: 1px 0;
 }
 
-/* Wrapper is exactly one line tall so the checkbox centres on the first line of text */
-.inkstream-task-checkbox-wrapper {
+/* Label is the checkbox column. height:1.6em = one line of text (matches
+   the explicit line-height on .ProseMirror), so align-items:center places
+   the indicator perfectly on the first-line baseline. No margin hacks. */
+.inkstream-task-label {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  height: 1.6em; /* matches line-height set on .ProseMirror */
+  height: 1.6em;
+  cursor: pointer;
+  user-select: none;
 }
 
-/* ── Custom styled checkbox ─────────────────────────────────────────────── */
-.inkstream-task-checkbox {
-  /* Override browser defaults */
-  -webkit-appearance: none;
-  appearance: none;
-
-  /* Box model */
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
+/* Hidden real input — kept in DOM for semantics and keyboard accessibility.
+   The label click triggers this input so native toggle + change event fire. */
+.inkstream-task-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
   margin: 0;
+}
 
-  /* Visual */
+/* Custom visual indicator */
+.inkstream-task-indicator {
+  display: block;
+  width: 16px;
+  height: 16px;
   border: 1.5px solid #cbd5e0;
-  border-radius: 4px;
+  border-radius: 3px;
   background: #ffffff;
-  cursor: pointer;
+  flex-shrink: 0;
   position: relative;
-
-  /* Smooth transitions */
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
-/* Hover state */
-.inkstream-task-checkbox:hover:not(:disabled) {
+/* Hover: driven by label hover, no specificity clash with checked state */
+.inkstream-task-label:hover .inkstream-task-indicator {
   border-color: #3182ce;
   background: #ebf8ff;
 }
 
-/* Focus state */
-.inkstream-task-checkbox:focus-visible {
-  outline: 2px solid #3182ce;
-  outline-offset: 2px;
-  border-color: #3182ce;
-}
-
-/* Checked state */
-.inkstream-task-checkbox:checked {
+/* Checked state: driven by data-checked on <li>, not :checked pseudo-class.
+   This avoids any specificity fight with :hover and updates instantly
+   because we set data-checked optimistically before the ProseMirror roundtrip. */
+.inkstream-task-item[data-checked="true"] .inkstream-task-indicator {
   background: #3182ce;
   border-color: #3182ce;
 }
 
-/* Checkmark via ::after */
-.inkstream-task-checkbox:checked::after {
+/* Checked + hover: slightly darker fill */
+.inkstream-task-item[data-checked="true"] .inkstream-task-label:hover .inkstream-task-indicator {
+  background: #2b6cb0;
+  border-color: #2b6cb0;
+}
+
+/* Checkmark via ::after on the indicator */
+.inkstream-task-item[data-checked="true"] .inkstream-task-indicator::after {
   content: '';
   position: absolute;
   left: 4px;
@@ -346,9 +352,15 @@ blockquote {
   display: block;
 }
 
-/* Click feedback */
-.inkstream-task-checkbox:active:not(:disabled) {
+/* Click feedback on the label */
+.inkstream-task-label:active .inkstream-task-indicator {
   transform: scale(0.9);
+}
+
+/* Focus ring: show on indicator when hidden input is keyboard-focused */
+.inkstream-task-input:focus-visible ~ .inkstream-task-indicator {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
 }
 
 .inkstream-task-content {
@@ -357,13 +369,12 @@ blockquote {
 }
 
 /* Strikethrough for checked items — thin line, muted color */
-.inkstream-task-item.checked .inkstream-task-content p,
 .inkstream-task-item[data-checked="true"] .inkstream-task-content p {
   text-decoration: line-through;
   text-decoration-thickness: 1px;
   text-decoration-color: #9ca3af;
   color: #9ca3af;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 /* ── List Dropdown menu items (label + icon) ────────────────────────────── */

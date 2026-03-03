@@ -35,11 +35,17 @@ export const isTaskListActive = (state: EditorState): boolean => {
 
 // ---------------------------------------------------------------------------
 // TaskItemView — interactive checkbox NodeView
+// Structure mirrors professional editors (Tiptap pattern):
+//   li[data-checked]
+//     label[contenteditable=false]   ← cursor guard, non-editable
+//       input[type=checkbox]         ← hidden real checkbox (a11y / label association)
+//       span.indicator               ← custom visual checkbox
+//     div.content                    ← contentDOM (editable text)
 // ---------------------------------------------------------------------------
 class TaskItemView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
-  private checkbox: HTMLInputElement;
+  private input: HTMLInputElement;
   private currentNode: Node;
 
   constructor(
@@ -49,42 +55,62 @@ class TaskItemView {
   ) {
     this.currentNode = node;
 
+    // ── Root <li> ─────────────────────────────────────────────────────────
     this.dom = document.createElement('li');
     this.dom.className = `inkstream-task-item${node.attrs.checked ? ' checked' : ''}`;
     this.dom.dataset.checked = String(Boolean(node.attrs.checked));
 
-    // Checkbox wrapper (not editable, sits to the left of content)
-    const wrapper = document.createElement('span');
-    wrapper.className = 'inkstream-task-checkbox-wrapper';
-    wrapper.contentEditable = 'false';
+    // ── Label (cursor guard + click target) ───────────────────────────────
+    const label = document.createElement('label');
+    label.contentEditable = 'false';
+    label.className = 'inkstream-task-label';
+    // Prevent ProseMirror from repositioning cursor when clicking the checkbox.
+    // Placed on the label (not the input) so it intercepts all pointer events
+    // in the checkbox column while still allowing the label→input click chain.
+    label.addEventListener('mousedown', (e) => e.preventDefault());
 
-    this.checkbox = document.createElement('input');
-    this.checkbox.type = 'checkbox';
-    this.checkbox.className = 'inkstream-task-checkbox';
-    this.checkbox.checked = Boolean(node.attrs.checked);
-    this.checkbox.setAttribute('aria-label', 'Toggle task');
+    // ── Hidden real input (semantics + keyboard a11y) ─────────────────────
+    this.input = document.createElement('input');
+    this.input.type = 'checkbox';
+    this.input.className = 'inkstream-task-input';
+    this.input.checked = Boolean(node.attrs.checked);
+    this.input.setAttribute('aria-label', 'Toggle task');
 
-    // Prevent mousedown from moving the editor cursor into the checkbox zone
-    this.checkbox.addEventListener('mousedown', (e) => e.preventDefault());
+    // ── Visual indicator (custom styled checkbox) ─────────────────────────
+    const indicator = document.createElement('span');
+    indicator.className = 'inkstream-task-indicator';
+    indicator.setAttribute('aria-hidden', 'true');
 
-    this.checkbox.addEventListener('change', () => {
+    // When the input toggles:
+    // 1. Immediately reflect in data-checked (CSS is driven by this attr, not :checked,
+    //    so there are no specificity fights with :hover).
+    // 2. Dispatch the ProseMirror transaction.
+    // update() will be called synchronously and keeps input.checked in sync.
+    this.input.addEventListener('change', () => {
+      const checked = this.input.checked;
+      // Optimistic DOM update for zero-latency visual feedback
+      this.dom.dataset.checked = String(checked);
+      if (checked) this.dom.classList.add('checked');
+      else this.dom.classList.remove('checked');
+
       const pos = this.getPos();
       if (pos === undefined) return;
       this.view.dispatch(
         this.view.state.tr.setNodeMarkup(pos, undefined, {
           ...this.currentNode.attrs,
-          checked: this.checkbox.checked,
+          checked,
         }),
       );
     });
 
-    wrapper.appendChild(this.checkbox);
+    label.appendChild(this.input);
+    label.appendChild(indicator);
 
-    // Editable content area
-    this.contentDOM = document.createElement('span');
+    // ── Editable content area (block container) ───────────────────────────
+    this.contentDOM = document.createElement('div');
     this.contentDOM.className = 'inkstream-task-content';
 
-    this.dom.appendChild(wrapper);
+    this.dom.appendChild(label);
     this.dom.appendChild(this.contentDOM);
   }
 
@@ -92,7 +118,8 @@ class TaskItemView {
     if (node.type !== this.currentNode.type) return false;
     this.currentNode = node;
     const checked = Boolean(node.attrs.checked);
-    this.checkbox.checked = checked;
+    // Sync native input state (enables keyboard toggle via Space)
+    this.input.checked = checked;
     this.dom.dataset.checked = String(checked);
     if (checked) this.dom.classList.add('checked');
     else this.dom.classList.remove('checked');
