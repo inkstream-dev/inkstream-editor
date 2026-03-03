@@ -15,7 +15,7 @@ import { PluginTier } from '../license';
 
 export interface ToolbarItem {
   id: string;
-  icon: string; // Or a React component, for now a string
+  icon?: string; // Or a React component, for now a string (optional when iconHtml is used)
   tooltip: string;
   command?: (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => boolean;
   onClick?: () => void;

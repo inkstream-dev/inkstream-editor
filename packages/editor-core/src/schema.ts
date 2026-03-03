@@ -9,8 +9,18 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       group: "block",
       attrs: {
         align: { default: null },
-        indent: { default: 0 }, // Add indent attribute
+        indent: { default: 0 },
       },
+      parseDOM: [{
+        tag: 'p',
+        getAttrs(dom) {
+          const el = dom as HTMLElement;
+          const align = el.style.textAlign || null;
+          const paddingMatch = el.style.paddingLeft?.match(/^(\d+(?:\.\d+)?)px$/);
+          const indent = paddingMatch ? Math.round(parseFloat(paddingMatch[1]) / 20) : 0;
+          return { align: align || null, indent: indent || 0 };
+        },
+      }],
       toDOM(node) {
         const attrs: { [key: string]: string } = {};
         if (node.attrs.align) {
@@ -28,6 +38,7 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       attrs: {
         align: { default: null },
       },
+      parseDOM: [{ tag: 'blockquote' }],
       toDOM(node) {
         const attrs: { [key: string]: string } = {};
         if (node.attrs.align) {
@@ -42,7 +53,17 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
         align: { default: null },
       },
       content: "inline*",
+      marks: "_",
       group: "block",
+      defining: true,
+      parseDOM: [
+        { tag: 'h1', getAttrs: (dom) => ({ level: 1, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h2', getAttrs: (dom) => ({ level: 2, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h3', getAttrs: (dom) => ({ level: 3, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h4', getAttrs: (dom) => ({ level: 4, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h5', getAttrs: (dom) => ({ level: 5, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h6', getAttrs: (dom) => ({ level: 6, align: (dom as HTMLElement).style.textAlign || null }) },
+      ],
       toDOM(node) {
         const domAttrs: { [key: string]: string } = {};
         if (node.attrs.align) {
