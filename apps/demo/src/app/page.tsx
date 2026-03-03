@@ -96,7 +96,7 @@ export default function Home() {
     "superscript", "subscript", "|",
     "image", "textColor", "highlight", "|",
     "blockquote", "horizontalLine", "|",
-    "table", "export", "|",
+    "table", "exportMarkdown", "|",
     "aiAssistant",
   ], []);
 
