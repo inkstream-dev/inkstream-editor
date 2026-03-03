@@ -176,7 +176,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                 }}
               >
                 <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={item.iconStyle}>{item.icon}</span>
+                  {item.iconHtml
+                    ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                    : <span style={item.iconStyle}>{item.icon}</span>
+                  }
                   {activeColor && (
                     <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
                   )}
@@ -223,7 +226,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
               }}
             >
               <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={item.iconStyle}>{item.icon}</span>
+                {item.iconHtml
+                  ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                  : <span style={item.iconStyle}>{item.icon}</span>
+                }
                 {activeColor && (
                   <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
                 )}
@@ -267,7 +273,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
             disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick)}
             title={item.tooltip}
           >
-            <span style={item.iconStyle}>{item.icon}</span>
+            <span style={item.iconStyle}>
+              {item.iconHtml
+                ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                : item.icon
+              }
+            </span>
           </button>
         );
       }

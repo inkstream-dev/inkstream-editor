@@ -24,6 +24,8 @@ export interface ToolbarItem {
   type?: 'dropdown' | 'color-picker';
   children?: ToolbarItem[];
   onColorChange?: (color: string) => (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+  /** When set, rendered as raw HTML inside the icon span (allows inline SVG icons). */
+  iconHtml?: string;
   /** Optional inline style applied to the icon element (e.g. colored swatch). */
   iconStyle?: Record<string, string>;
   /** When set, overrides `children` with a dynamic list computed from live editor state. */
