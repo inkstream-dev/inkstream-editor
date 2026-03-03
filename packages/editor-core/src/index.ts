@@ -164,3 +164,5 @@ export { createPlugin } from './plugins/plugin-factory';
 export { tableDialogBridge } from './tableDialogBridge';
 export { DEFAULT_TEXT_COLOR_PALETTE } from './plugins/textColor';
 export type { ColorEntry } from './plugins/textColor';
+export { DEFAULT_HIGHLIGHT_PALETTE } from './plugins/highlight';
+export type { HighlightColorEntry } from './plugins/highlight';
