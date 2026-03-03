@@ -31,6 +31,9 @@ importers:
 
   apps/demo:
     dependencies:
+      '@inkstream-dev/pro-plugins':
+        specifier: 0.1.0
+        version: 0.1.0(@inkstream/editor-core@packages+editor-core)(prosemirror-commands@1.7.1)(prosemirror-keymap@1.2.3)(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)
       '@inkstream/font-family':
         specifier: workspace:*
         version: link:../../packages/font-family
@@ -968,6 +971,25 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@inkstream-dev/pro-plugins@0.1.0(@inkstream/editor-core@packages+editor-core)(prosemirror-commands@1.7.1)(prosemirror-keymap@1.2.3)(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4):
+    resolution: {integrity: sha512-v+OjuW3XVGU5N6K6b51Odr/j77/zsYDI4NtynKzdtQKDIHnpxP7O+c12u2+LX5m0fro+9s91T0m8x87Gk8bLFg==, tarball: https://npm.pkg.github.com/download/@inkstream-dev/pro-plugins/0.1.0/7d4c2d5f6a8fe37653610c82648d3832367792aa}
+    peerDependencies:
+      '@inkstream/editor-core': '>=0.0.0'
+      prosemirror-commands: 1.7.1
+      prosemirror-keymap: 1.2.3
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-view: 1.41.4
+    dependencies:
+      '@inkstream/editor-core': link:packages/editor-core
+      prosemirror-commands: 1.7.1
+      prosemirror-keymap: 1.2.3
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-tables: 1.8.5
+      prosemirror-view: 1.41.4
+    dev: false
 
   /@istanbuljs/load-nyc-config@1.1.0:
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -4762,6 +4784,16 @@ packages:
     resolution: {integrity: sha512-6jiYHH2CIGbCfnxdHbXZ12gySFY/fz/ulZE333G6bPqIZ4F+TXo9ifiR86nAHpWnfoNjOb3o5ESi7J8Uz1jXHw==}
     dependencies:
       prosemirror-model: 1.25.4
+      prosemirror-transform: 1.10.5
+      prosemirror-view: 1.41.4
+    dev: false
+
+  /prosemirror-tables@1.8.5:
+    resolution: {integrity: sha512-V/0cDCsHKHe/tfWkeCmthNUcEp1IVO3p6vwN8XtwE9PZQLAZJigbw3QoraAdfJPir4NKJtNvOB8oYGKRl+t0Dw==}
+    dependencies:
+      prosemirror-keymap: 1.2.3
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
       prosemirror-transform: 1.10.5
       prosemirror-view: 1.41.4
     dev: false

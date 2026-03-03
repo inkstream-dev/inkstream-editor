@@ -4,25 +4,7 @@ import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@in
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
 import { headingPlugin } from "@inkstream/heading";
 import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
-import { useState, useMemo } from "react";
-
-// ---------------------------------------------------------------------------
-// PRO PLUGINS — External injection
-// ---------------------------------------------------------------------------
-// The @inkstream/pro-plugins package is NOT bundled with the public repo.
-// It is distributed privately via GitHub Packages (requires a paid license).
-//
-// To enable pro features in your app:
-//   1. Obtain a license key from https://inkstream.dev
-//   2. Configure GitHub Packages in your .npmrc:
-//        @inkstream:registry=https://npm.pkg.github.com
-//        //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-//   3. Install the package:
-//        npm install @inkstream/pro-plugins
-//   4. Replace the lazyPluginsConfig below with the real loaders, e.g.:
-//        loader: (tier) => import('@inkstream/pro-plugins')
-//          .then(m => ({ table: m.createProPlugins(tier).table }))
-// ---------------------------------------------------------------------------
+import { useState, useMemo, useEffect } from "react";
 
 const VALIDATION_ENDPOINT = "/api/validate-license";
 
@@ -34,16 +16,32 @@ export default function Home() {
     validationEndpoint: VALIDATION_ENDPOINT,
   });
 
-  // Pro plugin loaders — replace with real @inkstream/pro-plugins loaders
-  // once the package is installed from GitHub Packages.
+  // Inject table styles once on mount
+  useEffect(() => {
+    import("@inkstream-dev/pro-plugins").then((m) => {
+      if (m.injectTableStyles) m.injectTableStyles();
+    }).catch(() => {});
+  }, []);
+
   const lazyPluginsConfig = useMemo(() => [
-    // Example (uncomment after installing @inkstream/pro-plugins):
-    // {
-    //   loader: (tier) => import('@inkstream/pro-plugins')
-    //     .then(m => ({ table: m.createProPlugins(tier).table })),
-    //   requiredTier: 'pro' as const,
-    //   pluginKey: 'table',
-    // },
+    {
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream-dev/pro-plugins').then(m => ({ table: m.createProPlugins(tier).table })),
+      requiredTier: 'pro' as const,
+      pluginKey: 'table',
+    },
+    {
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream-dev/pro-plugins').then(m => ({ advancedExport: m.createProPlugins(tier).advancedExport })),
+      requiredTier: 'pro' as const,
+      pluginKey: 'advancedExport',
+    },
+    {
+      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+        import('@inkstream-dev/pro-plugins').then(m => ({ aiAssistant: m.createProPlugins(tier).aiAssistant })),
+      requiredTier: 'premium' as const,
+      pluginKey: 'aiAssistant',
+    },
   ], []);
 
   const { loadedPlugins: proPluginsLoaded, isLoading: isLoadingProPlugins } = useLazyPlugins({
@@ -51,32 +49,30 @@ export default function Home() {
     lazyPlugins: lazyPluginsConfig,
   });
 
-  const allPlugins = useMemo(() => {
-    return [
-      availablePlugins.bold,
-      availablePlugins.italic,
-      availablePlugins.underline,
-      availablePlugins.strike,
-      availablePlugins.code,
-      headingPlugin,
-      availablePlugins.alignLeft,
-      availablePlugins.alignCenter,
-      availablePlugins.alignRight,
-      availablePlugins.indent,
-      availablePlugins.bulletList,
-      availablePlugins.orderedList,
-      availablePlugins.listItem,
-      availablePlugins.blockquote,
-      availablePlugins.codeBlock,
-      availablePlugins.image,
-      availablePlugins.textColor,
-      availablePlugins.highlight,
-      availablePlugins.horizontalLine,
-      availablePlugins.history,
-      linkBubbleWrapperPlugin,
-      ...proPluginsLoaded,
-    ];
-  }, [proPluginsLoaded]);
+  const allPlugins = useMemo(() => [
+    availablePlugins.bold,
+    availablePlugins.italic,
+    availablePlugins.underline,
+    availablePlugins.strike,
+    availablePlugins.code,
+    headingPlugin,
+    availablePlugins.alignLeft,
+    availablePlugins.alignCenter,
+    availablePlugins.alignRight,
+    availablePlugins.indent,
+    availablePlugins.bulletList,
+    availablePlugins.orderedList,
+    availablePlugins.listItem,
+    availablePlugins.blockquote,
+    availablePlugins.codeBlock,
+    availablePlugins.image,
+    availablePlugins.textColor,
+    availablePlugins.highlight,
+    availablePlugins.horizontalLine,
+    availablePlugins.history,
+    linkBubbleWrapperPlugin,
+    ...proPluginsLoaded,
+  ], [proPluginsLoaded]);
 
   const handleLicenseError = (plugin: Plugin, requiredTier: string) => {
     console.warn(`License required: Plugin "${plugin.name}" needs ${requiredTier} tier`);
@@ -90,7 +86,7 @@ export default function Home() {
           <p className="text-gray-600 mb-6">
             Test the freemium model with different license tiers
           </p>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
             <label className="block text-left mb-2 font-semibold">
               License Key (Optional)
@@ -124,19 +120,19 @@ export default function Home() {
               </p>
               <div className="text-xs text-gray-500 space-y-1">
                 <p>💡 <strong>Free:</strong> Basic formatting, lists, images</p>
-                <p>💼 <strong>Pro:</strong> + Tables, Advanced Export (requires @inkstream/pro-plugins)</p>
-                <p>✨ <strong>Premium:</strong> + AI Writing Assistant (requires @inkstream/pro-plugins)</p>
+                <p>💼 <strong>Pro:</strong> + Tables, Advanced Export</p>
+                <p>✨ <strong>Premium:</strong> + AI Writing Assistant</p>
                 <hr className="my-2" />
-                <p className="text-xs">Test keys: INKSTREAM-PRO-ABC123 · INKSTREAM-PREMIUM-XYZ789</p>
+                <p>Test keys: INKSTREAM-PRO-ABC123 · INKSTREAM-PREMIUM-XYZ789</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <EditorWithTableDialog 
-            key="inkstream-editor-instance" 
-            initialContent="<p>Try out the editor! Your tier determines which features you can use.</p>" 
+          <EditorWithTableDialog
+            key="inkstream-editor-instance"
+            initialContent="<p>Try out the editor! Your tier determines which features you can use.</p>"
             plugins={allPlugins}
             licenseKey={licenseKey}
             licenseValidationEndpoint={VALIDATION_ENDPOINT}
@@ -153,7 +149,9 @@ export default function Home() {
               "alignLeft", "alignCenter", "alignRight", "|",
               "bulletList", "orderedList", "codeBlock", "code", "|",
               "image", "textColor", "highlight", "|",
-              "blockquote", "horizontalLine",
+              "blockquote", "horizontalLine", "|",
+              "table", "export", "|",
+              "aiAssistant",
             ]}
           />
         </div>
@@ -161,4 +159,5 @@ export default function Home() {
     </main>
   );
 }
+
 
