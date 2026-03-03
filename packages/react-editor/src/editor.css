@@ -282,9 +282,18 @@ blockquote {
   padding: 1px 0;
 }
 
+/* Browsers add margin-top/bottom to <p> by default (typically 1em each).
+   Without this reset, the first text line starts 1em below the top of the
+   content div, making the checkbox appear 1em too high even though the math
+   for label height:1.6em is correct. Reset here instead of globally so
+   other editor paragraphs are not affected. */
+.inkstream-task-content > p {
+  margin: 0;
+}
+
 /* Label is the checkbox column. height:1.6em = one line of text (matches
    the explicit line-height on .ProseMirror), so align-items:center places
-   the indicator perfectly on the first-line baseline. No margin hacks. */
+   the indicator perfectly on the first-line midpoint. No margin hacks. */
 .inkstream-task-label {
   flex-shrink: 0;
   display: flex;
@@ -337,18 +346,22 @@ blockquote {
   border-color: #2b6cb0;
 }
 
-/* Checkmark via ::after on the indicator */
+/* Checkmark via ::after on the indicator.
+   left/top 50% puts the pseudo-element top-left corner at the indicator centre.
+   translate(-50%, -50%) recentres it on its own midpoint, then rotate(45deg)
+   spins in place. The result is the checkmark geometrically centred inside the
+   16×16 indicator with no hardcoded pixel offsets. */
 .inkstream-task-item[data-checked="true"] .inkstream-task-indicator::after {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 1.5px;
+  left: 50%;
+  top: 50%;
   width: 5px;
-  height: 8px;
+  height: 9px;
   border: 1.5px solid #ffffff;
   border-top: none;
   border-left: none;
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
   display: block;
 }
 
