@@ -166,3 +166,5 @@ export { DEFAULT_TEXT_COLOR_PALETTE } from './plugins/textColor';
 export type { ColorEntry } from './plugins/textColor';
 export { DEFAULT_HIGHLIGHT_PALETTE } from './plugins/highlight';
 export type { HighlightColorEntry } from './plugins/highlight';
+export { insertDivider } from './plugins/horizontal-line';
+export type { DividerOptions } from './plugins/horizontal-line';
