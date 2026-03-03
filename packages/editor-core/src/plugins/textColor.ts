@@ -1,44 +1,121 @@
 import { createPlugin } from './plugin-factory';
-import { Schema, MarkType } from 'prosemirror-model';
+import { Schema } from 'prosemirror-model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
-import { keymap } from 'prosemirror-keymap';
-import { ToolbarItem } from './index';
 import { TextSelection } from 'prosemirror-state';
+import { ToolbarItem } from './index';
 
-// Command to apply a text color mark
-export function setTextColor(color: string): (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean {
-  return function(state: EditorState, dispatch?: (tr: Transaction) => void) {
+// ---------------------------------------------------------------------------
+// Default color palette — configurable via pluginOptions.textColor.palette
+// ---------------------------------------------------------------------------
+export interface ColorEntry {
+  label: string;
+  value: string;
+}
+
+export const DEFAULT_TEXT_COLOR_PALETTE: ColorEntry[] = [
+  // Neutrals
+  { label: 'Black',      value: '#000000' },
+  { label: 'Dark Gray',  value: '#374151' },
+  { label: 'Gray',       value: '#6B7280' },
+  { label: 'Light Gray', value: '#9CA3AF' },
+  // Warm
+  { label: 'Red',        value: '#EF4444' },
+  { label: 'Orange',     value: '#F97316' },
+  { label: 'Amber',      value: '#F59E0B' },
+  { label: 'Yellow',     value: '#EAB308' },
+  // Cool
+  { label: 'Green',      value: '#22C55E' },
+  { label: 'Teal',       value: '#14B8A6' },
+  { label: 'Blue',       value: '#3B82F6' },
+  { label: 'Indigo',     value: '#6366F1' },
+  // Soft / pastel
+  { label: 'Purple',     value: '#8B5CF6' },
+  { label: 'Pink',       value: '#EC4899' },
+  { label: 'Light Blue', value: '#93C5FD' },
+  { label: 'Light Green',value: '#86EFAC' },
+];
+
+// ---------------------------------------------------------------------------
+// Module-level last-used tracker — scoped to this plugin module only
+// ---------------------------------------------------------------------------
+let lastUsedTextColor: string | null = null;
+
+// ---------------------------------------------------------------------------
+// Commands
+// ---------------------------------------------------------------------------
+export function setTextColor(color: string) {
+  return function (state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
     const { from, to } = state.selection;
     const markType = state.schema.marks.textColor;
-    if (!markType) {
-      return false;
-    }
+    if (!markType) return false;
 
     if (dispatch) {
-      console.log("setTextColor: Dispatching transaction to apply color", color);
       let tr = state.tr;
-      // Remove existing textColor marks in the selection
+      // Clear existing textColor marks in the selection
       state.doc.nodesBetween(from, to, (node, pos) => {
         if (node.isText) {
           node.marks.forEach(mark => {
             if (mark.type === markType) {
-              console.log("setTextColor: Removing existing mark at pos", pos);
               tr = tr.removeMark(pos, pos + node.nodeSize, mark);
             }
           });
         }
       });
-      // Apply the new textColor mark
       tr = tr.addMark(from, to, markType.create({ color }));
       dispatch(tr);
     }
-    console.log("setTextColor: Command executed, returning true");
     return true;
   };
 }
 
+/** Apply color and record it as last-used. */
+function applyColor(color: string) {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void): boolean => {
+    lastUsedTextColor = color;
+    return setTextColor(color)(state, dispatch);
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Active-color helper (reads color from cursor / selection)
+// ---------------------------------------------------------------------------
+function getActiveTextColor(state: EditorState): string | null {
+  const markType = state.schema.marks.textColor;
+  if (!markType) return null;
+
+  const { empty, from, to } = state.selection;
+
+  if (empty) {
+    const marks =
+      state.selection instanceof TextSelection && state.selection.$cursor
+        ? state.selection.$cursor.marks()
+        : state.storedMarks ?? [];
+    const mark = markType.isInSet(marks ?? []);
+    return mark ? (mark.attrs.color as string) : null;
+  }
+
+  // Range selection: return color only when the whole range shares the same color
+  let color: string | null | undefined;
+  state.doc.nodesBetween(from, to, node => {
+    if (!node.isText) return;
+    const mark = markType.isInSet(node.marks);
+    const c = mark ? (mark.attrs.color as string) : null;
+    if (color === undefined) {
+      color = c;
+    } else if (color !== c) {
+      color = null; // mixed — show neutral
+      return false; // stop traversal
+    }
+  });
+  return color ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Plugin
+// ---------------------------------------------------------------------------
 export const textColorPlugin = createPlugin({
   name: 'textColor',
+
   marks: {
     textColor: {
       attrs: { color: { default: 'black' } },
@@ -46,54 +123,72 @@ export const textColorPlugin = createPlugin({
       group: 'inline',
       parseDOM: [{
         style: 'color',
-        getAttrs: (value: string | HTMLElement) => {
-          if (typeof value === 'string') {
-            return { color: value };
-          }
-          return null;
-        }
+        getAttrs: (value: string | HTMLElement) =>
+          typeof value === 'string' ? { color: value } : null,
       }],
       toDOM: (mark: any) => ['span', { style: `color: ${mark.attrs.color}` }, 0],
     },
   },
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    const plugins: ProseMirrorPlugin[] = [];
-    return plugins;
-  },
-  getToolbarItems: (schema: Schema): ToolbarItem[] => {
+
+  getProseMirrorPlugins: (_schema: Schema): ProseMirrorPlugin[] => [],
+
+  getToolbarItems: (_schema: Schema, options: any = {}): ToolbarItem[] => {
+    const palette: ColorEntry[] =
+      options?.palette ?? DEFAULT_TEXT_COLOR_PALETTE;
+
+    // Build static palette swatch children
+    const swatchItems: ToolbarItem[] = palette.map(({ label, value }) => ({
+      id: `textColor-swatch-${value.replace('#', '')}`,
+      icon: '■',
+      iconStyle: { color: value },
+      tooltip: label,
+      command: applyColor(value),
+    }));
+
     return [
       {
         id: 'textColor',
-        icon: 'A', // Placeholder icon, will be replaced with a color picker
+        icon: 'A',
         tooltip: 'Text Color',
-        type: 'color-picker',
-        onColorChange: (color: string) => setTextColor(color),
-        command: setTextColor('#000000'), // Default to black
-        isActive: (state: EditorState) => {
-          const { from, to, empty } = state.selection;
-          const markType = state.schema.marks.textColor;
-          if (!markType) {
-            console.log("isActive: markType is null");
-            return false;
+        type: 'dropdown',
+        childrenLayout: 'grid',
+
+        // Reads live cursor/selection color to show underline indicator on button
+        getActiveColor: getActiveTextColor,
+
+        // Called each time the dropdown renders — inserts the last-used row dynamically
+        getChildren: (_state: EditorState): ToolbarItem[] => {
+          const items: ToolbarItem[] = [];
+
+          if (lastUsedTextColor) {
+            items.push({
+              id: 'textColor-last-used',
+              icon: '■',
+              iconStyle: { color: lastUsedTextColor },
+              tooltip: `Last used: ${lastUsedTextColor}`,
+              command: applyColor(lastUsedTextColor),
+            });
+            // Separator after last-used
+            items.push({ id: 'textColor-sep-last', icon: '|', tooltip: '' });
           }
-          if (empty) {
-            if (state.selection instanceof TextSelection) {
-              const $cursor = state.selection.$cursor;
-              if ($cursor) {
-                const isActive = !!markType.isInSet($cursor.marks() || []);
-                console.log("isActive: empty selection, cursor marks, isActive:", isActive);
-                return isActive;
-              }
-            }
-            const isActive = !!markType.isInSet(state.storedMarks || []);
-            console.log("isActive: empty selection, stored marks, isActive:", isActive);
-            return isActive;
-          } else {
-            const isActive = state.doc.rangeHasMark(from, to, markType);
-            console.log("isActive: selection range, isActive:", isActive);
-            return isActive;
-          }
+
+          items.push(...swatchItems);
+
+          // Separator before custom picker
+          items.push({ id: 'textColor-sep-custom', icon: '|', tooltip: '' });
+
+          items.push({
+            id: 'textColor-custom',
+            icon: '🎨 Custom…',
+            tooltip: 'Custom Color',
+            type: 'color-picker',
+            onColorChange: (color: string) => applyColor(color),
+          });
+
+          return items;
         },
+
+        isActive: (state: EditorState) => getActiveTextColor(state) !== null,
       },
     ];
   },

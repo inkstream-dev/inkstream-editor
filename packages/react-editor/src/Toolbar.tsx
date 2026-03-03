@@ -67,10 +67,63 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     }
   };
 
+  /**
+   * Renders a list of dropdown children.
+   * When layout === 'grid', contiguous non-separator palette swatches are
+   * rendered in a compact 8-column colour grid; everything else (last-used
+   * row, separators, custom picker) renders as a normal list.
+   */
+  const renderDropdownChildren = (
+    children: (ToolbarItem | string)[],
+    layout: ToolbarItem['childrenLayout'] | undefined,
+    depth: number,
+  ) => {
+    if (layout !== 'grid') {
+      return children.map((child, i) => renderToolbarItem(child, i, depth));
+    }
+
+    // Split into segments: pre-grid (last-used + separator), grid swatches, post-grid
+    const isSwatch = (child: ToolbarItem | string) =>
+      typeof child === 'object' &&
+      !child.id?.includes('sep') &&
+      !child.id?.includes('last-used') &&
+      child.type !== 'color-picker';
+
+    const preGrid: (ToolbarItem | string)[] = [];
+    const swatches: (ToolbarItem | string)[] = [];
+    const postGrid: (ToolbarItem | string)[] = [];
+
+    let phase: 'pre' | 'grid' | 'post' = 'pre';
+    for (const child of children) {
+      if (phase === 'pre' && isSwatch(child)) phase = 'grid';
+      else if (phase === 'grid' && !isSwatch(child)) phase = 'post';
+
+      if (phase === 'pre') preGrid.push(child);
+      else if (phase === 'grid') swatches.push(child);
+      else postGrid.push(child);
+    }
+
+    return (
+      <>
+        {preGrid.map((child, i) => renderToolbarItem(child, i, depth))}
+        {swatches.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 2, padding: '6px 8px' }}>
+            {swatches.map((child, i) => renderToolbarItem(child, i, depth))}
+          </div>
+        )}
+        {postGrid.map((child, i) => renderToolbarItem(child, i + swatches.length, depth))}
+      </>
+    );
+  };
+
   const renderToolbarItem = (item: ToolbarItem | string, index: number, depth = 0) => {
     if (typeof item === 'string' && item === '|') {
       return <div key={`separator-${index}`} className="inkstream-toolbar-separator" />;
     } else if (typeof item === 'object') {
+      // Separator ToolbarItem convention (id contains 'sep' and no command/children)
+      if (item.icon === '|') {
+        return <div key={item.id ?? `sep-${index}`} className="inkstream-toolbar-separator" />;
+      }
       // Check visibility
       if (item.isVisible && editorState && !item.isVisible(editorState)) {
         return null;
@@ -91,9 +144,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
             }}
           />
         );
-      } else if (item.type === 'dropdown' && item.children) {
+      } else if (item.type === 'dropdown' && (item.children || item.getChildren)) {
+        // Resolve children: prefer dynamic getChildren over static children
+        const resolvedChildren = item.getChildren && editorState
+          ? item.getChildren(editorState)
+          : (item.children ?? []);
+
         const isOpen = openDropdown === item.id || openNested === item.id;
         const isNested = depth > 0;
+
+        // Active color for the color indicator bar on the button
+        const activeColor = item.getActiveColor && editorState
+          ? item.getActiveColor(editorState)
+          : null;
 
         if (isNested) {
           // Nested dropdown (submenu inside bubble menu)
@@ -112,16 +175,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                   setOpenNested(isOpen ? null : item.id);
                 }}
               >
-                {item.icon}
+                <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={item.iconStyle}>{item.icon}</span>
+                  {activeColor && (
+                    <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
+                  )}
+                </span>
               </button>
               {isOpen && (
                 <div 
                   className="inkstream-toolbar-dropdown-content nested"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {item.children.map((child, childIndex) => 
-                    renderToolbarItem(child, childIndex, depth + 1)
-                  )}
+                  {renderDropdownChildren(resolvedChildren, item.childrenLayout, depth + 1)}
                 </div>
               )}
             </div>
@@ -147,7 +213,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                     setOpenDropdown(null);
                   } else {
                     setOpenDropdown(item.id);
-                    // Calculate position for bubble menu
                     const rect = e.currentTarget.getBoundingClientRect();
                     setDropdownPosition({
                       top: rect.bottom + 5,
@@ -157,7 +222,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                 }
               }}
             >
-              {item.icon}
+              <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={item.iconStyle}>{item.icon}</span>
+                {activeColor && (
+                  <span style={{ display: 'block', height: 2, width: '100%', background: activeColor, borderRadius: 1 }} />
+                )}
+              </span>
             </button>
             {isOpen && (
               <div 
@@ -172,13 +242,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                   zIndex: 9999,
                 }}
                 onMouseLeave={() => {
-                  // Close nested menu when leaving the bubble menu
                   setOpenNested(null);
                 }}
               >
-                {item.children.map((child, childIndex) => 
-                  renderToolbarItem(child, childIndex, depth + 1)
-                )}
+                {renderDropdownChildren(resolvedChildren, item.childrenLayout, depth + 1)}
               </div>
             )}
           </React.Fragment>
@@ -200,7 +267,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
             disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick)}
             title={item.tooltip}
           >
-            {item.icon}
+            <span style={item.iconStyle}>{item.icon}</span>
           </button>
         );
       }

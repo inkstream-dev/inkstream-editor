@@ -246,3 +246,22 @@ blockquote {
   font-family: 'Courier New', Courier, monospace;
   overflow-x: auto;
 }
+/* Color picker input used in text-color dropdown */
+.inkstream-toolbar-color-picker {
+  width: 28px;
+  height: 28px;
+  padding: 1px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  cursor: pointer;
+  background: none;
+}
+
+/* Compact swatch buttons inside the color grid */
+.inkstream-toolbar-bubble-menu .inkstream-toolbar-button,
+.inkstream-toolbar-dropdown-content .inkstream-toolbar-button {
+  min-width: 26px;
+  padding: 3px 5px;
+  font-size: 13px;
+  line-height: 1;
+}

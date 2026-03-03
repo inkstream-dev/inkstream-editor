@@ -24,6 +24,14 @@ export interface ToolbarItem {
   type?: 'dropdown' | 'color-picker';
   children?: ToolbarItem[];
   onColorChange?: (color: string) => (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+  /** Optional inline style applied to the icon element (e.g. colored swatch). */
+  iconStyle?: Record<string, string>;
+  /** When set, overrides `children` with a dynamic list computed from live editor state. */
+  getChildren?: (state: EditorState) => ToolbarItem[];
+  /** Returns the currently active color for this item (used to render a color indicator). */
+  getActiveColor?: (state: EditorState) => string | null;
+  /** When 'grid', children are rendered in a compact color-swatch grid instead of a list. */
+  childrenLayout?: 'grid';
 }
 
 export interface Plugin {
