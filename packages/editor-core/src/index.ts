@@ -25,6 +25,8 @@ import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
 import { blockquotePlugin } from './plugins/blockquote';
+import { listsPlugin } from './plugins/lists';
+import { taskListPlugin } from './plugins/task-list';
 
 import { horizontalLinePlugin } from './plugins/horizontal-line';
 import { textColorPlugin } from './plugins/textColor';
@@ -109,10 +111,18 @@ export const buildKeymap = (schema: Schema, manager: PluginManager) => {
     };
   }
 
-  // Add keybinding for list items (Enter)
+  // Add keybinding for list items (Enter) — handles both plain and task list items
+  const enterCommands: Array<(state: EditorState, dispatch?: (tr: Transaction) => void) => boolean> = [];
   if (schema.nodes.list_item) {
-    keys["Enter"] = chainCommands(splitListItem(schema.nodes.list_item), liftListItem(schema.nodes.list_item), splitBlock);
+    enterCommands.push(splitListItem(schema.nodes.list_item));
+    enterCommands.push(liftListItem(schema.nodes.list_item));
   }
+  if (schema.nodes.task_item) {
+    enterCommands.push(splitListItem(schema.nodes.task_item));
+    enterCommands.push(liftListItem(schema.nodes.task_item));
+  }
+  enterCommands.push(splitBlock);
+  keys["Enter"] = chainCommands(...enterCommands);
 
   return keymap(keys);
 };
@@ -131,16 +141,20 @@ export const availablePlugins = {
   alignRight: alignRightPlugin,
   image: imagePlugin,
   indent: indentPlugin,
+  // Unified list plugin (replaces bulletList + orderedList + listItem)
+  lists: listsPlugin,
+  taskList: taskListPlugin,
+  // Legacy individual list plugins kept for backward compatibility
   bulletList: bulletListPlugin,
   orderedList: orderedListPlugin,
-  code: codePlugin,
-  history: historyPlugin,
   listItem: listItemPlugin,
   blockquote: blockquotePlugin,
   horizontalLine: horizontalLinePlugin,
   textColor: textColorPlugin,
   highlight: highlightPlugin,
   codeBlock: codeBlockPlugin,
+  code: codePlugin,
+  history: historyPlugin,
 };
 
 /**

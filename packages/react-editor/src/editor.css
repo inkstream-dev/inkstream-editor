@@ -265,3 +265,74 @@ blockquote {
   font-size: 13px;
   line-height: 1;
 }
+
+/* ── Task List ─────────────────────────────────────────────────────────── */
+.inkstream-task-list {
+  list-style: none;
+  padding-left: 0.25rem;
+  margin: 0;
+}
+
+.inkstream-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.inkstream-task-checkbox-wrapper {
+  flex-shrink: 0;
+  padding-top: 3px; /* align checkbox with first line of text */
+  line-height: 1;
+}
+
+.inkstream-task-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #3182ce;
+  margin: 0;
+}
+
+.inkstream-task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Strikethrough + muted text for checked items */
+.inkstream-task-item.checked .inkstream-task-content p,
+.inkstream-task-item[data-checked="true"] .inkstream-task-content p {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* ── List Dropdown menu items (label + icon) ────────────────────────────── */
+.inkstream-toolbar-button.inkstream-toolbar-menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.inkstream-toolbar-menu-item-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  width: 100%;
+}
+
+.inkstream-toolbar-menu-label {
+  white-space: nowrap;
+}
+
+/* Override the compact swatch size for full-width menu items */
+.inkstream-toolbar-bubble-menu .inkstream-toolbar-button.inkstream-toolbar-menu-item,
+.inkstream-toolbar-dropdown-content .inkstream-toolbar-button.inkstream-toolbar-menu-item {
+  min-width: 140px;
+  padding: 6px 12px;
+  font-size: 13px;
+}

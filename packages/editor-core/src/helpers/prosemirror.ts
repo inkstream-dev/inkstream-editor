@@ -16,5 +16,5 @@ export const getNodeType = (nameOrType: string | NodeType, schema: any): NodeTyp
 };
 
 export const isList = (nodeTypeName: string): boolean => {
-  return nodeTypeName === 'bullet_list' || nodeTypeName === 'ordered_list';
+  return nodeTypeName === 'bullet_list' || nodeTypeName === 'ordered_list' || nodeTypeName === 'task_list';
 };

@@ -269,16 +269,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                 executeCommand(item.command);
               }
             }}
-            className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''}`}
+            className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''} ${depth > 0 && item.label ? 'inkstream-toolbar-menu-item' : ''}`}
             disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick)}
             title={item.tooltip}
           >
-            <span style={item.iconStyle}>
-              {item.iconHtml
-                ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                : item.icon
-              }
-            </span>
+            {depth > 0 && item.label ? (
+              <span className="inkstream-toolbar-menu-item-inner">
+                {item.iconHtml
+                  ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                  : <span style={item.iconStyle}>{item.icon}</span>
+                }
+                <span className="inkstream-toolbar-menu-label">{item.label}</span>
+              </span>
+            ) : (
+              <span style={item.iconStyle}>
+                {item.iconHtml
+                  ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                  : item.icon
+                }
+              </span>
+            )}
           </button>
         );
       }
