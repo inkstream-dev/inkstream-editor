@@ -229,6 +229,11 @@ blockquote {
   user-select: none;
   min-height: 120px;
   outline: none;
+  /* Reset line-height inherited from .image-node-view-wrapper (which sets
+     line-height:0 to remove the inline-block descender gap on the img).
+     Without this reset, <p> children inherit line-height:0 and collapse,
+     causing .inkstream-upload-text and .inkstream-upload-hint to overlap. */
+  line-height: 1.5;
 }
 
 .inkstream-image-upload-area:hover,
