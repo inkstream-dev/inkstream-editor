@@ -1,15 +1,19 @@
 "use client";
 
 import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
+import type { EditorHandle } from "@inkstream/react-editor";
 import { availablePlugins, Plugin } from "@inkstream/editor-core";
 import { headingPlugin } from "@inkstream/heading";
 import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 
 const VALIDATION_ENDPOINT = "/api/validate-license";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState<string>("INKSTREAM-PRO-ABC123");
+  const [savedContent, setSavedContent] = useState<string>('');
+  const [liveHtml, setLiveHtml] = useState<string>('');
+  const editorRef = useRef<EditorHandle>(null);
 
   const { tier: validatedTier, isValidating, error: licenseError } = useLicenseValidation({
     licenseKey,
@@ -78,6 +82,12 @@ export default function Home() {
     console.warn(`License required: Plugin "${plugin.name}" needs ${requiredTier} tier`);
   };
 
+  // Demonstrate imperative getContent() — triggered on button click
+  const handleSave = useCallback(() => {
+    const html = editorRef.current?.getContent() ?? '';
+    setSavedContent(html);
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center p-8 bg-gray-50">
       <div className="w-full max-w-6xl">
@@ -131,12 +141,14 @@ export default function Home() {
 
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <EditorWithTableDialog
+            ref={editorRef}
             key="inkstream-editor-instance"
             initialContent="<p>Try out the editor! Your tier determines which features you can use.</p>"
             plugins={allPlugins}
             licenseKey={licenseKey}
             licenseValidationEndpoint={VALIDATION_ENDPOINT}
             onLicenseError={handleLicenseError}
+            onChange={setLiveHtml}
             pluginOptions={{
               fontFamily: {
                 fontFamilies: ['Arial', 'Georgia', 'Helvetica', 'Tahoma', 'Times New Roman', 'Verdana']
@@ -154,6 +166,33 @@ export default function Home() {
               "aiAssistant",
             ]}
           />
+        </div>
+
+        {/* Content API demo */}
+        <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="text-lg font-semibold">Content API Demo</h2>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+            >
+              Save (getContent)
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-1">onChange (live)</p>
+              <pre className="text-xs bg-gray-50 border rounded p-3 overflow-auto max-h-40 whitespace-pre-wrap break-all">
+                {liveHtml || '<empty>'}
+              </pre>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-1">getContent() on save</p>
+              <pre className="text-xs bg-gray-50 border rounded p-3 overflow-auto max-h-40 whitespace-pre-wrap break-all">
+                {savedContent || '<click Save to capture>'}
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
     </main>
