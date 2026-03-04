@@ -205,12 +205,23 @@
   background: white;
 }
 
-blockquote {
-  border-left: 4px solid #ccc;
-  margin-left: 0;
-  padding-left: 10px;
+/* Scope blockquote styles to the editor to avoid affecting the host page */
+.inkstream-editor blockquote {
+  margin: 0.75em 0;
+  padding: 0.5em 1em 0.5em 1.25em;
+  border-left: 3px solid #d1d5db;
+  color: #4b5563;
+  background: #f9fafb;
+  border-radius: 0 4px 4px 0;
   font-style: italic;
-  color: #666;
+}
+
+/* Nested blockquotes — slightly darker treatment */
+.inkstream-editor blockquote blockquote {
+  border-left-color: #9ca3af;
+  background: #f3f4f6;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 .inkstream-image-upload-area {
