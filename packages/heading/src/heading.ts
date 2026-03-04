@@ -73,7 +73,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 1 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 1 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 1;
             },
           },
           {
@@ -84,7 +84,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 2 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 2 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 2;
             },
           },
           {
@@ -95,7 +95,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 3 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 3 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 3;
             },
           },
           {
@@ -106,7 +106,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 4 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 4 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 4;
             },
           },
           {
@@ -117,7 +117,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 5 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 5 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 5;
             },
           },
           {
@@ -128,7 +128,7 @@ export const headingPlugin = createPlugin({
             command: setBlockType(schema.nodes.heading, { level: 6 }),
             isActive: (state: EditorState) => {
               const { $from } = state.selection;
-              return $from.parent.hasMarkup(schema.nodes.heading, { level: 6 });
+              return $from.parent.type === schema.nodes.heading && $from.parent.attrs['level'] === 6;
             },
           },
         ],
