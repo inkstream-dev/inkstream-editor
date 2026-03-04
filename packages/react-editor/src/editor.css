@@ -348,6 +348,28 @@
   font-family: 'Courier New', Courier, monospace;
   overflow-x: auto;
 }
+
+/* Inline code mark — scoped to editor, excluded from inside code blocks */
+.inkstream-editor code {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.875em;
+  background-color: #f1f5f9;
+  color: #e11d48;
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Don't double-style code elements inside code blocks */
+.inkstream-code-block code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  color: inherit;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+}
 /* ── Color system ─────────────────────────────────────────────────────────── */
 
 /* Section label inside dropdowns (e.g. "Recently used", "Colors") */

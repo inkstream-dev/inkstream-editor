@@ -1,85 +1,93 @@
 import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
-import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from 'prosemirror-state';
+import { EditorState, Transaction, TextSelection } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
-import { keymap } from 'prosemirror-keymap';
-import { inputRules, InputRule } from 'prosemirror-inputrules';
+import { InputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
 
-type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
+// ---------------------------------------------------------------------------
+// SVG icon — angle brackets <> (universal inline code symbol)
+// ---------------------------------------------------------------------------
+const svgCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <polyline points="6,3 3,8 6,13"/>
+  <polyline points="10,3 13,8 10,13"/>
+</svg>`;
 
-export const toggleCode: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-  return toggleMark(state.schema.marks.code)(state, dispatch);
-};
+// ---------------------------------------------------------------------------
+// Commands
+// ---------------------------------------------------------------------------
 
-export const setCode: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-  const { from, to } = state.selection;
-  const markType = state.schema.marks.code;
-  if (!markType) {
-    return false;
+/** Toggle the code mark on the current selection or stored marks. */
+export const toggleCode = (state: EditorState, dispatch?: (tr: Transaction) => void): boolean =>
+  toggleMark(state.schema.marks.code)(state, dispatch);
+
+/** Returns true when the cursor or selection is fully inside a code mark. */
+export const isCodeActive = (state: EditorState): boolean => {
+  const { selection, schema } = state;
+  const markType = schema.marks.code;
+  if (!markType) return false;
+
+  const { from, to } = selection;
+
+  // Collapsed cursor — check stored marks and cursor marks
+  if (selection.empty) {
+    const marks =
+      selection instanceof TextSelection && selection.$cursor
+        ? selection.$cursor.marks()
+        : state.storedMarks ?? [];
+    return markType.isInSet(marks ?? []) !== null;
   }
-  if (dispatch) {
-    dispatch(state.tr.addMark(from, to, markType.create()));
-  }
-  return true;
+
+  // Range selection — true only when the entire range has the mark
+  return state.doc.rangeHasMark(from, to, markType);
 };
 
-export const unsetCode: Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => {
-  const markType = state.schema.marks.code;
-  if (!markType) {
-    return false;
-  }
-  return toggleMark(markType)(state, dispatch);
-};
-
-export const isCodeActive = (state: EditorState) => {
-  const { from, to } = state.selection;
-  return state.doc.rangeHasMark(from, to, state.schema.marks.code);
-};
-
+// ---------------------------------------------------------------------------
+// Plugin
+// ---------------------------------------------------------------------------
 export const codePlugin = createPlugin({
   name: 'code',
+
   marks: {
     code: {
-      parseDOM: [{ tag: 'code' }],
-      toDOM() { return ['code', 0]; },
+      // Prevent other marks inside code (bold+code, italic+code etc.)
       excludes: '_',
+      // Signals to paste/serialization logic that this is a code context
       code: true,
+      parseDOM: [
+        { tag: 'code' },
+        { tag: 'tt' }, // legacy teletype — still emitted by some HTML exporters
+      ],
+      toDOM() { return ['code', 0]; },
     },
   },
-  getProseMirrorPlugins: (schema: Schema): ProseMirrorPlugin[] => {
-    return [];
-  },
-  getInputRules: (schema: Schema): InputRule[] => {
-    return [
-      new InputRule(/(^|[^`])`([^`]+)`(?!`)/, (state, match, start, end) => {
-        const tr = state.tr;
-        if (match[2]) {
-          const textStart = start + match[0].indexOf(match[2]);
-          const textEnd = textStart + match[2].length;
-          tr.delete(textStart - 1, textEnd + 1); // Delete backticks
-          tr.addMark(textStart - 1, textEnd - 1, schema.marks.code.create());
-        }
-        return tr;
-      }),
-    ];
-  },
-  getKeymap: (schema: Schema): { [key: string]: any } => {
-    const keys: { [key: string]: Command } = {
-      'Mod-e': toggleCode,
-      'Mod-`': toggleCode,
-    };
-    return keys;
-  },
-  getToolbarItems: (schema: Schema): ToolbarItem[] => {
-    return [
-      {
-        id: 'code',
-        icon: '</>',
-        tooltip: 'Code',
-        command: toggleCode,
-        isActive: isCodeActive,
-      },
-    ];
-  },
+
+  getInputRules: (schema: Schema): InputRule[] => [
+    // Match `content` (backtick-wrapped, non-empty, no backticks inside).
+    // Uses replaceWith to atomically swap the whole matched range for the
+    // content-only text with code mark — no manual position arithmetic needed.
+    new InputRule(/`([^`]+)`/, (state, match, start, end) => {
+      const markType = schema.marks.code;
+      if (!markType || !match[1]) return null;
+      return state.tr.replaceWith(
+        start, end,
+        schema.text(match[1], [markType.create()]),
+      );
+    }),
+  ],
+
+  getKeymap: () => ({
+    // Mod-e matches Notion's inline code shortcut — memorable and conflict-free
+    'Mod-e': toggleCode,
+  }),
+
+  getToolbarItems: (_schema: Schema): ToolbarItem[] => [
+    {
+      id: 'code',
+      iconHtml: svgCode,
+      tooltip: 'Inline Code (Ctrl+E)',
+      command: toggleCode,
+      isActive: isCodeActive,
+    },
+  ],
 });
