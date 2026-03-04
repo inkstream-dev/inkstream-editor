@@ -2,6 +2,7 @@ import { createPlugin } from './plugin-factory';
 import { Schema } from 'prosemirror-model';
 import { EditorState, TextSelection } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
+import { InputRule } from 'prosemirror-inputrules';
 import { ToolbarItem } from './index';
 
 // ---------------------------------------------------------------------------
@@ -15,9 +16,24 @@ const svgItalic = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" w
 
 export const italicPlugin = createPlugin({
   name: 'italic',
+
+  getInputRules: (schema: Schema): InputRule[] => [
+    // *text* — single asterisk (not preceded/followed by asterisk, avoids bold overlap)
+    new InputRule(/(?<!\*)\*([^*]+)\*$/, (state, match, start, end) => {
+      if (!match[1]) return null;
+      return state.tr.replaceWith(start, end, schema.text(match[1], [schema.marks.em.create()]));
+    }),
+    // _text_ — single underscore
+    new InputRule(/_([^_]+)_$/, (state, match, start, end) => {
+      if (!match[1]) return null;
+      return state.tr.replaceWith(start, end, schema.text(match[1], [schema.marks.em.create()]));
+    }),
+  ],
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-i': toggleMark(schema.marks.em) };
   },
+
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     return [
       {
