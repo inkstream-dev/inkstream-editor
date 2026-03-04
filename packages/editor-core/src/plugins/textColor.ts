@@ -78,6 +78,21 @@ export function setTextColor(color: string) {
   };
 }
 
+/** Remove all textColor marks from the current selection. */
+export function removeTextColor(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
+  const { from, to } = state.selection;
+  const markType = state.schema.marks.textColor;
+  if (!markType) return false;
+
+  // Only proceed if there's actually a textColor mark in the range
+  if (!state.doc.rangeHasMark(from, to, markType)) return false;
+
+  if (dispatch) {
+    dispatch(state.tr.removeMark(from, to, markType));
+  }
+  return true;
+}
+
 /** Apply color and record it as last-used. */
 function applyColor(color: string) {
   return (state: EditorState, dispatch?: (tr: Transaction) => void): boolean => {
