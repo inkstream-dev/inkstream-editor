@@ -15,18 +15,13 @@ const svgBold = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" wid
 </svg>`;
 
 // ---------------------------------------------------------------------------
-// Helper: mark input rule (shared local utility)
+// Helper: mark input rule — atomically replaces full match with marked content
 // ---------------------------------------------------------------------------
 function markInputRule(regexp: RegExp, markType: any) {
   return new InputRule(regexp, (state, match, start, end) => {
-    const tr = state.tr;
-    if (match[1]) {
-      const textStart = start + match[0].indexOf(match[1]);
-      const textEnd = textStart + match[1].length;
-      tr.delete(textStart, textEnd);
-      tr.addMark(textStart, textEnd, markType.create());
-    }
-    return tr;
+    if (!match[1]) return null;
+    const mark = markType.create();
+    return state.tr.replaceWith(start, end, state.schema.text(match[1], [mark]));
   });
 }
 

@@ -224,6 +224,13 @@
   margin-bottom: 0.5em;
 }
 
+/* Underline mark — enhance UA default with offset/thickness */
+.inkstream-editor u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .inkstream-image-upload-area {
   display: flex;
   flex-direction: column;
