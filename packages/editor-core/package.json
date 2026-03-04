@@ -7,7 +7,9 @@
   "scripts": {
     "lint": "eslint .",
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
