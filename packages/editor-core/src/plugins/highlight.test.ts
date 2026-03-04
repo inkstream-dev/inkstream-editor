@@ -402,8 +402,8 @@ describe('applyOrToggleHighlight (via swatch command)', () => {
     const hl1 = hlMarkType.create({ backgroundColor: '#FEF08A' });
     const hl2 = hlMarkType.create({ backgroundColor: '#BFDBFE' });
     const mixed = p(schema, schema.text('yellow', [hl1]), schema.text('blue', [hl2]));
-    const state = createStateWithSelection(doc(schema, mixed), 1, 12);
-    // Active is null (mixed), so applying green should set all to green
+    const state = createStateWithSelection(doc(schema, mixed), 1, 11);
+
     const children = toolbarItem.getChildren!(state);
     const greenSwatch = children.find(c => c.id === 'highlight-swatch-BBF7D0')!;
     const next = applyCommand(state, greenSwatch.command!)!;
@@ -446,7 +446,7 @@ describe('getActiveHighlightColor', () => {
     const hl1 = hlMarkType.create({ backgroundColor: '#FEF08A' });
     const hl2 = hlMarkType.create({ backgroundColor: '#BFDBFE' });
     const mixed = p(schema, schema.text('yellow', [hl1]), schema.text('blue', [hl2]));
-    const state = createStateWithSelection(doc(schema, mixed), 1, 12);
+    const state = createStateWithSelection(doc(schema, mixed), 1, 11);
     expect(getActiveHighlightColor(state)).toBeNull();
   });
 
@@ -644,7 +644,7 @@ describe('highlight with other marks', () => {
     const hl1 = hlMarkType.create({ backgroundColor: '#FEF08A' });
     const hl2 = hlMarkType.create({ backgroundColor: '#BFDBFE' });
     const mixed = p(schema, schema.text('yellow', [hl1]), schema.text('blue', [hl2]));
-    const state = createStateWithSelection(doc(schema, mixed), 1, 12);
+    const state = createStateWithSelection(doc(schema, mixed), 1, 11);
     expect(getActiveHighlightColor(state)).toBeNull();
   });
 
