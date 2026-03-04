@@ -175,14 +175,14 @@ function injectStyles(): void {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function normalizeUrl(url: string): string {
+export function normalizeUrl(url: string): string {
   url = url.trim();
   if (!url) return '';
   if (!/^[a-z][a-z0-9+\-.]*:\/\//i.test(url)) return 'https://' + url;
   return url;
 }
 
-function isValidUrl(url: string): boolean {
+export function isValidUrl(url: string): boolean {
   if (!url) return false;
   try { new URL(url); return true; } catch { return false; }
 }
