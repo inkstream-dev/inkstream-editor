@@ -13,9 +13,6 @@ import { boldPlugin } from './plugins/bold';
 import { underlinePlugin } from './plugins/underline';
 import { italicPlugin } from './plugins/italic';
 import { strikePlugin } from './plugins/strike';
-import { alignLeftPlugin } from './plugins/align-left';
-import { alignCenterPlugin } from './plugins/align-center';
-import { alignRightPlugin } from './plugins/align-right';
 import { alignmentPlugin } from './plugins/alignment';
 import { imagePlugin } from './plugins/image';
 import { indentPlugin } from './plugins/indent';
@@ -135,12 +132,8 @@ export const availablePlugins = {
   underline: underlinePlugin,
   italic: italicPlugin,
   strike: strikePlugin,
-  // Unified alignment plugin (replaces alignLeft/alignCenter/alignRight)
+  // Unified alignment plugin (all 4 alignments + SVG icons + keyboard shortcuts)
   alignment: alignmentPlugin,
-  // Legacy individual plugins kept for backward compatibility
-  alignLeft: alignLeftPlugin,
-  alignCenter: alignCenterPlugin,
-  alignRight: alignRightPlugin,
   image: imagePlugin,
   indent: indentPlugin,
   // Unified list plugin (replaces bulletList + orderedList + listItem)
