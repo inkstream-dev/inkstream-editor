@@ -175,7 +175,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
               className="inkstream-toolbar-dropdown"
             >
               <button
-                className={`inkstream-toolbar-button ${isOpen ? 'active' : ''}`}
+                className={`inkstream-toolbar-button ${isOpen ? 'active' : ''} ${item.label ? 'inkstream-toolbar-menu-item' : ''}`}
                 title={item.tooltip}
                 onMouseEnter={() => setOpenNested(item.id)}
                 onClick={(e) => {
@@ -184,15 +184,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                   setOpenNested(isOpen ? null : item.id);
                 }}
               >
-                <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                  {item.iconHtml
-                    ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                    : <span style={item.iconStyle}>{item.icon}</span>
-                  }
-                  {activeColor && (
-                    <span className="inkstream-color-indicator" style={{ background: activeColor }} />
-                  )}
-                </span>
+                {item.label ? (
+                  <span className="inkstream-toolbar-menu-item-inner">
+                    {item.iconHtml
+                      ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                      : <span style={item.iconStyle}>{item.icon}</span>
+                    }
+                    <span className="inkstream-toolbar-menu-label">{item.label}</span>
+                  </span>
+                ) : (
+                  <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {item.iconHtml
+                      ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                      : <span style={item.iconStyle}>{item.icon}</span>
+                    }
+                    {activeColor && (
+                      <span className="inkstream-color-indicator" style={{ background: activeColor }} />
+                    )}
+                  </span>
+                )}
               </button>
               {isOpen && (
                 <div 
