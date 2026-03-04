@@ -29,13 +29,12 @@ export const isCodeActive = (state: EditorState): boolean => {
 
   const { from, to } = selection;
 
-  // Collapsed cursor — check stored marks and cursor marks
+  // Collapsed cursor — check cursor marks then stored marks
   if (selection.empty) {
-    const marks =
-      selection instanceof TextSelection && selection.$cursor
-        ? selection.$cursor.marks()
-        : state.storedMarks ?? [];
-    return markType.isInSet(marks ?? []) !== null;
+    if (selection instanceof TextSelection && selection.$cursor) {
+      return !!markType.isInSet(selection.$cursor.marks() || []);
+    }
+    return !!markType.isInSet(state.storedMarks || []);
   }
 
   // Range selection — true only when the entire range has the mark
