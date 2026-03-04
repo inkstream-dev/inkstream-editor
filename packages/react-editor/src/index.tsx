@@ -250,6 +250,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 };
 
 export * from './EditorWithTableDialog';
+export { TablePropertiesDialog } from './TablePropertiesDialog';
+export type { } from './TablePropertiesDialog';
 export { useLazyPlugins } from './useLazyPlugins';
 export { useLicenseValidation } from './useLicenseValidation';
 export type { UseLicenseValidationOptions, UseLicenseValidationResult } from './useLicenseValidation';

@@ -3,6 +3,7 @@ import { DOMSerializer } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 import { RichTextEditor } from './index';
 import { TableInsertDialog } from './TableInsertDialog';
+import { TablePropertiesDialog } from './TablePropertiesDialog';
 import { tableDialogBridge } from '@inkstream/editor-core';
 
 /** Imperative handle exposed via ref on EditorWithTableDialog. */
@@ -28,6 +29,7 @@ export interface EditorWithTableDialogProps {
 export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDialogProps>(
   (props, ref) => {
     const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
+    const [isPropertiesDialogOpen, setIsPropertiesDialogOpen] = useState(false);
     const editorViewRef = useRef<EditorView | null>(null);
 
     useImperativeHandle(ref, () => ({
@@ -44,11 +46,15 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
       },
     }));
 
-    // Register the dialog opener in the bridge; clean up on unmount
+    // Register bridges; clean up on unmount
     useEffect(() => {
       tableDialogBridge.openDialog = () => setIsTableDialogOpen(true);
+      tableDialogBridge.openPropertiesDialog = () => setIsPropertiesDialogOpen(true);
+      tableDialogBridge.getEditorView = () => editorViewRef.current;
       return () => {
         tableDialogBridge.openDialog = null;
+        tableDialogBridge.openPropertiesDialog = null;
+        tableDialogBridge.getEditorView = null;
       };
     }, []);
 
@@ -72,6 +78,10 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
           isOpen={isTableDialogOpen}
           onClose={() => setIsTableDialogOpen(false)}
           onInsert={handleInsertTable}
+        />
+        <TablePropertiesDialog
+          isOpen={isPropertiesDialogOpen}
+          onClose={() => setIsPropertiesDialogOpen(false)}
         />
       </>
     );

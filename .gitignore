@@ -44,3 +44,4 @@ dist/
 packages/*/src/**/*.js
 packages/*/src/**/*.d.ts
 .github/
+prompts/
