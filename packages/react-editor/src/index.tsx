@@ -71,19 +71,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       return true;
     });
     
-    console.log(`License tier: ${validatedTier}, Validated plugins:`, validated.map(p => p.name));
     return validated;
   }, [plugins, validatedTier, onLicenseError]);
   
   // Create plugin state - recalculates when validatedPlugins change
   const pluginState = useMemo(() => {
-    console.log('=== CREATING/UPDATING PLUGIN STATE ===');
-
     // Create plugin manager and register all plugins
     const manager = new PluginManager();
-    console.log('Registering plugins:', validatedPlugins.map(p => p.name));
     validatedPlugins.forEach(plugin => manager.registerPlugin(plugin));
-    console.log('Manager has plugins:', manager.getPlugins().map(p => p.name));
     
     // Create schema from the manager
     const editorSchema = inkstreamSchema(manager);
@@ -95,9 +90,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       buildInputRules(editorSchema),
       buildKeymap(editorSchema, manager),
     ];
-
-    console.log('=== PLUGIN STATE CREATED ===');
-    console.log('Total plugins:', pmPlugins.length);
 
     return {
       validatedPlugins,
@@ -132,14 +124,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   useEffect(() => {
     if (!editorRef.current) {
-      console.log('useEffect: Skipping initialization (no ref)');
       return;
     }
 
-    console.log("=== INITIALIZING EDITORVIEW ===");
-    console.log(`Loaded ${validatedPlugins.length} out of ${plugins.length} plugins (license tier: ${validatedTier})`);
-    console.log('Using proseMirrorPlugins:', proseMirrorPlugins);
-    
     // Parse initial content from HTML string
     let doc;
     try {
@@ -152,13 +139,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       doc = schema.node("doc", null, [schema.node("paragraph")]);
     }
 
-    console.log('About to call EditorState.create with', proseMirrorPlugins.length, 'plugins');
     const state = EditorState.create({
       schema: schema,
       doc: doc,
       plugins: proseMirrorPlugins,
     });
-    console.log('=== EDITORSTATE CREATED SUCCESSFULLY ===');
 
     const view = new EditorView(editorRef.current, {
       state,
@@ -222,13 +207,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     // console.log("Toolbar items collected:", orderedToolbarItems);
     // console.log("Toolbar items collected:", orderedToolbarItems);
-    console.log("Ordered Toolbar Items:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);
 
     // Cleanup function for EditorView when component unmounts or plugins change
     return () => {
       if (editorViewRef.current) {
-        console.log("Destroying EditorView...");
         editorViewRef.current.destroy();
         editorViewRef.current = null;
         setCurrentEditorState(null);

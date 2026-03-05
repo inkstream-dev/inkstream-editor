@@ -78,7 +78,7 @@ export default function Home() {
   ], [proPluginsLoaded]);
 
   const handleLicenseError = useCallback((plugin: Plugin, requiredTier: string) => {
-    console.warn(`License required: Plugin "${plugin.name}" needs ${requiredTier} tier`);
+    // Silently ignore tier mismatches in the demo — the editor already handles them gracefully
   }, []);
 
   const pluginOptions = useMemo(() => ({

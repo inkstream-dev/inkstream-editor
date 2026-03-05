@@ -85,8 +85,6 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
       setError(null);
 
       try {
-        console.log(`[useLazyPlugins] Loading ${pluginsToLoad.length} plugins for tier: ${effectiveTier}`);
-        
         // Load all plugins in parallel
         const results = await Promise.all(
           pluginsToLoad.map(async (config) => {
@@ -118,7 +116,6 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
           })
         );
 
-        console.log(`[useLazyPlugins] Successfully loaded ${results.length} plugins`);
         setLoadedPlugins(results);
         loadedTierRef.current = effectiveTier;
       } catch (err) {
