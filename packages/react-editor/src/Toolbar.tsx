@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { ToolbarItem } from '@inkstream/editor-core';
+import { ToolbarItem } from '@inkstream-dev/editor-core';
 
 interface ToolbarProps {
   editorState: EditorState | null;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { tableDialogBridge } from '@inkstream/editor-core';
+import { tableDialogBridge } from '@inkstream-dev/editor-core';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -23,11 +23,20 @@
       "@/*": [
         "./src/*"
       ],
-      "@inkstream/react-editor": [
+      "@inkstream-dev/react-editor": [
         "../../packages/react-editor/src"
       ],
-      "@inkstream/link-bubble": [
+      "@inkstream-dev/editor-core": [
+        "../../packages/editor-core/src"
+      ],
+      "@inkstream-dev/link-bubble": [
         "../../packages/link-bubble/src"
+      ],
+      "@inkstream-dev/heading": [
+        "../../packages/heading/src"
+      ],
+      "@inkstream-dev/font-family": [
+        "../../packages/font-family/src"
       ]
     },
     "plugins": [

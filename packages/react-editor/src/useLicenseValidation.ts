@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LicenseTier, LicenseManager, ServerValidationResponse } from '@inkstream/editor-core';
+import { LicenseTier, LicenseManager, ServerValidationResponse } from '@inkstream-dev/editor-core';
 
 export interface UseLicenseValidationOptions {
   licenseKey?: string;

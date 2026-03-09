@@ -1,10 +1,10 @@
 "use client";
 
-import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
-import type { EditorHandle } from "@inkstream/react-editor";
-import { availablePlugins, Plugin } from "@inkstream/editor-core";
-import { headingPlugin } from "@inkstream/heading";
-import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
+import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream-dev/react-editor";
+import type { EditorHandle } from "@inkstream-dev/react-editor";
+import { availablePlugins, Plugin } from "@inkstream-dev/editor-core";
+import { headingPlugin } from "@inkstream-dev/heading";
+import { linkBubbleWrapperPlugin } from "@inkstream-dev/link-bubble";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 
 const VALIDATION_ENDPOINT = "/api/validate-license";
@@ -29,19 +29,19 @@ export default function Home() {
 
   const lazyPluginsConfig = useMemo(() => [
     {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+      loader: (tier: import('@inkstream-dev/editor-core').LicenseTier) =>
         import('@inkstream-dev/pro-plugins').then(m => ({ table: m.createProPlugins(tier).table })),
       requiredTier: 'pro' as const,
       pluginKey: 'table',
     },
     {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+      loader: (tier: import('@inkstream-dev/editor-core').LicenseTier) =>
         import('@inkstream-dev/pro-plugins').then(m => ({ advancedExport: m.createProPlugins(tier).advancedExport })),
       requiredTier: 'pro' as const,
       pluginKey: 'advancedExport',
     },
     {
-      loader: (tier: import('@inkstream/editor-core').LicenseTier) =>
+      loader: (tier: import('@inkstream-dev/editor-core').LicenseTier) =>
         import('@inkstream-dev/pro-plugins').then(m => ({ aiAssistant: m.createProPlugins(tier).aiAssistant })),
       requiredTier: 'premium' as const,
       pluginKey: 'aiAssistant',

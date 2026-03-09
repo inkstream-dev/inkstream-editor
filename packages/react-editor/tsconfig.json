@@ -9,6 +9,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -16,11 +17,11 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "paths": {
-      "@inkstream/editor-core": [
-        "../editor-core/src"
+      "@inkstream-dev/editor-core": [
+        "../editor-core/dist/index.d.ts"
       ],
-      "@inkstream/link-bubble": [
-        "../link-bubble/src"
+      "@inkstream-dev/link-bubble": [
+        "../link-bubble/dist/index.d.ts"
       ]
     }
   },

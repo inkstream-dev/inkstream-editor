@@ -1,9 +1,9 @@
 
-import { createPlugin } from '@inkstream/editor-core';
+import { createPlugin } from '@inkstream-dev/editor-core';
 import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { setBlockType } from 'prosemirror-commands';
-import { ToolbarItem } from '@inkstream/editor-core';
+import { ToolbarItem } from '@inkstream-dev/editor-core';
 
 // Professional "H" with subscript numeral icon — matches toolbar icon family (14×14, stroke-based)
 const HEADING_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

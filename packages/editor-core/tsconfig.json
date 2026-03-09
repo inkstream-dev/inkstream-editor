@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@inkstream/editor-core": ["./src/index.ts"]
+      "@inkstream-dev/editor-core": ["./src/index.ts"]
     }
   },
   "include": [

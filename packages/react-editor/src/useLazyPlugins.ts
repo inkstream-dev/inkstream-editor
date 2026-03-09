@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plugin, LicenseTier } from '@inkstream/editor-core';
+import { Plugin, LicenseTier } from '@inkstream-dev/editor-core';
 
 /**
  * A plugin loader function that receives the server-validated tier so it can
@@ -10,7 +10,7 @@ import { Plugin, LicenseTier } from '@inkstream/editor-core';
  *
  * @example
  * ```ts
- * loader: (tier) => import('@inkstream/pro-plugins')
+ * loader: (tier) => import('@inkstream-dev/pro-plugins')
  *   .then(m => ({ table: m.createProPlugins(tier).table }))
  * ```
  */

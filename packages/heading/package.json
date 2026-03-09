@@ -1,6 +1,6 @@
 {
-  "name": "@inkstream/heading",
-  "version": "0.0.0",
+  "name": "@inkstream-dev/heading",
+  "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -10,18 +10,37 @@
   },
   "keywords": [],
   "author": "",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
-    "@inkstream/eslint-config": "workspace:*",
+    "@inkstream-dev/eslint-config": "workspace:*",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream/editor-core": "workspace:*",
+    "@inkstream-dev/editor-core": "workspace:*",
     "prosemirror-model": "^1.19.0",
     "prosemirror-state": "^1.4.0",
     "prosemirror-keymap": "^1.2.2",
     "prosemirror-commands": "^1.5.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inkstream-dev/inkstream.git"
+  },
+  "homepage": "https://inkstream.dev",
+  "bugs": {
+    "url": "https://github.com/inkstream-dev/inkstream/issues"
+  },
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "sideEffects": false
 }

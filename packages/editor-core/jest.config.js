@@ -2,7 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^@inkstream/(.*)$': '<rootDir>/../$1/src',
+    '^@inkstream-dev/(.*)$': '<rootDir>/../$1/src',
   },
   // Collect coverage from source files only (exclude dist, test-utils, test files)
   collectCoverageFrom: [
