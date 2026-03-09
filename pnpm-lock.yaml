@@ -187,7 +187,7 @@ importers:
   packages/font-family:
     dependencies:
       '@inkstream/editor-core':
-        specifier: workspace:*
+        specifier: ^0.1.1
         version: link:../editor-core
       prosemirror-commands:
         specifier: 1.7.1
@@ -218,7 +218,7 @@ importers:
   packages/heading:
     dependencies:
       '@inkstream/editor-core':
-        specifier: workspace:*
+        specifier: ^0.1.1
         version: link:../editor-core
       prosemirror-commands:
         specifier: 1.7.1
@@ -249,7 +249,7 @@ importers:
   packages/link-bubble:
     dependencies:
       '@inkstream/editor-core':
-        specifier: workspace:*
+        specifier: ^0.1.1
         version: link:../editor-core
       prosemirror-commands:
         specifier: 1.7.1
@@ -292,10 +292,10 @@ importers:
   packages/react-editor:
     dependencies:
       '@inkstream/editor-core':
-        specifier: workspace:*
+        specifier: ^0.1.1
         version: link:../editor-core
       '@inkstream/link-bubble':
-        specifier: workspace:*
+        specifier: ^0.1.1
         version: link:../link-bubble
     devDependencies:
       '@inkstream/eslint-config':
