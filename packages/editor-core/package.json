@@ -1,5 +1,5 @@
 {
-  "name": "@inkstream-dev/editor-core",
+  "name": "@inkstream/editor-core",
   "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@inkstream-dev/eslint-config": "workspace:*",
+    "@inkstream/eslint-config": "workspace:*",
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
     "typescript": "^5.3.3",

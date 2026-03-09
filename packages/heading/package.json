@@ -1,5 +1,5 @@
 {
-  "name": "@inkstream-dev/heading",
+  "name": "@inkstream/heading",
   "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,11 +16,11 @@
   "devDependencies": {
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
-    "@inkstream-dev/eslint-config": "workspace:*",
+    "@inkstream/eslint-config": "workspace:*",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream-dev/editor-core": "workspace:*",
+    "@inkstream/editor-core": "workspace:*",
     "prosemirror-model": "^1.19.0",
     "prosemirror-state": "^1.4.0",
     "prosemirror-keymap": "^1.2.2",

@@ -1,5 +1,5 @@
 {
-  "name": "@inkstream-dev/react-editor",
+  "name": "@inkstream/react-editor",
   "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,14 +18,14 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "eslint": "^8.56.0",
-    "@inkstream-dev/eslint-config": "workspace:*",
+    "@inkstream/eslint-config": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream-dev/editor-core": "workspace:*",
-    "@inkstream-dev/link-bubble": "workspace:*"
+    "@inkstream/editor-core": "workspace:*",
+    "@inkstream/link-bubble": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

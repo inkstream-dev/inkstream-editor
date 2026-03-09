@@ -4,8 +4,8 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
-import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream-dev/editor-core';
-import { getLinkBubbleToolbarItem } from '@inkstream-dev/link-bubble';
+import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream/editor-core';
+import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 import { ImageNodeView } from './ImageNodeView';

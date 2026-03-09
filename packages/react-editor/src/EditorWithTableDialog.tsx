@@ -4,7 +4,7 @@ import { EditorView } from 'prosemirror-view';
 import { RichTextEditor } from './index';
 import { TableInsertDialog } from './TableInsertDialog';
 import { TablePropertiesDialog } from './TablePropertiesDialog';
-import { tableDialogBridge } from '@inkstream-dev/editor-core';
+import { tableDialogBridge } from '@inkstream/editor-core';
 
 /** Imperative handle exposed via ref on EditorWithTableDialog. */
 export interface EditorHandle {

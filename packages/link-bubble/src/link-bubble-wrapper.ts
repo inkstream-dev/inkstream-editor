@@ -1,6 +1,6 @@
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import type { Plugin } from '@inkstream-dev/editor-core';
+import type { Plugin } from '@inkstream/editor-core';
 import {
   linkBubblePlugin,
   getLinkBubbleToolbarItem,

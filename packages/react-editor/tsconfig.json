@@ -17,10 +17,10 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "paths": {
-      "@inkstream-dev/editor-core": [
+      "@inkstream/editor-core": [
         "../editor-core/dist/index.d.ts"
       ],
-      "@inkstream-dev/link-bubble": [
+      "@inkstream/link-bubble": [
         "../link-bubble/dist/index.d.ts"
       ]
     }

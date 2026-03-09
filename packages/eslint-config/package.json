@@ -1,5 +1,5 @@
 {
-  "name": "@inkstream-dev/eslint-config",
+  "name": "@inkstream/eslint-config",
   "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",

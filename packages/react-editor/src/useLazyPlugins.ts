@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plugin, LicenseTier } from '@inkstream-dev/editor-core';
+import { Plugin, LicenseTier } from '@inkstream/editor-core';
 
 /**
  * A plugin loader function that receives the server-validated tier so it can

@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@inkstream-dev/react-editor", "@inkstream-dev/editor-core", "@inkstream-dev/heading", "@inkstream-dev/font-family", "@inkstream-dev/link-bubble", "@inkstream-dev/pro-plugins"],
+  transpilePackages: ["@inkstream/react-editor", "@inkstream/editor-core", "@inkstream/heading", "@inkstream/font-family", "@inkstream/link-bubble", "@inkstream-dev/pro-plugins"],
   reactStrictMode: false, // Disable StrictMode to prevent double-initialization of ProseMirror
   
   webpack: (config, { isServer }) => {

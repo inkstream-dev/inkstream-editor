@@ -1,7 +1,7 @@
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { Schema, Mark } from 'prosemirror-model';
-import { ToolbarItem } from '@inkstream-dev/editor-core';
+import { ToolbarItem } from '@inkstream/editor-core';
 
 // Module-level reference to the active bubble view (one editor instance at a time)
 let activeLinkBubble: LinkBubbleView | null = null;

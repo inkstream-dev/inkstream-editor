@@ -31,19 +31,19 @@ importers:
 
   apps/demo:
     dependencies:
-      '@inkstream-dev/font-family':
-        specifier: workspace:*
-        version: link:../../packages/font-family
-      '@inkstream-dev/heading':
-        specifier: workspace:*
-        version: link:../../packages/heading
-      '@inkstream-dev/link-bubble':
-        specifier: workspace:*
-        version: link:../../packages/link-bubble
       '@inkstream-dev/pro-plugins':
         specifier: link:../../../inkstream-pro-plugins
         version: link:../../../inkstream-pro-plugins
-      '@inkstream-dev/react-editor':
+      '@inkstream/font-family':
+        specifier: workspace:*
+        version: link:../../packages/font-family
+      '@inkstream/heading':
+        specifier: workspace:*
+        version: link:../../packages/heading
+      '@inkstream/link-bubble':
+        specifier: workspace:*
+        version: link:../../packages/link-bubble
+      '@inkstream/react-editor':
         specifier: workspace:*
         version: link:../../packages/react-editor
       next:
@@ -144,7 +144,7 @@ importers:
         specifier: 1.41.4
         version: 1.41.4
     devDependencies:
-      '@inkstream-dev/eslint-config':
+      '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/jest':
@@ -186,7 +186,7 @@ importers:
 
   packages/font-family:
     dependencies:
-      '@inkstream-dev/editor-core':
+      '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
       prosemirror-commands:
@@ -202,7 +202,7 @@ importers:
         specifier: 1.4.4
         version: 1.4.4
     devDependencies:
-      '@inkstream-dev/eslint-config':
+      '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/node':
@@ -217,7 +217,7 @@ importers:
 
   packages/heading:
     dependencies:
-      '@inkstream-dev/editor-core':
+      '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
       prosemirror-commands:
@@ -233,7 +233,7 @@ importers:
         specifier: 1.4.4
         version: 1.4.4
     devDependencies:
-      '@inkstream-dev/eslint-config':
+      '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/node':
@@ -248,7 +248,7 @@ importers:
 
   packages/link-bubble:
     dependencies:
-      '@inkstream-dev/editor-core':
+      '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
       prosemirror-commands:
@@ -267,7 +267,7 @@ importers:
         specifier: 1.41.4
         version: 1.41.4
     devDependencies:
-      '@inkstream-dev/eslint-config':
+      '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/jest':
@@ -291,14 +291,14 @@ importers:
 
   packages/react-editor:
     dependencies:
-      '@inkstream-dev/editor-core':
+      '@inkstream/editor-core':
         specifier: workspace:*
         version: link:../editor-core
-      '@inkstream-dev/link-bubble':
+      '@inkstream/link-bubble':
         specifier: workspace:*
         version: link:../link-bubble
     devDependencies:
-      '@inkstream-dev/eslint-config':
+      '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/node':
