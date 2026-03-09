@@ -34,13 +34,13 @@
   "bugs": {
     "url": "https://github.com/inkstream-dev/inkstream/issues"
   },
-  "module": "./dist/index.mjs",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
       "require": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "sideEffects": false
 }
