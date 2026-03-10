@@ -1,6 +1,6 @@
 {
   "name": "@inkstream/heading",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -24,6 +24,11 @@
   },
   "peerDependencies": {
     "@inkstream/editor-core": "^0.1.4"
+  },
+  "dependencies": {
+    "prosemirror-commands": "^1.5.2",
+    "prosemirror-model": "^1.19.0",
+    "prosemirror-state": "^1.4.0"
   },
   "devDependencies": {
     "@inkstream/editor-core": "workspace:*",

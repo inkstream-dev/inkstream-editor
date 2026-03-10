@@ -219,6 +219,16 @@ importers:
         version: 5.9.3
 
   packages/heading:
+    dependencies:
+      prosemirror-commands:
+        specifier: 1.7.1
+        version: 1.7.1
+      prosemirror-model:
+        specifier: 1.25.4
+        version: 1.25.4
+      prosemirror-state:
+        specifier: 1.4.4
+        version: 1.4.4
     devDependencies:
       '@inkstream/editor-core':
         specifier: workspace:*
@@ -240,6 +250,16 @@ importers:
         version: 5.9.3
 
   packages/link-bubble:
+    dependencies:
+      prosemirror-model:
+        specifier: 1.25.4
+        version: 1.25.4
+      prosemirror-state:
+        specifier: 1.4.4
+        version: 1.4.4
+      prosemirror-view:
+        specifier: 1.41.4
+        version: 1.41.4
     devDependencies:
       '@inkstream/editor-core':
         specifier: workspace:*
@@ -277,6 +297,15 @@ importers:
       '@inkstream/link-bubble':
         specifier: workspace:^
         version: link:../link-bubble
+      prosemirror-model:
+        specifier: 1.25.4
+        version: 1.25.4
+      prosemirror-state:
+        specifier: 1.4.4
+        version: 1.4.4
+      prosemirror-view:
+        specifier: 1.41.4
+        version: 1.41.4
     devDependencies:
       '@inkstream/eslint-config':
         specifier: workspace:*
