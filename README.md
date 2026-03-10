@@ -1,6 +1,6 @@
 # Inkstream
 
-A developer-focused, extensible WYSIWYG rich text editor built on **ProseMirror** with a modular plugin system, React wrapper, and a freemium licensing model — designed to be embedded in any React/Next.js application.
+A developer-focused, extensible WYSIWYG rich text editor SDK built on **ProseMirror** with a modular plugin system, React wrapper, and a freemium licensing model — designed to be embedded in any React or Next.js application.
 
 ---
 
@@ -11,141 +11,133 @@ A developer-focused, extensible WYSIWYG rich text editor built on **ProseMirror*
 - **Pro plugin distribution** — Pro/Premium plugins shipped as a private npm package (`@inkstream-dev/pro-plugins`) separate from the open-source core
 - **Lazy loading** — Pro/Premium plugin code is only downloaded after the license tier is server-confirmed
 - **Content API** — `onChange` prop for live HTML updates; `ref.getContent()` / `ref.focus()` for imperative access
-- **Rich built-in plugins** — bold, italic, underline, strikethrough, headings, lists, blockquote, code blocks, images, text colour, highlight, horizontal rule, indent/outdent, undo/redo, link bubble
+- **Rich built-in plugins** — bold, italic, underline, strikethrough, lists, blockquote, code blocks, images, text colour, highlight, horizontal rule, indent/outdent, alignment, undo/redo, and more
 - **Pro plugins** — Tables (full CRUD), Advanced Export, AI Writing Assistant (tier-gated)
 - **Toolbar layout control** — pass an ordered array of plugin IDs to `toolbarLayout`; `'|'` inserts a separator
+
+---
+
+## 📦 Published Packages
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| [`@inkstream/react-editor`](packages/react-editor) | `0.1.7` | Main React component, hooks, toolbar |
+| [`@inkstream/editor-core`](packages/editor-core) | `0.1.4` | ProseMirror schema, plugin system, license manager |
+| [`@inkstream/heading`](packages/heading) | `0.1.5` | Standalone heading plugin (H1–H6) |
+| [`@inkstream/link-bubble`](packages/link-bubble) | `0.1.5` | Inline link editing bubble (bundled in react-editor) |
+| [`@inkstream/font-family`](packages/font-family) | `0.1.2` | Standalone font-family picker plugin |
+
+> **Pro plugins** — `@inkstream/pro-plugins` is a private npm package (not on public npm).  
+> Customers receive an npm token after purchase. See [DISTRIBUTION.md](./DISTRIBUTION.md).
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-Inkstream/                         (public monorepo)
+Inkstream/                          (public monorepo)
 ├── apps/
-│   └── demo/                      # Next.js demo/playground
+│   ├── demo/                       # Next.js internal playground (localhost:3000)
+│   └── website/                    # Empty stub — marketing site lives at a separate repo
 ├── packages/
-│   ├── editor-core/               # ProseMirror schema, plugin system, license manager
-│   ├── react-editor/              # React components, hooks, toolbar
-│   ├── heading/                   # Heading plugin (external package)
-│   ├── font-family/               # Font-family plugin
-│   ├── link-bubble/               # Inline link editing bubble
-│   └── image/                     # Image insertion plugin
+│   ├── editor-core/                # ProseMirror schema, plugin system, license manager
+│   ├── react-editor/               # React components, hooks, toolbar, CSS
+│   ├── heading/                    # Standalone heading plugin
+│   ├── font-family/                # Standalone font-family plugin
+│   ├── link-bubble/                # Inline link editing bubble (bundled in react-editor)
+│   ├── image/                      # Image insertion plugin (not yet published)
+│   └── eslint-config/              # Shared ESLint configuration
 ├── docker/
 │   ├── Dockerfile
 │   └── docker-compose.yml
-├── DISTRIBUTION.md                # Guide: installing @inkstream-dev/pro-plugins
+├── DISTRIBUTION.md                 # Guide: installing @inkstream/pro-plugins
+├── LAZY_LOADING.md                 # Guide: useLazyPlugins hook
+├── LICENSE_SYSTEM_README.md        # Guide: license system architecture
 ├── turbo.json
 └── package.json
 ```
 
-> **Pro plugins** live in a separate private repository:  
-> `git@github.com:yogeshkoli/inkstream-pro-plugins.git`  
-> Published as `@inkstream-dev/pro-plugins` on GitHub Packages.  
-> See [DISTRIBUTION.md](./DISTRIBUTION.md) for the full customer setup guide.
-
----
-
-## 🏗️ Tech Stack
-
-| Layer              | Technology                               |
-|--------------------|------------------------------------------|
-| Editor Engine      | ProseMirror                              |
-| UI Framework       | React 18 + Next.js 14 (App Router)       |
-| Build System       | Turborepo + pnpm workspaces              |
-| TypeScript         | Strict mode throughout                   |
-| Styling            | Tailwind CSS (demo) + scoped editor CSS  |
-| License Validation | Server-side REST endpoint (per-consumer) |
-| Pro Distribution   | GitHub Packages (private registry)       |
-| Local Dev          | Docker + docker-compose                  |
+> The marketing website lives at a **separate repository** and is not part of this monorepo.
 
 ---
 
 ## 🚀 Quick Start
 
-### Run the demo locally
+### Install
 
 ```bash
-pnpm install
-pnpm dev          # starts all packages in dev mode
-# → http://localhost:3000
+npm install @inkstream/react-editor
 ```
 
-### Build all packages
+`@inkstream/editor-core` and ProseMirror packages are installed automatically as dependencies — no additional installs required.
 
-```bash
-pnpm build
-```
-
-### Run tests (`editor-core` only)
-
-```bash
-cd packages/editor-core
-pnpm test
-```
-
----
-
-## 📦 Installation in your app
-
-### Free tier (open source)
-
-```bash
-npm install @inkstream/react-editor @inkstream/editor-core
-```
+### Basic usage
 
 ```tsx
-import { EditorWithTableDialog } from '@inkstream/react-editor';
+import { RichTextEditor } from '@inkstream/react-editor';
 import { availablePlugins } from '@inkstream/editor-core';
 
 export default function MyPage() {
   return (
-    <EditorWithTableDialog
+    <RichTextEditor
       initialContent="<p>Hello world</p>"
       plugins={[
         availablePlugins.bold,
         availablePlugins.italic,
-        availablePlugins.bulletList,
+        availablePlugins.lists,
         availablePlugins.history,
       ]}
+      onChange={(html) => console.log(html)}
     />
   );
 }
 ```
 
-### Pro tier
+### With standalone plugins
 
-See [DISTRIBUTION.md](./DISTRIBUTION.md) for registry token setup, then:
+Some plugins are separate packages — install them individually:
 
 ```bash
-npm install @inkstream-dev/pro-plugins
+npm install @inkstream/heading @inkstream/font-family
 ```
 
 ```tsx
-import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from '@inkstream/react-editor';
+import { RichTextEditor } from '@inkstream/react-editor';
+import { availablePlugins } from '@inkstream/editor-core';
+import { headingPlugin } from '@inkstream/heading';
+import { fontFamilyPlugin } from '@inkstream/font-family';
+
+export default function MyPage() {
+  return (
+    <RichTextEditor
+      initialContent="<h1>Hello</h1>"
+      plugins={[
+        headingPlugin,
+        fontFamilyPlugin,
+        availablePlugins.bold,
+        availablePlugins.italic,
+        availablePlugins.history,
+      ]}
+      toolbarLayout={['heading', 'font-family', '|', 'bold', 'italic']}
+    />
+  );
+}
+```
+
+### With ref (imperative API)
+
+```tsx
+import { useRef } from 'react';
+import { EditorWithTableDialog } from '@inkstream/react-editor';
 import type { EditorHandle } from '@inkstream/react-editor';
 import { availablePlugins } from '@inkstream/editor-core';
-import { useRef } from 'react';
 
 export default function MyPage() {
   const editorRef = useRef<EditorHandle>(null);
 
-  const { tier } = useLicenseValidation({
-    licenseKey: 'INKSTREAM-PRO-…',
-    validationEndpoint: '/api/validate-license',
-  });
-
-  const { loadedPlugins } = useLazyPlugins({
-    validatedTier: tier,
-    lazyPlugins: [{
-      loader: (t) => import('@inkstream-dev/pro-plugins').then(m => ({ table: m.createProPlugins(t).table })),
-      requiredTier: 'pro',
-      pluginKey: 'table',
-    }],
-  });
-
   const handleSave = () => {
     const html = editorRef.current?.getContent();
-    console.log(html); // full HTML string
+    console.log(html);
   };
 
   return (
@@ -153,11 +145,7 @@ export default function MyPage() {
       <EditorWithTableDialog
         ref={editorRef}
         initialContent="<p>Hello</p>"
-        plugins={[...Object.values(availablePlugins), ...loadedPlugins]}
-        licenseValidationEndpoint="/api/validate-license"
-        licenseKey="INKSTREAM-PRO-…"
-        onChange={(html) => console.log('live:', html)}
-        toolbarLayout={['bold', 'italic', '|', 'table']}
+        plugins={Object.values(availablePlugins)}
       />
       <button onClick={handleSave}>Save</button>
     </>
@@ -169,14 +157,14 @@ export default function MyPage() {
 
 ## 🔑 License Validation
 
-Inkstream uses **server-side** license validation. The client-side key format check is for UX only — no feature unlocks client-side.
+Inkstream uses **server-side** license validation. The client-side key format check is for UX only — no feature unlocks happen client-side.
 
 ### Flow
 
 1. Consumer calls `useLicenseValidation({ licenseKey, validationEndpoint })`
 2. Hook POSTs `{ licenseKey }` to `validationEndpoint`
 3. Server responds with `{ isValid: boolean, tier: "free" | "pro" | "premium" }`
-4. `validatedTier` flows into `RichTextEditor` and `useLazyPlugins`
+4. `tier` flows into `RichTextEditor` and `useLazyPlugins`
 5. Without a `validationEndpoint`, tier is always `"free"` — **secure by default**
 
 ### Validation endpoint contract
@@ -187,92 +175,100 @@ Inkstream uses **server-side** license validation. The client-side key format ch
 // Response: { isValid: boolean, tier: "free" | "pro" | "premium" }
 ```
 
-The demo ships a minimal implementation at  
-`apps/demo/src/app/api/validate-license/route.ts` — replace the hardcoded keys with a real database/licensing service in production.
+A minimal demo implementation is at `apps/demo/src/app/api/validate-license/route.ts`.  
+Replace the hardcoded keys with a database or licensing service in production.
+
+See [LICENSE_SYSTEM_README.md](./LICENSE_SYSTEM_README.md) for the full architecture guide.
 
 ---
 
-## 🧩 Component API
+## 🛡️ Pro Plugins
 
-### `<EditorWithTableDialog>`
+Pro plugins are distributed as a private npm package — not on public npm.  
+After purchase, customers receive an npm token to install `@inkstream/pro-plugins`.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `initialContent` | `string` | Initial HTML content |
-| `plugins` | `Plugin[]` | Array of plugin instances to register |
-| `toolbarLayout` | `string[]` | Ordered plugin IDs; `'|'` = separator |
-| `pluginOptions` | `object` | Per-plugin options (keyed by plugin name) |
-| `licenseKey` | `string` | License key (passed to validation endpoint) |
-| `licenseValidationEndpoint` | `string` | URL of your server-side validation endpoint |
-| `onLicenseError` | `(plugin, tier) => void` | Called when a plugin's tier requirement isn't met |
-| `onChange` | `(html: string) => void` | Fires on every content change with serialized HTML |
+```tsx
+import { RichTextEditor, useLazyPlugins, useLicenseValidation } from '@inkstream/react-editor';
+import { availablePlugins } from '@inkstream/editor-core';
 
-**Ref handle (`EditorHandle`):**
+export default function MyEditor({ licenseKey }: { licenseKey: string }) {
+  const { tier } = useLicenseValidation({
+    licenseKey,
+    validationEndpoint: '/api/validate-license',
+  });
 
-```ts
-interface EditorHandle {
-  getContent(): string;  // snapshot of current HTML
-  focus(): void;
+  const { loadedPlugins, isLoading } = useLazyPlugins({
+    validatedTier: tier,
+    lazyPlugins: [
+      {
+        loader: (t) =>
+          import('@inkstream/pro-plugins').then(m => ({ table: m.createProPlugins(t).table })),
+        requiredTier: 'pro',
+        pluginKey: 'table',
+      },
+    ],
+  });
+
+  return (
+    <RichTextEditor
+      plugins={[...Object.values(availablePlugins), ...loadedPlugins]}
+      licenseKey={licenseKey}
+      licenseValidationEndpoint="/api/validate-license"
+    />
+  );
 }
 ```
 
-Usage:
-```tsx
-const editorRef = useRef<EditorHandle>(null);
-<EditorWithTableDialog ref={editorRef} … />
-// later:
-const html = editorRef.current?.getContent();
-```
+See [DISTRIBUTION.md](./DISTRIBUTION.md) for the full customer setup guide.  
+See [LAZY_LOADING.md](./LAZY_LOADING.md) for the `useLazyPlugins` hook reference.
 
 ---
 
 ## 🔌 Plugin Architecture
 
-Every capability is a plugin implementing the `Plugin` interface:
-
-```ts
-interface Plugin {
-  name: string;
-  tier?: 'free' | 'pro' | 'premium';   // defaults to 'free'
-  nodes?: NodeSpec map;
-  marks?: MarkSpec map;
-  getProseMirrorPlugins(schema): ProseMirrorPlugin[];
-  getToolbarItems(schema, options?): Map<string, ToolbarItem>;
-  getInputRules(schema): InputRule[];
-  getKeymap(schema): Keymap;
-}
-```
-
-Always create plugins with the `createPlugin()` factory:
+Every capability is a plugin implementing the `Plugin` interface. Use the `createPlugin()` factory:
 
 ```ts
 import { createPlugin } from '@inkstream/editor-core';
 
 export const myPlugin = createPlugin({
   name: 'my-plugin',
-  tier: 'free',
-  marks: { myMark: { /* ProseMirror MarkSpec */ } },
-  getProseMirrorPlugins: (schema) => [ /* … */ ],
+  tier: 'free',                        // 'free' | 'pro' | 'premium', defaults to 'free'
+  marks: { myMark: { /* MarkSpec */ } },
+  getProseMirrorPlugins: (schema) => [ /* ProseMirror plugins */ ],
   getToolbarItems: (schema) => new Map([['my-plugin', { id: 'my-plugin', icon: '…', command: … }]]),
+  getInputRules: (schema) => [ /* InputRule[] */ ],
+  getKeymap: (schema) => ({ 'Mod-m': /* command */ }),
 });
 ```
 
-Then register it with `PluginManager` (or pass directly in the `plugins` prop).
+Built-in plugins available via `availablePlugins` from `@inkstream/editor-core`:
+
+`bold` · `italic` · `underline` · `strike` · `alignment` · `image` · `indent` · `lists` · `taskList` · `blockquote` · `horizontalLine` · `textColor` · `highlight` · `codeBlock` · `code` · `superscript` · `subscript` · `history`
 
 ---
 
-## 🛡️ Security Model
+## 🛠️ Dev Setup
 
-| Layer | Protection |
-|-------|-----------|
-| Private registry | Pro source code not on public npm |
-| Runtime guard (`guardPlugin`) | All Pro plugin methods return no-ops without server-validated tier |
-| Server validation | Tier determined server-side; client key check is UX-only |
-| Secure by default | No `validationEndpoint` → always free tier |
+```bash
+# Install dependencies
+pnpm install
 
----
+# Start all dev servers
+pnpm dev           # demo app at http://localhost:3000
 
-## 🐳 Docker
+# Build all packages
+pnpm build
+
+# Run tests (editor-core only — 733 tests)
+cd packages/editor-core
+pnpm test
+
+# Lint all packages
+pnpm lint
+```
+
+### Docker
 
 ```bash
 docker-compose up --build
@@ -281,10 +277,24 @@ docker-compose up --build
 
 ---
 
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Editor Engine | ProseMirror |
+| UI Framework | React 19 |
+| App Framework | Next.js 16 (App Router) |
+| Build System | Turborepo + pnpm workspaces |
+| Package Bundler | tsup (CJS + ESM output) |
+| TypeScript | Strict mode throughout |
+| License Validation | Server-side REST endpoint |
+| Pro Distribution | Private npm registry |
+
+---
+
 ## 📄 License
 
 MIT — free for personal and commercial use.
 
-> Pro plugins (`@inkstream-dev/pro-plugins`) are distributed under a commercial license.  
+> Pro plugins (`@inkstream/pro-plugins`) are distributed under a commercial license.  
 > See [DISTRIBUTION.md](./DISTRIBUTION.md) for details.
-

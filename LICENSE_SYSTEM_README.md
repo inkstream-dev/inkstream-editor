@@ -1,242 +1,144 @@
-# Inkstream License System Implementation
+# License System Architecture
 
-## Overview
-Successfully implemented a freemium license validation system for Inkstream editor with three tiers: Free, Pro, and Premium.
+This document describes how Inkstream's license validation system works, covering the three tiers, key format, validation flow, and the runtime plugin guard.
 
-## Architecture Changes
+---
 
-### 1. License Management (`packages/editor-core/src/license/`)
-- **LicenseManager.ts**: Core license validation class
-  - `validateLicenseKey()`: Validates license key format and extracts tier
-  - `canUsePlugin()`: Checks if plugin tier is available for current license
-  - `getTier()`: Returns current license tier
-  - License key format: `INKSTREAM-{TIER}-{RANDOM}`
+## Tiers
 
-- **types.ts**: TypeScript type definitions
-  - `LicenseTier`: 'free' | 'pro' | 'premium'
-  - `PluginTier`: 'free' | 'pro' | 'premium'  
-  - `LicenseKey`: string
-  - `LicenseValidationResult`: validation response type
+| Tier | Description |
+|------|-------------|
+| `free` | Default. All open-source plugins in `@inkstream/editor-core`. No key required. |
+| `pro` | Adds table editing and advanced export. Requires a valid `INKSTREAM-PRO-*` key. |
+| `premium` | Everything in pro, plus AI writing assistant. Requires an `INKSTREAM-PREMIUM-*` key. |
 
-### 2. Plugin System Updates (`packages/editor-core/src/plugins/`)
-- Added `tier` property to `Plugin` interface
-- Updated `PluginConfig` to include optional `tier` field
-- All existing plugins set to `tier = 'free'`
-- Modified `createPlugin()` factory to support tier metadata
+---
 
-### 3. React Component Integration (`packages/react-editor/src/index.tsx`)
-```typescript
-// License validation in RichTextEditor component
-const licenseManager = new LicenseManager(licenseKey);
-const validatedPlugins = plugins.filter(plugin => 
-  licenseManager.canUsePlugin(plugin.tier || 'free')
-);
+## Key format
+
+```
+INKSTREAM-{TIER}-{RANDOM}
+
+Examples:
+  INKSTREAM-FREE-ABC123
+  INKSTREAM-PRO-XYZ789
+  INKSTREAM-PREMIUM-QRS456
 ```
 
-### 4. Pro Plugins Package (`packages/pro-plugins/`)
-New package containing premium features:
+`{RANDOM}` is an alphanumeric string (`[A-Z0-9]+`).
 
-**Table Plugin** (PRO tier)
-- Basic table support (placeholder for full prosemirror-tables integration)
-- Insert table toolbar button
+---
 
-**AI Assistant Plugin** (PREMIUM tier)
-- AI writing assistance dropdown
-- Actions: Complete, Improve, Summarize, Translate
-- Placeholder implementations ready for AI API integration
+## `LicenseManager` helpers
 
-**Advanced Export Plugin** (PRO tier)
-- Export functionality dropdown
-- Formats: PDF, Word (.docx), Markdown
-- Placeholder implementations ready for export library integration
+`LicenseManager` is exported from `@inkstream/editor-core` and provides two static helpers:
 
-## License Tiers
+```ts
+import { LicenseManager } from '@inkstream/editor-core';
 
-### Free Tier (No License)
-Access to all free plugins:
-- Text formatting (bold, italic, underline, strike)
-- Headings (H1-H6)
-- Lists (bullet, ordered)
-- Alignment (left, center, right)
-- Images
-- Links
-- Code blocks
-- Blockquotes
-- Text color & highlight
-- Font family
-- History (undo/redo)
+// Format check only — does NOT grant feature access. UX use only.
+LicenseManager.isValidKeyFormat('INKSTREAM-PRO-ABC123'); // → true
 
-### Pro Tier (`INKSTREAM-PRO-XXXXX`)
-Everything in Free tier plus:
-- Table editing
-- Advanced export (PDF, Word, Markdown)
+// Tier comparison — determines if userTier satisfies requiredTier.
+LicenseManager.canTierAccess('pro', 'pro');      // → true
+LicenseManager.canTierAccess('pro', 'premium');  // → false
+LicenseManager.canTierAccess('premium', 'pro');  // → true
+```
 
-### Premium Tier (`INKSTREAM-PREMIUM-XXXXX`)
-Everything in Pro tier plus:
-- AI Assistant (writing suggestions, completions, translations)
+`canTierAccess(userTier, requiredTier)` implements the tier hierarchy:  
+`premium` ≥ `pro` ≥ `free`.
 
-## Usage Example
+---
 
-```tsx
-import { RichTextEditor } from '@inkstream/react-editor';
-import { availablePlugins } from '@inkstream/editor-core';
-import { proPlugins } from '@inkstream/pro-plugins';
+## Validation flow
 
-function App() {
-  const [licenseKey, setLicenseKey] = useState('');
-  
-  // Combine free and pro plugins
-  const allPlugins = Object.values(availablePlugins).concat(proPlugins);
-  
-  return (
-    <RichTextEditor 
-      plugins={allPlugins} 
-      licenseKey={licenseKey}
-      onLicenseError={(error) => console.warn(error)}
-    />
-  );
+```
+User enters licenseKey
+        │
+        ▼
+useLicenseValidation({ licenseKey, validationEndpoint })
+        │
+        ├─ No validationEndpoint? → tier = 'free'   (secure by default)
+        ├─ Invalid key format?   → tier = 'free'   (UX feedback, no server call)
+        │
+        ▼
+POST validationEndpoint { licenseKey }
+        │
+        ├─ Network error?     → tier = 'free'   (fail secure)
+        ├─ isValid: false?    → tier = 'free'
+        │
+        ▼
+{ isValid: true, tier: 'pro' }
+        │
+        ▼
+validatedTier = 'pro'  →  passed to RichTextEditor + useLazyPlugins
+```
+
+The server response is the **single authoritative source** of the user's tier. The client-side key format check is purely for UX (to avoid sending obviously malformed keys to the server) and has no security value.
+
+---
+
+## Secure by default
+
+Without a `validationEndpoint`, the tier is permanently `'free'`:
+
+```ts
+useLicenseValidation({ licenseKey: 'INKSTREAM-PRO-XYZ' })
+// → { tier: 'free' }  — no endpoint, no paid access
+```
+
+This means shipping an editor without a validation endpoint is always safe.
+
+---
+
+## Validation endpoint contract
+
+```ts
+// POST /api/validate-license
+// Request body
+{ licenseKey: string }
+
+// Success response
+{ isValid: true, tier: 'free' | 'pro' | 'premium' }
+
+// Failure response
+{ isValid: false, reason?: string }
+```
+
+A minimal demo implementation lives at:  
+`apps/demo/src/app/api/validate-license/route.ts`
+
+In production, replace the hardcoded key map with a call to your database or licensing service. Return `{ isValid: false }` for expired or revoked keys.
+
+---
+
+## `guardPlugin()` — runtime protection in pro-plugins
+
+Every plugin in `@inkstream/pro-plugins` is wrapped by `guardPlugin()`. This function compares the tier passed into `createProPlugins(tier)` against the plugin's `requiredTier`. If the tier is insufficient, all plugin methods (`getProseMirrorPlugins`, `getToolbarItems`, `getInputRules`, `getKeymap`) return empty stubs.
+
+This means even if a user obtains the `@inkstream/pro-plugins` package through other means, the plugins produce no output without a server-validated tier:
+
+```ts
+// Inside @inkstream/pro-plugins
+export function createProPlugins(tier: LicenseTier) {
+  return {
+    table: guardPlugin(tablePluginImpl, 'pro', tier),
+    advancedExport: guardPlugin(advancedExportImpl, 'pro', tier),
+    aiAssistant: guardPlugin(aiAssistantImpl, 'premium', tier),
+  };
 }
 ```
 
-## Testing
+Always call `createProPlugins` with the tier from `useLicenseValidation` — never with a hardcoded value.
 
-### Test Free Tier (No License)
-```typescript
-// Leave license field empty or use invalid key
-licenseKey = ""
-// Should only show free plugins
-```
+---
 
-### Test Pro Tier
-```typescript
-licenseKey = "INKSTREAM-PRO-ABC123"
-// Should show free + pro plugins (table, export)
-// Should block premium plugins (AI assistant)
-```
+## Security layers summary
 
-### Test Premium Tier
-```typescript
-licenseKey = "INKSTREAM-PREMIUM-XYZ789"
-// Should show all plugins (free + pro + premium)
-```
-
-## Build Status
-✅ All packages build successfully
-✅ Tests passing (2/2 test suites, 4/4 tests)
-✅ Demo app compiles and runs on http://localhost:3000
-✅ TypeScript compilation clean
-✅ No breaking changes to existing functionality
-
-## Next Steps
-
-### 1. Enhance License Validation
-- [ ] Add server-side license verification API
-- [ ] Implement license expiration dates
-- [ ] Add seat/user limits for team licenses
-- [ ] Store license data securely (encrypted localStorage)
-
-### 2. Complete Pro Plugins
-- [ ] Integrate `prosemirror-tables` for full table functionality
-  - Cell merging
-  - Column resizing
-  - Row/column operations
-  - Header cells
-- [ ] Implement AI Assistant with OpenAI/Anthropic API
-  - Text completion
-  - Grammar improvements
-  - Summarization
-  - Translation
-- [ ] Build export functionality
-  - PDF generation (jsPDF)
-  - Word document export (docx library)
-  - Markdown serialization
-
-### 3. Add More Premium Features
-- [ ] Collaborative editing (real-time sync)
-- [ ] Comments and suggestions
-- [ ] Version history
-- [ ] Advanced formatting (superscript, subscript)
-- [ ] Math equations (KaTeX)
-- [ ] Diagram support (Mermaid)
-
-### 4. User Experience
-- [ ] License activation flow UI
-- [ ] Upgrade prompts for locked features
-- [ ] Feature comparison table
-- [ ] Trial license generation
-- [ ] License management dashboard
-
-## File Structure
-```
-packages/
-├── editor-core/
-│   ├── src/
-│   │   ├── license/
-│   │   │   ├── types.ts           # License type definitions
-│   │   │   ├── LicenseManager.ts  # Core license logic
-│   │   │   └── index.ts
-│   │   └── plugins/
-│   │       ├── index.ts           # Plugin interface with tier support
-│   │       └── plugin-factory.ts  # createPlugin with tier
-│   └── package.json
-├── pro-plugins/
-│   ├── src/
-│   │   ├── table.ts               # PRO: Table editing
-│   │   ├── ai-assistant.ts        # PREMIUM: AI assistant
-│   │   ├── advanced-export.ts     # PRO: Export functionality
-│   │   └── index.ts
-│   ├── package.json
-│   └── tsconfig.json
-├── react-editor/
-│   ├── src/
-│   │   └── index.tsx              # License validation integration
-│   └── package.json
-└── ...
-
-apps/
-└── demo/
-    ├── src/
-    │   └── app/
-    │       └── page.tsx           # Demo with license UI
-    └── package.json
-```
-
-## Technical Notes
-
-### TypeScript Configuration
-- pro-plugins uses TypeScript path mapping to resolve workspace packages during development
-- `skipLibCheck: true` used to avoid prosemirror version conflicts
-- DOM lib required for HTMLElement types in plugin code
-
-### Dependency Management  
-- Workspace dependencies use `workspace:*` protocol
-- pnpm ensures consistent versions across monorepo
-- Turbo handles build order and caching
-
-### Design Decisions
-1. **Plugin-level tier assignment**: Each plugin declares its required tier, making it easy to add new premium plugins
-2. **Client-side validation**: Fast UI responsiveness; server validation should be added for production
-3. **Graceful degradation**: Invalid licenses default to free tier rather than breaking the editor
-4. **Composable architecture**: Users can mix free and pro plugins as needed
-
-## Demo URL
-http://localhost:3000
-
-## License Testing Commands
-```bash
-# Build all packages
-pnpm build
-
-# Run tests
-cd packages/editor-core && pnpm test
-
-# Start demo
-cd apps/demo && pnpm dev
-```
-
-## Console Warnings
-When using pro/premium plugins without proper license, warnings appear:
-```
-Plugin 'table' requires 'pro' tier but current tier is 'free'
-Plugin 'aiAssistant' requires 'premium' tier but current tier is 'free'
-```
+| Layer | Protection |
+|-------|-----------|
+| **Private registry** | `@inkstream/pro-plugins` is not on public npm; install requires an authenticated token |
+| **Server validation** | Tier is determined server-side; client key format check is UX only |
+| **`guardPlugin()`** | All pro plugin methods are no-ops unless a server-validated tier is passed |
+| **Lazy loading** | Pro plugin code is not downloaded until the server confirms the tier |
+| **Secure by default** | No `validationEndpoint` → always free tier |
