@@ -1,6 +1,6 @@
 {
   "name": "@inkstream/react-editor",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,9 @@
     "dist"
   ],
   "devDependencies": {
+    "@inkstream/editor-core": "workspace:*",
     "@inkstream/eslint-config": "workspace:*",
+    "@inkstream/link-bubble": "workspace:*",
     "@types/node": "^20.11.5",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
@@ -25,13 +27,12 @@
     "tsup": "^8.5.1",
     "typescript": "^5.3.3"
   },
-  "dependencies": {
-    "@inkstream/editor-core": "^0.1.1",
-    "@inkstream/link-bubble": "^0.1.1"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "@inkstream/editor-core": "^0.1.3",
+    "@inkstream/link-bubble": "^0.1.3"
   },
   "repository": {
     "type": "git",
