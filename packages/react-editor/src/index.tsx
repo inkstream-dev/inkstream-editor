@@ -12,6 +12,12 @@ import { ImageNodeView } from './ImageNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
 import { createRoot } from 'react-dom/client';
 
+// Stable module-level defaults to prevent new object/array references on
+// every render, which would cause useEffect to re-run infinitely.
+const DEFAULT_PLUGINS = Object.values(availablePlugins);
+const DEFAULT_PLUGIN_OPTIONS: { [key: string]: any } = {};
+const DEFAULT_TOOLBAR_LAYOUT: string[] = [];
+
 interface RichTextEditorProps {
   initialContent: string;
   plugins?: Plugin[];  // Now accepts Plugin instances instead of string IDs
@@ -35,9 +41,9 @@ interface RichTextEditorProps {
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
   initialContent, 
-  plugins = Object.values(availablePlugins),  // Default to all available plugins
-  pluginOptions = {}, 
-  toolbarLayout = [],
+  plugins = DEFAULT_PLUGINS,
+  pluginOptions = DEFAULT_PLUGIN_OPTIONS,
+  toolbarLayout = DEFAULT_TOOLBAR_LAYOUT,
   licenseKey,
   licenseValidationEndpoint,
   onLicenseError,
