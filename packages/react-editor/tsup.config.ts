@@ -19,9 +19,10 @@ export default defineConfig({
 
   sourcemap: true,
 
-  // Do NOT bundle these — consumers bring their own copies, and ProseMirror
-  // in particular relies on class identity so there must be exactly one
-  // instance at runtime.
+  // Do NOT bundle these. react/react-dom are peerDeps (provided by consumers).
+  // @inkstream/* packages are regular dependencies (auto-installed) but kept
+  // external so each ships as a standalone module — pnpm deduplication then
+  // ensures a single shared instance of ProseMirror at runtime.
   external: [
     'react',
     'react-dom',
