@@ -7,7 +7,6 @@ import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
 import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream/editor-core';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
-import './editor.css';
 import { ImageNodeView } from './ImageNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
 import { createRoot } from 'react-dom/client';

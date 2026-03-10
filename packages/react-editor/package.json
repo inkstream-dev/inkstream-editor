@@ -45,7 +45,8 @@
       "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./dist/editor.css": "./dist/editor.css",
     "./package.json": "./package.json"
   },
-  "sideEffects": false
+  "sideEffects": ["./dist/editor.css"]
 }
