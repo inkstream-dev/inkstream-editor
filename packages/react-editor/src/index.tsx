@@ -147,10 +147,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const { pluginManager, schema, proseMirrorPlugins } = pluginState;
 
-  // Keep a ref so handleDispatchTransaction never needs onChange in its dep array.
-  // This prevents the chain: onChange change → new handleDispatchTransaction → useEffect re-run → editor destroyed.
+  // Keep refs so callbacks are never stale without appearing in effect dep arrays.
+  // This prevents: prop change → new callback identity → effect re-run → editor destroyed.
   const onChangeRef = useRef(onChange);
   useEffect(() => { onChangeRef.current = onChange; });
+  const onEditorReadyRef = useRef(onEditorReady);
+  useEffect(() => { onEditorReadyRef.current = onEditorReady; });
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then reflecting that change in React's state.
@@ -168,6 +170,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, []); // stable — reads onChange via ref, not closure
 
+  // Effect 1 — EditorView lifecycle.
+  // Creates and destroys the ProseMirror editor instance.
+  // Depends ONLY on what actually requires a new EditorView:
+  //   schema, plugins, initial content, and the stable dispatch function.
+  // toolbarLayout / pluginOptions changes do NOT belong here and will NOT
+  // cause the editor to be torn down and recreated.
   useEffect(() => {
     if (!editorRef.current) {
       return;
@@ -227,18 +235,31 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     editorViewRef.current = view;
     setCurrentEditorState(state);
-    onEditorReady?.(view);
+    onEditorReadyRef.current?.(view);
 
-    // Get all available toolbar items
+    // Destroy the EditorView when schema/plugins change or component unmounts.
+    return () => {
+      if (editorViewRef.current) {
+        editorViewRef.current.destroy();
+        editorViewRef.current = null;
+        setCurrentEditorState(null);
+      }
+    };
+  }, [schema, proseMirrorPlugins, initialContent, handleDispatchTransaction]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Effect 2 — Toolbar construction.
+  // Builds toolbar items and applies toolbarLayout ordering.
+  // This effect runs independently of the EditorView — changing toolbarLayout
+  // or pluginOptions only re-runs this effect, never recreating the editor.
+  useEffect(() => {
     const allToolbarItems = pluginManager.getToolbarItems(schema, pluginOptions);
     allToolbarItems.set('link', getLinkBubbleToolbarItem(schema));
     let orderedToolbarItems: ToolbarItemOrSeparator[] = [];
 
     if (toolbarLayout && toolbarLayout.length > 0) {
-      // If a layout is provided, use it to order the items
       for (const itemId of toolbarLayout) {
         if (itemId === '|') {
-          orderedToolbarItems.push(itemId); // Add separator directly
+          orderedToolbarItems.push(itemId);
         } else {
           const item = allToolbarItems.get(itemId);
           if (item) {
@@ -247,23 +268,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
       }
     } else {
-      // Otherwise, use the default order (values from the map)
       orderedToolbarItems = Array.from(allToolbarItems.values());
     }
 
-    // console.log("Toolbar items collected:", orderedToolbarItems);
-    // console.log("Toolbar items collected:", orderedToolbarItems);
     setToolbarItems(orderedToolbarItems);
-
-    // Cleanup function for EditorView when component unmounts or plugins change
-    return () => {
-      if (editorViewRef.current) {
-        editorViewRef.current.destroy();
-        editorViewRef.current = null;
-        setCurrentEditorState(null);
-      }
-    };
-  }, [schema, proseMirrorPlugins, pluginManager, validatedPlugins, plugins, validatedTier, initialContent, handleDispatchTransaction, pluginOptions, toolbarLayout]); // Reinitialize when plugins or validated tier changes
+  }, [pluginManager, schema, pluginOptions, toolbarLayout]);
 
   return (
     <div className={wrapperClass}>
