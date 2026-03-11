@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { EditorView } from '@inkstream/pm/view';
 import { ToolbarItem } from '@inkstream/editor-core';

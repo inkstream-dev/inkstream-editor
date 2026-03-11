@@ -1,6 +1,11 @@
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { EditorState } from '@inkstream/pm/state';
+
+// useLayoutEffect is not safe in SSR (throws a React warning about effects not
+// encoding into the server renderer's output). Use a no-op on the server.
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type Subscriber = () => void;
 type Unsubscribe = () => void;
@@ -58,7 +63,7 @@ export function useEditorState<T>(
   // Store selector in a ref so subscribe/getSnapshot stay stable even when
   // the caller passes a new function reference on each render.
   const selectorRef = useRef(selector);
-  useLayoutEffect(() => { selectorRef.current = selector; });
+  useIsomorphicLayoutEffect(() => { selectorRef.current = selector; });
 
   const subscribe = useCallback(
     (callback: Subscriber): Unsubscribe =>

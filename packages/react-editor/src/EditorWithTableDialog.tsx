@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { DOMSerializer } from '@inkstream/pm/model';
 import { EditorView } from '@inkstream/pm/view';

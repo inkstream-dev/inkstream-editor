@@ -36,11 +36,18 @@ const validationCache = new Map<string, { tier: LicenseTier; expiresAt: number }
  * - Without validationEndpoint → always returns 'free'.
  * - With validationEndpoint → trusts only the server response, never the key format.
  * - Network failure → fails secure (returns 'free'), never fails open.
+ * - SSR / server environment → returns 'free' immediately (no browser APIs needed).
  */
 export function useLicenseValidation({
   licenseKey,
   validationEndpoint,
 }: UseLicenseValidationOptions): UseLicenseValidationResult {
+  // SSR guard — this hook must not attempt DOM or fetch operations on the server.
+  // The editor itself is client-only, so this is a safety net for edge cases
+  // where the hook is evaluated before hydration.
+  if (typeof window === 'undefined') {
+    return { tier: 'free', isValidating: false, error: null };
+  }
   const [tier, setTier] = useState<LicenseTier>('free');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);

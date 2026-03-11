@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Node } from '@inkstream/pm/model';
 import { EditorView } from '@inkstream/pm/view';

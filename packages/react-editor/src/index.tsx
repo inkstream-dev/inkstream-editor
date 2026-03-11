@@ -193,6 +193,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const store = new EditorStateStore();
     storeRef.current = store;
 
+    // SSR guard — this effect only runs on the client, but be explicit.
+    if (typeof window === 'undefined') return;
+
     // Parse initial content from HTML string
     let doc;
     try {
