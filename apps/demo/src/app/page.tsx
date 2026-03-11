@@ -169,6 +169,7 @@ export default function Home() {
             onChange={setLiveHtml}
             pluginOptions={pluginOptions}
             toolbarLayout={toolbarLayout}
+            showThemeToggle
           />
         </div>
 

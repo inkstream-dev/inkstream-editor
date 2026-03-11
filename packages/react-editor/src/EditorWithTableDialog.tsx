@@ -24,6 +24,12 @@ export interface EditorWithTableDialogProps {
   onLicenseError?: (plugin: any, tier: string) => void;
   /** Called with the current HTML string whenever the document changes. */
   onChange?: (html: string) => void;
+  /** Controls the colour scheme: 'auto' follows OS, 'light' forces light, 'dark' forces dark. */
+  theme?: import('./index').ThemeMode;
+  /** When true, adds a theme-toggle button to the right end of the toolbar. */
+  showThemeToggle?: boolean;
+  /** Called whenever the theme changes. */
+  onThemeChange?: (theme: import('./index').ThemeMode) => void;
 }
 
 export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDialogProps>(

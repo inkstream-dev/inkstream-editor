@@ -2,15 +2,116 @@ import React, { useState, useRef, useEffect } from 'react';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { ToolbarItem } from '@inkstream/editor-core';
+import type { ThemeMode } from './index';
+
+// ── Theme Toggle ──────────────────────────────────────────────────────────────
+
+const SunIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+);
+
+const MonitorIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+    <line x1="8" y1="21" x2="16" y2="21"/>
+    <line x1="12" y1="17" x2="12" y2="21"/>
+  </svg>
+);
+
+const THEME_OPTIONS: { value: ThemeMode; label: string; Icon: React.FC }[] = [
+  { value: 'auto',  label: 'Auto (system)', Icon: MonitorIcon },
+  { value: 'light', label: 'Light',         Icon: SunIcon },
+  { value: 'dark',  label: 'Dark',          Icon: MoonIcon },
+];
+
+interface ThemeToggleProps {
+  currentTheme: ThemeMode;
+  onChange: (theme: ThemeMode) => void;
+}
+
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ currentTheme, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [open]);
+
+  const current = THEME_OPTIONS.find(o => o.value === currentTheme)!;
+
+  return (
+    <div ref={containerRef} className="inkstream-theme-toggle">
+      <button
+        className={`inkstream-toolbar-button inkstream-theme-toggle-btn${open ? ' active' : ''}`}
+        title={`Theme: ${current.label}`}
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <current.Icon />
+      </button>
+      {open && (
+        <div className="inkstream-theme-dropdown" role="listbox" aria-label="Select theme">
+          {THEME_OPTIONS.map(({ value, label, Icon }) => (
+            <button
+              key={value}
+              role="option"
+              aria-selected={currentTheme === value}
+              className={`inkstream-theme-option${currentTheme === value ? ' active' : ''}`}
+              onClick={() => { onChange(value); setOpen(false); }}
+            >
+              <Icon />
+              <span>{label}</span>
+              {currentTheme === value && (
+                <svg className="inkstream-theme-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Toolbar ───────────────────────────────────────────────────────────────────
 
 interface ToolbarProps {
   editorState: EditorState | null;
   editorDispatch: ((tr: Transaction) => void) | null;
   editorView: EditorView | null;
   toolbarItems: (ToolbarItem | string)[];
+  /** When provided, renders a ThemeToggle button at the right end of the toolbar. */
+  themeMode?: ThemeMode;
+  onThemeChange?: (theme: ThemeMode) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems, themeMode, onThemeChange }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openNested, setOpenNested] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -319,6 +420,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
   return (
     <div className="inkstream-toolbar">
       {toolbarItems.map((item, index) => renderToolbarItem(item, index))}
+      {themeMode !== undefined && onThemeChange && (
+        <ThemeToggle currentTheme={themeMode} onChange={onThemeChange} />
+      )}
     </div>
   );
 };

@@ -18,6 +18,9 @@ const DEFAULT_PLUGINS = Object.values(availablePlugins);
 const DEFAULT_PLUGIN_OPTIONS: { [key: string]: any } = {};
 const DEFAULT_TOOLBAR_LAYOUT: string[] = [];
 
+/** Controls which colour scheme the editor uses. */
+export type ThemeMode = 'auto' | 'light' | 'dark';
+
 interface RichTextEditorProps {
   initialContent: string;
   plugins?: Plugin[];  // Now accepts Plugin instances instead of string IDs
@@ -37,6 +40,21 @@ interface RichTextEditorProps {
    * Receives the current content serialized as an HTML string.
    */
   onChange?: (html: string) => void;
+  /**
+   * Controls the colour scheme: 'auto' follows the OS, 'light' forces light,
+   * 'dark' forces dark. Defaults to 'auto'.
+   *
+   * Pass this prop to control theme from outside. Omit it (with showThemeToggle)
+   * to let users switch the theme through the built-in toolbar toggle.
+   */
+  theme?: ThemeMode;
+  /**
+   * When true, adds a theme-toggle button to the right end of the toolbar so
+   * users can switch between Auto / Light / Dark without any extra wiring.
+   */
+  showThemeToggle?: boolean;
+  /** Called whenever the theme changes (both via the built-in toggle and via prop). */
+  onThemeChange?: (theme: ThemeMode) => void;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
@@ -49,13 +67,35 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onLicenseError,
   onEditorReady,
   onChange,
+  theme,
+  showThemeToggle = false,
+  onThemeChange,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
   const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
   type ToolbarItemOrSeparator = ToolbarItem | string;
 
-  const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]); // State for toolbar items
+  const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]);
+
+  // Theme state — uncontrolled when `theme` prop is not provided; syncs when it is.
+  const [internalTheme, setInternalTheme] = useState<ThemeMode>(theme ?? 'auto');
+
+  // Sync controlled theme prop → internal state
+  useEffect(() => {
+    if (theme !== undefined) setInternalTheme(theme);
+  }, [theme]);
+
+  const handleThemeChange = useCallback((next: ThemeMode) => {
+    setInternalTheme(next);
+    onThemeChange?.(next);
+  }, [onThemeChange]);
+
+  const wrapperClass = [
+    'inkstream-editor-wrapper',
+    internalTheme === 'dark' ? 'inkstream-dark' : '',
+    internalTheme === 'light' ? 'inkstream-light' : '',
+  ].filter(Boolean).join(' ');
   
   // Server-validated tier. Always 'free' until the validation endpoint confirms otherwise.
   const { tier: validatedTier } = useLicenseValidation({ licenseKey, validationEndpoint: licenseValidationEndpoint });
@@ -226,12 +266,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [schema, proseMirrorPlugins, pluginManager, validatedPlugins, plugins, validatedTier, initialContent, handleDispatchTransaction, pluginOptions, toolbarLayout]); // Reinitialize when plugins or validated tier changes
 
   return (
-    <div className="inkstream-editor-wrapper">
+    <div className={wrapperClass}>
       <Toolbar
         editorState={currentEditorState}
         editorDispatch={editorViewRef.current ? editorViewRef.current.dispatch : null}
         editorView={editorViewRef.current}
         toolbarItems={toolbarItems}
+        themeMode={showThemeToggle ? internalTheme : undefined}
+        onThemeChange={showThemeToggle ? handleThemeChange : undefined}
       />
       <div ref={editorRef} className="inkstream-editor" />
     </div>

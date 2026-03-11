@@ -35,6 +35,74 @@ No additional installs required. ProseMirror packages and `@inkstream/editor-cor
 | `onLicenseError` | `(plugin, tier) => void` | Called when a plugin's tier requirement is not met |
 | `onChange` | `(html: string) => void` | Fires on every content change with the serialized HTML |
 | `onEditorReady` | `(view: EditorView) => void` | Called once with the EditorView instance after mount |
+| `theme` | `'auto' \| 'light' \| 'dark'` | Controls the colour scheme. `'auto'` follows the OS (default). Pass this prop to control theme externally. |
+| `showThemeToggle` | `boolean` | When `true`, adds a theme-switcher button to the right end of the toolbar. |
+| `onThemeChange` | `(theme: ThemeMode) => void` | Called whenever the theme changes (via the built-in toggle or `theme` prop change). |
+
+## Theming
+
+### Automatic (OS-aware) — default
+
+The editor automatically switches between light and dark based on the user's OS setting. No extra code needed.
+
+```tsx
+<RichTextEditor initialContent="<p>Hello</p>" />
+```
+
+### Force a theme (controlled)
+
+```tsx
+import { RichTextEditor } from '@inkstream/react-editor';
+import type { ThemeMode } from '@inkstream/react-editor';
+
+// Always dark
+<RichTextEditor theme="dark" initialContent="<p>Hello</p>" />
+
+// Always light
+<RichTextEditor theme="light" initialContent="<p>Hello</p>" />
+
+// Follows OS (same as default)
+<RichTextEditor theme="auto" initialContent="<p>Hello</p>" />
+```
+
+### Built-in theme toggle (recommended)
+
+Add `showThemeToggle` to render a 🖥/☀/🌙 button at the right end of the toolbar. The user can switch between Auto, Light, and Dark without any extra wiring.
+
+```tsx
+<RichTextEditor
+  initialContent="<p>Hello</p>"
+  showThemeToggle
+/>
+```
+
+### Controlled toggle (sync with external state)
+
+```tsx
+const [theme, setTheme] = useState<ThemeMode>('auto');
+
+<RichTextEditor
+  initialContent="<p>Hello</p>"
+  theme={theme}
+  showThemeToggle
+  onThemeChange={setTheme}
+/>
+```
+
+### Custom brand colours (CSS token override)
+
+All visual values are CSS custom properties scoped to `.inkstream-editor-wrapper`. Override them per-instance without touching the package:
+
+```css
+/* Wherever your component styles live */
+.my-app .inkstream-editor-wrapper {
+  --ink-accent: #7c3aed;          /* purple accent instead of indigo */
+  --ink-radius-md: 4px;           /* flatter corners */
+  --ink-bg: #fafaf9;              /* warm white background */
+}
+```
+
+Available tokens: `--ink-bg`, `--ink-surface`, `--ink-surface-hover`, `--ink-surface-active`, `--ink-border`, `--ink-border-muted`, `--ink-border-accent`, `--ink-text`, `--ink-text-muted`, `--ink-text-subtle`, `--ink-accent`, `--ink-accent-hover`, `--ink-accent-bg`, `--ink-accent-border`, `--ink-danger`, `--ink-shadow-sm`, `--ink-shadow-md`, `--ink-radius-sm`, `--ink-radius-md`.
 
 ## `EditorWithTableDialog`
 
