@@ -10,6 +10,7 @@ import { Toolbar } from './Toolbar';
 import './editor.css';
 import { ImageNodeView } from './ImageNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
+import { EditorStateStore } from './useEditorState';
 import { createRoot } from 'react-dom/client';
 
 // Stable module-level defaults to prevent new object/array references on
@@ -72,8 +73,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onThemeChange,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const editorViewRef = useRef<EditorView | null>(null); // Use ref for EditorView instance
-  const [currentEditorState, setCurrentEditorState] = useState<EditorState | null>(null); // State for React to react to
+  const editorViewRef = useRef<EditorView | null>(null);
+  // Per-transaction notification store — toolbar buttons subscribe to this
+  // instead of receiving editorState as a React prop on every keystroke.
+  const storeRef = useRef<EditorStateStore | null>(null);
+  // React state for the EditorView instance — triggers re-render once on mount/unmount
+  // so that the Toolbar receives a non-null editorView prop after initialization.
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
   type ToolbarItemOrSeparator = ToolbarItem | string;
 
   const [toolbarItems, setToolbarItems] = useState<ToolbarItemOrSeparator[]>([]);
@@ -155,12 +161,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   useEffect(() => { onEditorReadyRef.current = onEditorReady; });
 
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
-  // and then reflecting that change in React's state.
+  // and then notifying the store so subscribed toolbar buttons can re-render independently.
   const handleDispatchTransaction = useCallback((transaction: Transaction) => {
     if (editorViewRef.current) {
       const newState = editorViewRef.current.state.apply(transaction);
       editorViewRef.current.updateState(newState);
-      setCurrentEditorState(newState);
+      // Notify all subscribers (toolbar buttons) — each decides independently
+      // whether to re-render based on their selector's return value.
+      storeRef.current?.update(newState);
       if (onChangeRef.current && transaction.docChanged) {
         const div = document.createElement('div');
         const fragment = DOMSerializer.fromSchema(newState.schema).serializeFragment(newState.doc.content);
@@ -168,7 +176,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onChangeRef.current(div.innerHTML);
       }
     }
-  }, []); // stable — reads onChange via ref, not closure
+  }, []); // stable — reads everything via refs, not closures
 
   // Effect 1 — EditorView lifecycle.
   // Creates and destroys the ProseMirror editor instance.
@@ -180,6 +188,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (!editorRef.current) {
       return;
     }
+
+    // Create a fresh store for this EditorView lifetime.
+    const store = new EditorStateStore();
+    storeRef.current = store;
 
     // Parse initial content from HTML string
     let doc;
@@ -234,7 +246,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     });
 
     editorViewRef.current = view;
-    setCurrentEditorState(state);
+    // Seed the store with the initial state so buttons render correctly
+    // before the first transaction fires.
+    store.update(state);
+    // Trigger one React re-render so Toolbar receives editorView prop.
+    setEditorView(view);
     onEditorReadyRef.current?.(view);
 
     // Destroy the EditorView when schema/plugins change or component unmounts.
@@ -242,7 +258,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       if (editorViewRef.current) {
         editorViewRef.current.destroy();
         editorViewRef.current = null;
-        setCurrentEditorState(null);
+        storeRef.current = null;
+        setEditorView(null);
       }
     };
   }, [schema, proseMirrorPlugins, initialContent, handleDispatchTransaction]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -277,9 +294,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className={wrapperClass}>
       <Toolbar
-        editorState={currentEditorState}
-        editorDispatch={editorViewRef.current ? editorViewRef.current.dispatch : null}
-        editorView={editorViewRef.current}
+        store={storeRef.current}
+        editorView={editorView}
         toolbarItems={toolbarItems}
         themeMode={showThemeToggle ? internalTheme : undefined}
         onThemeChange={showThemeToggle ? handleThemeChange : undefined}
@@ -295,3 +311,4 @@ export type { } from './TablePropertiesDialog';
 export { useLazyPlugins } from './useLazyPlugins';
 export { useLicenseValidation } from './useLicenseValidation';
 export type { UseLicenseValidationOptions, UseLicenseValidationResult } from './useLicenseValidation';
+export { useEditorState, EditorStateStore } from './useEditorState';

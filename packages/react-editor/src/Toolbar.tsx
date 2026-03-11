@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { EditorState, Transaction } from '@inkstream/pm/state';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { EditorView } from '@inkstream/pm/view';
 import { ToolbarItem } from '@inkstream/editor-core';
+import { EditorStateStore, useEditorState } from './useEditorState';
 import type { ThemeMode } from './index';
 
 // ── Theme Toggle ──────────────────────────────────────────────────────────────
@@ -102,8 +102,9 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ currentTheme, onChange }) => 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 
 interface ToolbarProps {
-  editorState: EditorState | null;
-  editorDispatch: ((tr: Transaction) => void) | null;
+  /** Per-transaction notification store — replaces passing editorState as a prop. */
+  store: EditorStateStore | null;
+  /** The current EditorView instance (null before the editor mounts). */
   editorView: EditorView | null;
   toolbarItems: (ToolbarItem | string)[];
   /** When provided, renders a ThemeToggle button at the right end of the toolbar. */
@@ -111,7 +112,7 @@ interface ToolbarProps {
   onThemeChange?: (theme: ThemeMode) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, editorView, toolbarItems, themeMode, onThemeChange }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ store, editorView, toolbarItems, themeMode, onThemeChange }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openNested, setOpenNested] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
@@ -159,13 +160,139 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     };
   }, []);
 
-  const executeCommand = (command: ToolbarItem['command']) => {
-    if (editorState && editorDispatch && editorView && command) {
+  const executeCommand = useCallback((command: ToolbarItem['command']) => {
+    if (editorView && command) {
       editorView.focus();
-      command(editorState, editorDispatch, editorView);
-      setOpenDropdown(null); // Close dropdown after command
+      // Always read current state directly from the view — no stale closure risk.
+      command(editorView.state, editorView.dispatch, editorView);
+      setOpenDropdown(null);
     }
+  }, [editorView]);
+
+  // ── Per-button components ───────────────────────────────────────────────────
+  // Each component subscribes to the store independently via useEditorState.
+  // They re-render ONLY when their own selector value changes, not on every
+  // keystroke like the old "pass editorState as prop" approach.
+
+  interface LeafButtonProps {
+    item: ToolbarItem;
+    depth: number;
+  }
+
+  const LeafButton: React.FC<LeafButtonProps> = ({ item, depth }) => {
+    const isActive  = useEditorState(store, s => !!item.isActive?.(s));
+    const isEnabled = useEditorState(store, s => item.isEnabled ? item.isEnabled(s) : true);
+    const isVisible = useEditorState(store, s => item.isVisible ? item.isVisible(s) : true);
+
+    if (isVisible === false) return null;
+
+    return (
+      <button
+        key={item.id}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (item.onClick) {
+            item.onClick();
+            setOpenDropdown(null);
+          } else if (item.command) {
+            executeCommand(item.command);
+          }
+        }}
+        className={`inkstream-toolbar-button ${isActive ? 'active' : ''} ${depth > 0 && item.label ? 'inkstream-toolbar-menu-item' : ''}`}
+        disabled={!editorView || (!item.command && !item.onClick) || isEnabled === false}
+        title={item.tooltip}
+      >
+        {depth > 0 && item.label ? (
+          <span className="inkstream-toolbar-menu-item-inner">
+            {item.iconHtml
+              ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+              : <span style={item.iconStyle}>{item.icon}</span>
+            }
+            <span className="inkstream-toolbar-menu-label">{item.label}</span>
+          </span>
+        ) : (
+          <span style={item.iconStyle}>
+            {item.iconHtml
+              ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+              : item.icon
+            }
+          </span>
+        )}
+      </button>
+    );
   };
+
+  interface DropdownTriggerProps {
+    item: ToolbarItem;
+    depth: number;
+    isOpen: boolean;
+    onToggle: (e: React.MouseEvent) => void;
+  }
+
+  const DropdownTrigger: React.FC<DropdownTriggerProps> = ({ item, depth, isOpen, onToggle }) => {
+    const isVisible   = useEditorState(store, s => item.isVisible ? item.isVisible(s) : true);
+    const activeColor = useEditorState(store, s => item.getActiveColor ? item.getActiveColor(s) : null);
+
+    if (isVisible === false) return null;
+
+    if (depth > 0) {
+      // Nested dropdown trigger (submenu inside a bubble menu)
+      return (
+        <button
+          className={`inkstream-toolbar-button ${isOpen ? 'active' : ''} ${item.label ? 'inkstream-toolbar-menu-item' : ''}`}
+          title={item.tooltip}
+          onMouseEnter={() => setOpenNested(item.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setOpenNested(isOpen ? null : item.id);
+          }}
+        >
+          {item.label ? (
+            <span className="inkstream-toolbar-menu-item-inner">
+              {item.iconHtml
+                ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                : <span style={item.iconStyle}>{item.icon}</span>
+              }
+              <span className="inkstream-toolbar-menu-label">{item.label}</span>
+            </span>
+          ) : (
+            <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+              {item.iconHtml
+                ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+                : <span style={item.iconStyle}>{item.icon}</span>
+              }
+              {activeColor && (
+                <span className="inkstream-color-indicator" style={{ background: activeColor }} />
+              )}
+            </span>
+          )}
+        </button>
+      );
+    }
+
+    // Top-level dropdown trigger
+    return (
+      <button
+        ref={(ref) => { if (ref) buttonRefs.current.set(item.id, ref); }}
+        className={`inkstream-toolbar-button ${isOpen ? 'active' : ''}`}
+        title={item.tooltip}
+        onClick={onToggle}
+      >
+        <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+          {item.iconHtml
+            ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
+            : <span style={item.iconStyle}>{item.icon}</span>
+          }
+          {activeColor && (
+            <span className="inkstream-color-indicator" style={{ background: activeColor }} />
+          )}
+        </span>
+      </button>
+    );
+  };
+
+  // ── Rendering helpers ───────────────────────────────────────────────────────
 
   /**
    * Renders a list of dropdown children.
@@ -217,18 +344,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
     );
   };
 
-  const renderToolbarItem = (item: ToolbarItem | string, index: number, depth = 0) => {
+  const renderToolbarItem = (item: ToolbarItem | string, index: number, depth = 0): React.ReactNode => {
     if (typeof item === 'string' && item === '|') {
       return <div key={`separator-${index}`} className="inkstream-toolbar-separator" />;
     } else if (typeof item === 'object') {
-      // Separator ToolbarItem convention (id contains 'sep' and no command/children)
+      // Separator ToolbarItem convention (icon === '|')
       if (item.icon === '|') {
-        // Use horizontal divider styling when inside a dropdown (depth > 0)
         return <div key={item.id ?? `sep-${index}`} className={depth > 0 ? 'inkstream-dropdown-divider' : 'inkstream-toolbar-separator'} />;
-      }
-      // Check visibility
-      if (item.isVisible && editorState && !item.isVisible(editorState)) {
-        return null;
       }
 
       if (item.type === 'label') {
@@ -247,66 +369,40 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
             className="inkstream-toolbar-color-picker"
             title={item.tooltip}
             onChange={(e) => {
-              if (item.onColorChange && editorState && editorDispatch) {
+              if (item.onColorChange && editorView) {
                 const command = item.onColorChange(e.target.value);
-                command(editorState, editorDispatch);
+                command(editorView.state, editorView.dispatch);
               }
             }}
           />
         );
-      } else if (item.type === 'dropdown' && (item.children || item.getChildren)) {
-        // Resolve children: prefer dynamic getChildren over static children
-        const resolvedChildren = item.getChildren && editorState
-          ? item.getChildren(editorState)
-          : (item.children ?? []);
+      }
 
+      if (item.type === 'dropdown' && (item.children || item.getChildren)) {
         const isOpen = openDropdown === item.id || openNested === item.id;
         const isNested = depth > 0;
 
-        // Active color for the color indicator bar on the button
-        const activeColor = item.getActiveColor && editorState
-          ? item.getActiveColor(editorState)
-          : null;
+        // Resolve children using current editorView state (dropdown is only
+        // rendered when open, so editorView.state is always fresh at that point).
+        const resolvedChildren = item.getChildren && editorView
+          ? item.getChildren(editorView.state)
+          : (item.children ?? []);
 
         if (isNested) {
-          // Nested dropdown (submenu inside bubble menu)
           return (
-            <div 
-              key={item.id}
-              className="inkstream-toolbar-dropdown"
-            >
-              <button
-                className={`inkstream-toolbar-button ${isOpen ? 'active' : ''} ${item.label ? 'inkstream-toolbar-menu-item' : ''}`}
-                title={item.tooltip}
-                onMouseEnter={() => setOpenNested(item.id)}
-                onClick={(e) => {
+            <div key={item.id} className="inkstream-toolbar-dropdown">
+              <DropdownTrigger
+                item={item}
+                depth={depth}
+                isOpen={isOpen}
+                onToggle={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   setOpenNested(isOpen ? null : item.id);
                 }}
-              >
-                {item.label ? (
-                  <span className="inkstream-toolbar-menu-item-inner">
-                    {item.iconHtml
-                      ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                      : <span style={item.iconStyle}>{item.icon}</span>
-                    }
-                    <span className="inkstream-toolbar-menu-label">{item.label}</span>
-                  </span>
-                ) : (
-                  <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {item.iconHtml
-                      ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                      : <span style={item.iconStyle}>{item.icon}</span>
-                    }
-                    {activeColor && (
-                      <span className="inkstream-color-indicator" style={{ background: activeColor }} />
-                    )}
-                  </span>
-                )}
-              </button>
+              />
               {isOpen && (
-                <div 
+                <div
                   className="inkstream-toolbar-dropdown-content nested"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -317,49 +413,30 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
           );
         }
 
-        // Top-level dropdown (main bubble menu)
+        // Top-level dropdown
         return (
           <React.Fragment key={item.id}>
-            <button
-              ref={(ref) => {
-                if (ref) buttonRefs.current.set(item.id, ref);
-              }}
-              className={`inkstream-toolbar-button ${isOpen ? 'active' : ''}`}
-              title={item.tooltip}
-              onClick={(e) => {
+            <DropdownTrigger
+              item={item}
+              depth={depth}
+              isOpen={isOpen}
+              onToggle={(e) => {
                 e.stopPropagation();
                 if (item.onClick) {
                   item.onClick();
                   setOpenDropdown(null);
+                } else if (isOpen) {
+                  setOpenDropdown(null);
                 } else {
-                  if (isOpen) {
-                    setOpenDropdown(null);
-                  } else {
-                    setOpenDropdown(item.id);
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setDropdownPosition({
-                      top: rect.bottom + 5,
-                      left: rect.left
-                    });
-                  }
+                  setOpenDropdown(item.id);
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  setDropdownPosition({ top: rect.bottom + 5, left: rect.left });
                 }
               }}
-            >
-              <span style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-                {item.iconHtml
-                  ? <span style={item.iconStyle} dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                  : <span style={item.iconStyle}>{item.icon}</span>
-                }
-                {activeColor && (
-                  <span className="inkstream-color-indicator" style={{ background: activeColor }} />
-                )}
-              </span>
-            </button>
+            />
             {isOpen && (
-              <div 
-                ref={(ref) => {
-                  if (ref) dropdownRefs.current.set(item.id, ref);
-                }}
+              <div
+                ref={(ref) => { if (ref) dropdownRefs.current.set(item.id, ref); }}
                 className="inkstream-toolbar-bubble-menu"
                 style={{
                   position: 'fixed',
@@ -367,51 +444,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editorState, editorDispatch, e
                   left: dropdownPosition?.left || 0,
                   zIndex: 9999,
                 }}
-                onMouseLeave={() => {
-                  setOpenNested(null);
-                }}
+                onMouseLeave={() => setOpenNested(null)}
               >
                 {renderDropdownChildren(resolvedChildren, item.childrenLayout, depth + 1)}
               </div>
             )}
           </React.Fragment>
         );
-      } else {
-        return (
-          <button
-            key={item.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (item.onClick) {
-                item.onClick();
-                setOpenDropdown(null);
-              } else if (item.command) {
-                executeCommand(item.command);
-              }
-            }}
-            className={`inkstream-toolbar-button ${item.isActive && editorState && item.isActive(editorState) ? 'active' : ''} ${depth > 0 && item.label ? 'inkstream-toolbar-menu-item' : ''}`}
-            disabled={!editorState || !editorDispatch || !editorView || (!item.command && !item.onClick) || (item.isEnabled !== undefined && editorState ? !item.isEnabled(editorState) : false)}
-            title={item.tooltip}
-          >
-            {depth > 0 && item.label ? (
-              <span className="inkstream-toolbar-menu-item-inner">
-                {item.iconHtml
-                  ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                  : <span style={item.iconStyle}>{item.icon}</span>
-                }
-                <span className="inkstream-toolbar-menu-label">{item.label}</span>
-              </span>
-            ) : (
-              <span style={item.iconStyle}>
-                {item.iconHtml
-                  ? <span dangerouslySetInnerHTML={{ __html: item.iconHtml }} />
-                  : item.icon
-                }
-              </span>
-            )}
-          </button>
-        );
       }
+
+      // Regular leaf button — subscribes independently to the store.
+      return <LeafButton key={item.id} item={item} depth={depth} />;
     } else {
       return <div key={`separator-${index}`} className="inkstream-toolbar-separator" />;
     }
