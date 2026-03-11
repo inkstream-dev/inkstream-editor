@@ -1,5 +1,5 @@
-import { EditorState, Transaction } from 'prosemirror-state';
-import { MarkType, Schema } from 'prosemirror-model';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { MarkType, Schema } from '@inkstream/pm/model';
 
 export const applyFontFamily = (fontFamily: string) => {
   return (state: EditorState, dispatch?: (tr: Transaction) => void) => {

@@ -1,6 +1,6 @@
-import { EditorState, Transaction } from 'prosemirror-state';
-import { setBlockType, lift } from 'prosemirror-commands';
-import { findWrapping } from 'prosemirror-transform';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { setBlockType, lift } from '@inkstream/pm/commands';
+import { findWrapping } from '@inkstream/pm/transform';
 
 export function toggleBlockquote(state: EditorState, dispatch?: (tr: Transaction) => void) {
   const { schema, selection } = state;

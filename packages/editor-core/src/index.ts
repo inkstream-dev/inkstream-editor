@@ -1,10 +1,10 @@
-import { Schema } from 'prosemirror-model';
-import { EditorState, Transaction } from 'prosemirror-state';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap, toggleMark, splitBlock, chainCommands } from 'prosemirror-commands';
-import { splitListItem, liftListItem } from 'prosemirror-schema-list';
-import { history } from 'prosemirror-history';
-import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from 'prosemirror-inputrules';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { keymap } from '@inkstream/pm/keymap';
+import { baseKeymap, toggleMark, splitBlock, chainCommands } from '@inkstream/pm/commands';
+import { splitListItem, liftListItem } from '@inkstream/pm/schema-list';
+import { history } from '@inkstream/pm/history';
+import { inputRules, wrappingInputRule, textblockTypeInputRule, smartQuotes, emDash, ellipsis, InputRule } from '@inkstream/pm/inputrules';
 import { PluginManager, Plugin, ToolbarItem } from './plugins';
 
 

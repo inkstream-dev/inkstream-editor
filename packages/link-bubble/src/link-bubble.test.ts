@@ -15,8 +15,8 @@
  * require a browser environment and are covered by integration/E2E tests.
  */
 
-import { EditorState, Transaction } from 'prosemirror-state';
-import { Schema, Node, Mark } from 'prosemirror-model';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { Schema, Node, Mark } from '@inkstream/pm/model';
 import {
   removeLinkAtSelection,
   getLinkBubbleToolbarItem,

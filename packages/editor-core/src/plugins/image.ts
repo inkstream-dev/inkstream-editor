@@ -1,7 +1,7 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
+import { Schema } from '@inkstream/pm/model';
 import { ToolbarItem } from './index';
-import { EditorState } from 'prosemirror-state';
+import { EditorState } from '@inkstream/pm/state';
 
 // ---------------------------------------------------------------------------
 // SVG icon — landscape frame: rectangle + sun circle + mountain path

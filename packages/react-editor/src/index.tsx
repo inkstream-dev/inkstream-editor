@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { EditorView } from '@inkstream/pm/view';
+import { DOMParser, DOMSerializer, Schema } from '@inkstream/pm/model';
 import { inkstreamSchema, PluginManager, Plugin, availablePlugins, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream/editor-core';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';

@@ -1,5 +1,5 @@
-import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { EditorView } from '@inkstream/pm/view';
 import type { Plugin } from '@inkstream/editor-core';
 import {
   linkBubblePlugin,

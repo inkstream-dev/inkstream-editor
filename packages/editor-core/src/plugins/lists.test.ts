@@ -1,6 +1,6 @@
-import { EditorState } from 'prosemirror-state';
-import { sinkListItem, liftListItem, splitListItem } from 'prosemirror-schema-list';
-import { Node } from 'prosemirror-model';
+import { EditorState } from '@inkstream/pm/state';
+import { sinkListItem, liftListItem, splitListItem } from '@inkstream/pm/schema-list';
+import { Node } from '@inkstream/pm/model';
 import {
   listsPlugin,
   toggleBulletList,

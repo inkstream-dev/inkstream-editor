@@ -1,11 +1,11 @@
-import { Schema } from 'prosemirror-model';
+import { Schema } from '@inkstream/pm/model';
 import {
   EditorState,
   Transaction,
   TextSelection,
   Plugin as ProseMirrorPlugin,
-} from 'prosemirror-state';
-import { inputRules, InputRule } from 'prosemirror-inputrules';
+} from '@inkstream/pm/state';
+import { inputRules, InputRule } from '@inkstream/pm/inputrules';
 import { createPlugin } from './plugin-factory';
 import { ToolbarItem } from './index';
 

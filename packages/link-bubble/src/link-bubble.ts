@@ -1,6 +1,6 @@
-import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { Schema, Mark } from 'prosemirror-model';
+import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from '@inkstream/pm/state';
+import { EditorView } from '@inkstream/pm/view';
+import { Schema, Mark } from '@inkstream/pm/model';
 import { ToolbarItem } from '@inkstream/editor-core';
 
 // Module-level reference to the active bubble view (one editor instance at a time)

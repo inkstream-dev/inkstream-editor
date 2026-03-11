@@ -1,8 +1,8 @@
-import { Schema } from 'prosemirror-model';
+import { Schema } from '@inkstream/pm/model';
 import { createPlugin } from './plugin-factory';
-import { EditorState, Transaction } from 'prosemirror-state';
-import { keymap } from 'prosemirror-keymap';
-import { liftListItem, sinkListItem } from 'prosemirror-schema-list';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { keymap } from '@inkstream/pm/keymap';
+import { liftListItem, sinkListItem } from '@inkstream/pm/schema-list';
 import { ToolbarItem } from './index';
 
 // Maximum indent level for block nodes (prevents unbounded indentation)

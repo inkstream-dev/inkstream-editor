@@ -28,8 +28,8 @@ import {
   text,
   doc,
 } from '../test-utils';
-import { NodeSelection } from 'prosemirror-state';
-import { Schema, Node } from 'prosemirror-model';
+import { NodeSelection } from '@inkstream/pm/state';
+import { Schema, Node } from '@inkstream/pm/model';
 
 const schema = getTestSchema();
 const imageNodeType = schema.nodes.image;

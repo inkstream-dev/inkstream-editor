@@ -1,10 +1,10 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
-import { toggleMark } from 'prosemirror-commands';
-import { InputRule } from 'prosemirror-inputrules';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState } from '@inkstream/pm/state';
+import { toggleMark } from '@inkstream/pm/commands';
+import { InputRule } from '@inkstream/pm/inputrules';
 import { ToolbarItem } from './index';
-import { TextSelection } from 'prosemirror-state';
+import { TextSelection } from '@inkstream/pm/state';
 
 // ---------------------------------------------------------------------------
 // SVG icon — Bold B: vertical bar + two arcs (upper/lower bumps)

@@ -20,11 +20,10 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream/editor-core": "^0.1.1",
-    "prosemirror-model": "^1.19.0",
-    "prosemirror-state": "^1.4.0",
-    "prosemirror-keymap": "^1.2.2",
-    "prosemirror-commands": "^1.5.2"
+    "@inkstream/editor-core": "^0.1.1"
+  },
+  "peerDependencies": {
+    "@inkstream/pm": ">=0.1.0"
   },
   "repository": {
     "type": "git",

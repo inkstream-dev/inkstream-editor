@@ -2,6 +2,9 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
+    // Must come before the general @inkstream/* rule — subpath imports need
+    // to resolve to the correct src file inside the pm package.
+    '^@inkstream/pm/(.*)$': '<rootDir>/../pm/src/$1',
     '^@inkstream/(.*)$': '<rootDir>/../$1/src',
   },
   // Collect coverage from source files only (exclude dist, test-utils, test files)

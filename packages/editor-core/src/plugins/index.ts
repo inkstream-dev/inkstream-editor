@@ -1,7 +1,7 @@
-import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { InputRule } from 'prosemirror-inputrules';
+import { Schema } from '@inkstream/pm/model';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
+import { EditorView } from '@inkstream/pm/view';
+import { InputRule } from '@inkstream/pm/inputrules';
 import { bulletListPlugin, isBulletListActive } from './bullet-list';
 import { orderedListPlugin, isOrderedListActive } from './ordered-list';
 import { codePlugin } from './code';

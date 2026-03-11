@@ -112,41 +112,13 @@ importers:
         version: 5.9.3
 
   packages/editor-core:
-    dependencies:
-      prosemirror-commands:
-        specifier: 1.7.1
-        version: 1.7.1
-      prosemirror-history:
-        specifier: 1.5.0
-        version: 1.5.0
-      prosemirror-inputrules:
-        specifier: 1.5.1
-        version: 1.5.1
-      prosemirror-keymap:
-        specifier: 1.2.3
-        version: 1.2.3
-      prosemirror-model:
-        specifier: 1.25.4
-        version: 1.25.4
-      prosemirror-schema-list:
-        specifier: ^1.5.1
-        version: 1.5.1
-      prosemirror-state:
-        specifier: 1.4.4
-        version: 1.4.4
-      prosemirror-transform:
-        specifier: 1.10.5
-        version: 1.10.5
-      prosemirror-utils:
-        specifier: ^1.0.4
-        version: 1.2.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)
-      prosemirror-view:
-        specifier: 1.41.4
-        version: 1.41.4
     devDependencies:
       '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
@@ -192,18 +164,9 @@ importers:
       '@inkstream/editor-core':
         specifier: ^0.1.1
         version: link:../editor-core
-      prosemirror-commands:
-        specifier: 1.7.1
-        version: 1.7.1
-      prosemirror-keymap:
-        specifier: 1.2.3
-        version: 1.2.3
-      prosemirror-model:
-        specifier: 1.25.4
-        version: 1.25.4
-      prosemirror-state:
-        specifier: 1.4.4
-        version: 1.4.4
+      '@inkstream/pm':
+        specifier: '>=0.1.0'
+        version: link:../pm
     devDependencies:
       '@inkstream/eslint-config':
         specifier: workspace:*
@@ -219,16 +182,6 @@ importers:
         version: 5.9.3
 
   packages/heading:
-    dependencies:
-      prosemirror-commands:
-        specifier: 1.7.1
-        version: 1.7.1
-      prosemirror-model:
-        specifier: 1.25.4
-        version: 1.25.4
-      prosemirror-state:
-        specifier: 1.4.4
-        version: 1.4.4
     devDependencies:
       '@inkstream/editor-core':
         specifier: workspace:*
@@ -236,6 +189,9 @@ importers:
       '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
@@ -250,16 +206,6 @@ importers:
         version: 5.9.3
 
   packages/link-bubble:
-    dependencies:
-      prosemirror-model:
-        specifier: 1.25.4
-        version: 1.25.4
-      prosemirror-state:
-        specifier: 1.4.4
-        version: 1.4.4
-      prosemirror-view:
-        specifier: 1.41.4
-        version: 1.41.4
     devDependencies:
       '@inkstream/editor-core':
         specifier: workspace:*
@@ -267,6 +213,9 @@ importers:
       '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
@@ -289,6 +238,55 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/pm:
+    dependencies:
+      prosemirror-commands:
+        specifier: 1.7.1
+        version: 1.7.1
+      prosemirror-history:
+        specifier: 1.5.0
+        version: 1.5.0
+      prosemirror-inputrules:
+        specifier: 1.5.1
+        version: 1.5.1
+      prosemirror-keymap:
+        specifier: 1.2.3
+        version: 1.2.3
+      prosemirror-model:
+        specifier: 1.25.4
+        version: 1.25.4
+      prosemirror-schema-list:
+        specifier: ^1.5.1
+        version: 1.5.1
+      prosemirror-state:
+        specifier: 1.4.4
+        version: 1.4.4
+      prosemirror-transform:
+        specifier: 1.10.5
+        version: 1.10.5
+      prosemirror-utils:
+        specifier: ^1.0.4
+        version: 1.2.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)
+      prosemirror-view:
+        specifier: 1.41.4
+        version: 1.41.4
+    devDependencies:
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/react-editor:
     dependencies:
       '@inkstream/editor-core':
@@ -297,19 +295,13 @@ importers:
       '@inkstream/link-bubble':
         specifier: workspace:^
         version: link:../link-bubble
-      prosemirror-model:
-        specifier: 1.25.4
-        version: 1.25.4
-      prosemirror-state:
-        specifier: 1.4.4
-        version: 1.4.4
-      prosemirror-view:
-        specifier: 1.41.4
-        version: 1.41.4
     devDependencies:
       '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27

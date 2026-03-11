@@ -10,7 +10,7 @@ import {
   text,
   doc,
 } from '../test-utils';
-import { toggleMark } from 'prosemirror-commands';
+import { toggleMark } from '@inkstream/pm/commands';
 
 const schema = getTestSchema();
 const strongMark = schema.marks.strong;

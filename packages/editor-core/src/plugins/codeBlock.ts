@@ -1,9 +1,9 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { keymap } from 'prosemirror-keymap';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction, TextSelection } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { keymap } from '@inkstream/pm/keymap';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction, TextSelection } from '@inkstream/pm/state';
 import { ToolbarItem } from './index';
-import { exitCode, chainCommands, newlineInCode, setBlockType } from 'prosemirror-commands';
+import { exitCode, chainCommands, newlineInCode, setBlockType } from '@inkstream/pm/commands';
 
 // ---------------------------------------------------------------------------
 // SVG icon — </> symbol, stroke-based, scales cleanly with currentColor

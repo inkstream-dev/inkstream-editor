@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { DOMSerializer } from 'prosemirror-model';
-import { EditorView } from 'prosemirror-view';
+import { DOMSerializer } from '@inkstream/pm/model';
+import { EditorView } from '@inkstream/pm/view';
 import { RichTextEditor } from './index';
 import { TableInsertDialog } from './TableInsertDialog';
 import { TablePropertiesDialog } from './TablePropertiesDialog';

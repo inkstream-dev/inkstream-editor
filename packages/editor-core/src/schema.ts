@@ -1,4 +1,4 @@
-import { Schema, Mark } from 'prosemirror-model';
+import { Schema, Mark } from '@inkstream/pm/model';
 import { PluginManager } from './plugins';
 
 export const inkstreamSchema = (manager: PluginManager) => new Schema({

@@ -1,6 +1,6 @@
 import { createPlugin } from './plugin-factory';
-import { EditorState } from 'prosemirror-state';
-import { history, undo, redo, undoDepth, redoDepth } from 'prosemirror-history';
+import { EditorState } from '@inkstream/pm/state';
+import { history, undo, redo, undoDepth, redoDepth } from '@inkstream/pm/history';
 import { ToolbarItem } from './index';
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────

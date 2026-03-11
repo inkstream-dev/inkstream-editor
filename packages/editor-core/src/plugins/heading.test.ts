@@ -1,5 +1,5 @@
-import { EditorState } from 'prosemirror-state';
-import { setBlockType } from 'prosemirror-commands';
+import { EditorState } from '@inkstream/pm/state';
+import { setBlockType } from '@inkstream/pm/commands';
 import { headingPlugin } from '../../../heading/src/heading';
 import {
   getTestSchema,

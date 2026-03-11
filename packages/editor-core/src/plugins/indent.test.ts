@@ -1,4 +1,4 @@
-import { EditorState } from 'prosemirror-state';
+import { EditorState } from '@inkstream/pm/state';
 import { indentPlugin } from './indent';
 import {
   getTestSchema,

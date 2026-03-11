@@ -1,4 +1,4 @@
-import { EditorState, TextSelection } from 'prosemirror-state';
+import { EditorState, TextSelection } from '@inkstream/pm/state';
 import { toggleCode, isCodeActive, codePlugin } from './code';
 import {
   getTestSchema,

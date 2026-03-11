@@ -1,5 +1,5 @@
-import { EditorState, TextSelection } from 'prosemirror-state';
-import { toggleMark } from 'prosemirror-commands';
+import { EditorState, TextSelection } from '@inkstream/pm/state';
+import { toggleMark } from '@inkstream/pm/commands';
 import { italicPlugin } from './italic';
 import {
   getTestSchema,

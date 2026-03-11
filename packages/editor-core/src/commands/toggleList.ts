@@ -1,6 +1,6 @@
-import { EditorState, Transaction } from 'prosemirror-state';
-import { NodeType, Node, Fragment } from 'prosemirror-model';
-import { wrapInList, liftListItem } from 'prosemirror-schema-list';
+import { EditorState, Transaction } from '@inkstream/pm/state';
+import { NodeType, Node, Fragment } from '@inkstream/pm/model';
+import { wrapInList, liftListItem } from '@inkstream/pm/schema-list';
 import { findParentNode, getNodeType, isList } from '../helpers/prosemirror';
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;

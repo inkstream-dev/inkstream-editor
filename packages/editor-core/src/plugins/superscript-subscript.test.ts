@@ -15,7 +15,7 @@
 
 import { superscriptPlugin } from './superscript';
 import { subscriptPlugin } from './subscript';
-import { toggleMark } from 'prosemirror-commands';
+import { toggleMark } from '@inkstream/pm/commands';
 import {
   getTestSchema,
   createState,
@@ -27,8 +27,8 @@ import {
   text,
   doc,
 } from '../test-utils';
-import { Schema } from 'prosemirror-model';
-import { TextSelection } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { TextSelection } from '@inkstream/pm/state';
 
 const schema = getTestSchema();
 const superMark  = schema.marks.superscript;

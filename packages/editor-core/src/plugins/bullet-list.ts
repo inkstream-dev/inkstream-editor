@@ -1,10 +1,10 @@
 import { toggleList } from '../commands/toggleList';
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from 'prosemirror-state';
-import { wrapInList, sinkListItem, liftListItem, splitListItem } from 'prosemirror-schema-list';
-import { keymap } from 'prosemirror-keymap';
+import { Schema } from '@inkstream/pm/model';
+import { inputRules, InputRule } from '@inkstream/pm/inputrules';
+import { EditorState, Plugin as ProseMirrorPlugin, Transaction } from '@inkstream/pm/state';
+import { wrapInList, sinkListItem, liftListItem, splitListItem } from '@inkstream/pm/schema-list';
+import { keymap } from '@inkstream/pm/keymap';
 import { ToolbarItem } from './index'; // Import Plugin and ToolbarItem interfaces
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;

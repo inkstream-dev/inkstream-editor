@@ -1,5 +1,5 @@
 import { toggleBlockquote } from '../commands/toggleBlockquote';
-import { EditorState, Transaction } from 'prosemirror-state';
+import { EditorState, Transaction } from '@inkstream/pm/state';
 
 export const blockquoteToolbarItem = {
   id: 'blockquote',

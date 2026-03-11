@@ -1,8 +1,8 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
-import { toggleMark } from 'prosemirror-commands';
-import { TextSelection } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState } from '@inkstream/pm/state';
+import { toggleMark } from '@inkstream/pm/commands';
+import { TextSelection } from '@inkstream/pm/state';
 import { ToolbarItem } from './index';
 
 // ---------------------------------------------------------------------------

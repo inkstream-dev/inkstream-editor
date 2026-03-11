@@ -1,0 +1,109 @@
+{
+  "name": "@inkstream/pm",
+  "version": "0.1.0",
+  "description": "ProseMirror dependency wrapper for Inkstream — single source of truth for all PM packages",
+  "license": "MIT",
+  "author": "",
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint ."
+  },
+  "exports": {
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "import": "./dist/model.mjs",
+      "require": "./dist/model.js"
+    },
+    "./state": {
+      "types": "./dist/state.d.ts",
+      "import": "./dist/state.mjs",
+      "require": "./dist/state.js"
+    },
+    "./view": {
+      "types": "./dist/view.d.ts",
+      "import": "./dist/view.mjs",
+      "require": "./dist/view.js"
+    },
+    "./commands": {
+      "types": "./dist/commands.d.ts",
+      "import": "./dist/commands.mjs",
+      "require": "./dist/commands.js"
+    },
+    "./keymap": {
+      "types": "./dist/keymap.d.ts",
+      "import": "./dist/keymap.mjs",
+      "require": "./dist/keymap.js"
+    },
+    "./inputrules": {
+      "types": "./dist/inputrules.d.ts",
+      "import": "./dist/inputrules.mjs",
+      "require": "./dist/inputrules.js"
+    },
+    "./history": {
+      "types": "./dist/history.d.ts",
+      "import": "./dist/history.mjs",
+      "require": "./dist/history.js"
+    },
+    "./schema-list": {
+      "types": "./dist/schema-list.d.ts",
+      "import": "./dist/schema-list.mjs",
+      "require": "./dist/schema-list.js"
+    },
+    "./transform": {
+      "types": "./dist/transform.d.ts",
+      "import": "./dist/transform.mjs",
+      "require": "./dist/transform.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "model": ["./dist/model.d.ts"],
+      "state": ["./dist/state.d.ts"],
+      "view": ["./dist/view.d.ts"],
+      "commands": ["./dist/commands.d.ts"],
+      "keymap": ["./dist/keymap.d.ts"],
+      "inputrules": ["./dist/inputrules.d.ts"],
+      "history": ["./dist/history.d.ts"],
+      "schema-list": ["./dist/schema-list.d.ts"],
+      "transform": ["./dist/transform.d.ts"],
+      "utils": ["./dist/utils.d.ts"]
+    }
+  },
+  "dependencies": {
+    "prosemirror-commands": "^1.5.2",
+    "prosemirror-history": "^1.2.2",
+    "prosemirror-inputrules": "^1.2.2",
+    "prosemirror-keymap": "^1.2.2",
+    "prosemirror-model": "^1.19.0",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.0",
+    "prosemirror-view": "^1.32.2",
+    "prosemirror-transform": "^1.3.2",
+    "prosemirror-utils": "^1.0.4"
+  },
+  "devDependencies": {
+    "@inkstream/eslint-config": "workspace:*",
+    "@types/node": "^20.11.5",
+    "eslint": "^8.56.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inkstream-dev/inkstream-editor.git"
+  },
+  "homepage": "https://inkstream.dev",
+  "bugs": {
+    "url": "https://github.com/inkstream-dev/inkstream-editor/issues"
+  }
+}

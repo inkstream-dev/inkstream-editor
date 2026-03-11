@@ -25,20 +25,12 @@
     },
     "./package.json": "./package.json"
   },
-  "dependencies": {
-    "prosemirror-commands": "^1.5.2",
-    "prosemirror-history": "^1.2.2",
-    "prosemirror-inputrules": "^1.2.2",
-    "prosemirror-keymap": "^1.2.2",
-    "prosemirror-model": "^1.19.0",
-    "prosemirror-schema-list": "^1.5.1",
-    "prosemirror-state": "^1.4.0",
-    "prosemirror-view": "^1.32.2",
-    "prosemirror-transform": "^1.3.2",
-    "prosemirror-utils": "^1.0.4"
+  "peerDependencies": {
+    "@inkstream/pm": ">=0.1.0"
   },
   "devDependencies": {
     "@inkstream/eslint-config": "workspace:*",
+    "@inkstream/pm": "workspace:*",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",

@@ -1,9 +1,9 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
-import { keymap } from 'prosemirror-keymap';
-import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
-import { Node as ProseMirrorNode } from 'prosemirror-model';
+import { Schema } from '@inkstream/pm/model';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
+import { keymap } from '@inkstream/pm/keymap';
+import { liftListItem, sinkListItem, splitListItem } from '@inkstream/pm/schema-list';
+import { Node as ProseMirrorNode } from '@inkstream/pm/model';
 
 type Command = (state: EditorState, dispatch?: (tr: Transaction) => void) => boolean;
 

@@ -1,5 +1,5 @@
-import { Schema } from 'prosemirror-model';
-import { EditorState, Transaction } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState, Transaction } from '@inkstream/pm/state';
 import { createPlugin } from './plugin-factory';
 import { ToolbarItem } from './index';
 import { setAlignment, getActiveAlignment, AlignValue } from '../commands/alignment';

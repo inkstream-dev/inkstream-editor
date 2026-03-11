@@ -1,7 +1,7 @@
-import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
 import { ToolbarItem, Plugin } from './index';
-import { InputRule } from 'prosemirror-inputrules';
+import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 
 export interface PluginConfig {

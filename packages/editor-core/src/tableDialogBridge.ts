@@ -1,4 +1,4 @@
-import { EditorView } from 'prosemirror-view';
+import { EditorView } from '@inkstream/pm/view';
 
 /**
  * Module-level bridge between the table plugin (pro-plugins package) and the

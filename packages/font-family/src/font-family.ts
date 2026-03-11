@@ -1,6 +1,6 @@
 import { createPlugin } from '@inkstream/editor-core';
-import { Schema, Mark, MarkType } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState } from 'prosemirror-state';
+import { Schema, Mark, MarkType } from '@inkstream/pm/model';
+import { Plugin as ProseMirrorPlugin, EditorState } from '@inkstream/pm/state';
 import { ToolbarItem } from '@inkstream/editor-core';
 import { applyFontFamily } from './commands';
 

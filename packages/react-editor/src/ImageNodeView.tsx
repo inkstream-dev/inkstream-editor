@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Node } from 'prosemirror-model';
-import { EditorView } from 'prosemirror-view';
+import { Node } from '@inkstream/pm/model';
+import { EditorView } from '@inkstream/pm/view';
 
 interface ImageNodeViewProps {
   node: Node;

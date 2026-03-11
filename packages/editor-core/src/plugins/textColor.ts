@@ -1,7 +1,7 @@
 import { createPlugin } from './plugin-factory';
-import { Schema } from 'prosemirror-model';
-import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from 'prosemirror-state';
-import { TextSelection } from 'prosemirror-state';
+import { Schema } from '@inkstream/pm/model';
+import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
+import { TextSelection } from '@inkstream/pm/state';
 import { ToolbarItem } from './index';
 
 // ---------------------------------------------------------------------------

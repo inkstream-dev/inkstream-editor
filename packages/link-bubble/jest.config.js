@@ -2,6 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
+    '^@inkstream/pm/(.*)$': '<rootDir>/../pm/src/$1',
     '^@inkstream/(.*)$': '<rootDir>/../$1/src',
   },
   collectCoverageFrom: [

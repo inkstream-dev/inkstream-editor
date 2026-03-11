@@ -23,16 +23,13 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@inkstream/editor-core": "^0.1.4"
-  },
-  "dependencies": {
-    "prosemirror-commands": "^1.5.2",
-    "prosemirror-model": "^1.19.0",
-    "prosemirror-state": "^1.4.0"
+    "@inkstream/editor-core": "^0.1.4",
+    "@inkstream/pm": ">=0.1.0"
   },
   "devDependencies": {
     "@inkstream/editor-core": "workspace:*",
     "@inkstream/eslint-config": "workspace:*",
+    "@inkstream/pm": "workspace:*",
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
     "tsup": "^8.5.1",

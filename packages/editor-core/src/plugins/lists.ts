@@ -1,8 +1,8 @@
-import { Schema } from 'prosemirror-model';
-import { EditorState, Transaction, Plugin as ProseMirrorPlugin } from 'prosemirror-state';
-import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { wrapInList, splitListItem, liftListItem, sinkListItem } from 'prosemirror-schema-list';
-import { Node as ProseMirrorNode } from 'prosemirror-model';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState, Transaction, Plugin as ProseMirrorPlugin } from '@inkstream/pm/state';
+import { inputRules, InputRule } from '@inkstream/pm/inputrules';
+import { wrapInList, splitListItem, liftListItem, sinkListItem } from '@inkstream/pm/schema-list';
+import { Node as ProseMirrorNode } from '@inkstream/pm/model';
 import { createPlugin } from './plugin-factory';
 import { ToolbarItem } from './index';
 import { toggleList } from '../commands/toggleList';

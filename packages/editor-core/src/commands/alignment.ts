@@ -1,4 +1,4 @@
-import { EditorState, Transaction } from 'prosemirror-state';
+import { EditorState, Transaction } from '@inkstream/pm/state';
 
 export type AlignValue = 'left' | 'center' | 'right' | 'justify';
 

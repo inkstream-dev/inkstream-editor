@@ -1,5 +1,5 @@
-import { Node, NodeType } from 'prosemirror-model';
-import { findParentNode as pmFindParentNode } from 'prosemirror-utils';
+import { Node, NodeType } from '@inkstream/pm/model';
+import { findParentNode as pmFindParentNode } from '@inkstream/pm/utils';
 
 export const findParentNode = (predicate: (node: Node) => boolean) => (selection: any) => {
   return pmFindParentNode(predicate)(selection);

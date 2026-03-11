@@ -1,13 +1,13 @@
-import { Schema, Node } from 'prosemirror-model';
+import { Schema, Node } from '@inkstream/pm/model';
 import {
   EditorState,
   Plugin as ProseMirrorPlugin,
   Transaction,
   TextSelection,
-} from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { inputRules, InputRule } from 'prosemirror-inputrules';
-import { splitListItem } from 'prosemirror-schema-list';
+} from '@inkstream/pm/state';
+import { EditorView } from '@inkstream/pm/view';
+import { inputRules, InputRule } from '@inkstream/pm/inputrules';
+import { splitListItem } from '@inkstream/pm/schema-list';
 import { createPlugin } from './plugin-factory';
 import { toggleList } from '../commands/toggleList';
 

@@ -8,9 +8,9 @@
  * - Undo/redo via history plugin
  */
 
-import { EditorState } from 'prosemirror-state';
-import { undo, redo } from 'prosemirror-history';
-import { toggleMark } from 'prosemirror-commands';
+import { EditorState } from '@inkstream/pm/state';
+import { undo, redo } from '@inkstream/pm/history';
+import { toggleMark } from '@inkstream/pm/commands';
 import { toggleCode, isCodeActive } from './code';
 import { setAlignment, getActiveAlignment } from '../commands/alignment';
 import { toggleBlockquote } from '../commands/toggleBlockquote';

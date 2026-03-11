@@ -1,4 +1,4 @@
-import { EditorState } from 'prosemirror-state';
+import { EditorState } from '@inkstream/pm/state';
 import { toggleBlockquote } from './toggleBlockquote';
 import { inkstreamSchema, PluginManager, availablePlugins } from '../index';
 

@@ -1,8 +1,8 @@
 
 import { createPlugin } from '@inkstream/editor-core';
-import { Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
-import { setBlockType } from 'prosemirror-commands';
+import { Schema } from '@inkstream/pm/model';
+import { EditorState } from '@inkstream/pm/state';
+import { setBlockType } from '@inkstream/pm/commands';
 import { ToolbarItem } from '@inkstream/editor-core';
 
 // Professional "H" with subscript numeral icon — matches toolbar icon family (14×14, stroke-based)
