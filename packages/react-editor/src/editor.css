@@ -1,101 +1,323 @@
-.link-dropdown {
-  position: absolute;
-  display: none; /* Hidden by default, controlled by JS */
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 1000;
+/* ═══════════════════════════════════════════════════════════════════════════
+   Inkstream Editor — Design Tokens & Theme System
+   ───────────────────────────────────────────────────────────────────────────
+   All visual values are defined as CSS custom properties on
+   .inkstream-editor-wrapper so they are scoped to the editor and never
+   affect the host application.
+
+   Theming strategy:
+     • Default (light) values on .inkstream-editor-wrapper
+     • @media (prefers-color-scheme: dark) auto-switch unless .inkstream-light
+     • .inkstream-dark  — forces dark regardless of OS setting
+     • .inkstream-light — forces light regardless of OS setting
+     • Override individual tokens for custom branding:
+         .your-app .inkstream-editor-wrapper { --ink-accent: #7c3aed; }
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Light theme (default) ─────────────────────────────────────────────── */
+.inkstream-editor-wrapper {
+  /* Surfaces */
+  --ink-bg:               #ffffff;
+  --ink-surface:          #f8fafc;
+  --ink-surface-hover:    #f1f5f9;
+  --ink-surface-active:   #eef2ff;
+
+  /* Borders */
+  --ink-border:           #e2e8f0;
+  --ink-border-muted:     #f1f5f9;
+  --ink-border-accent:    #c7d2fe;
+
+  /* Text */
+  --ink-text:             #0f172a;
+  --ink-text-muted:       #64748b;
+  --ink-text-subtle:      #94a3b8;
+  --ink-text-on-accent:   #ffffff;
+
+  /* Accent (indigo) */
+  --ink-accent:           #4f46e5;
+  --ink-accent-hover:     #3730a3;
+  --ink-accent-bg:        #eef2ff;
+  --ink-accent-border:    #c7d2fe;
+
+  /* Semantic */
+  --ink-danger:           #e11d48;
+
+  /* Shadows */
+  --ink-shadow-sm:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --ink-shadow-md:        0 4px 16px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06);
+
+  /* Shape */
+  --ink-radius-sm:        5px;
+  --ink-radius-md:        8px;
 }
 
+/* ── Dark theme — auto (follows OS unless .inkstream-light) ─────────────── */
+@media (prefers-color-scheme: dark) {
+  .inkstream-editor-wrapper:not(.inkstream-light) {
+    --ink-bg:               #1e1e2e;
+    --ink-surface:          #252537;
+    --ink-surface-hover:    #2e2e44;
+    --ink-surface-active:   #2d2b55;
+
+    --ink-border:           #383852;
+    --ink-border-muted:     #2a2a3e;
+    --ink-border-accent:    #4338ca;
+
+    --ink-text:             #e2e8f0;
+    --ink-text-muted:       #94a3b8;
+    --ink-text-subtle:      #64748b;
+    --ink-text-on-accent:   #ffffff;
+
+    --ink-accent:           #818cf8;
+    --ink-accent-hover:     #a5b4fc;
+    --ink-accent-bg:        #1e1b4b;
+    --ink-accent-border:    #4338ca;
+
+    --ink-danger:           #fb7185;
+
+    --ink-shadow-sm:        0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+    --ink-shadow-md:        0 4px 16px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+  }
+}
+
+/* ── Dark theme — forced ────────────────────────────────────────────────── */
+.inkstream-editor-wrapper.inkstream-dark {
+  --ink-bg:               #1e1e2e;
+  --ink-surface:          #252537;
+  --ink-surface-hover:    #2e2e44;
+  --ink-surface-active:   #2d2b55;
+
+  --ink-border:           #383852;
+  --ink-border-muted:     #2a2a3e;
+  --ink-border-accent:    #4338ca;
+
+  --ink-text:             #e2e8f0;
+  --ink-text-muted:       #94a3b8;
+  --ink-text-subtle:      #64748b;
+  --ink-text-on-accent:   #ffffff;
+
+  --ink-accent:           #818cf8;
+  --ink-accent-hover:     #a5b4fc;
+  --ink-accent-bg:        #1e1b4b;
+  --ink-accent-border:    #4338ca;
+
+  --ink-danger:           #fb7185;
+
+  --ink-shadow-sm:        0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+  --ink-shadow-md:        0 4px 16px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Editor Shell
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .inkstream-editor-wrapper {
-  border: 1px solid #ccc;
+  border: 1px solid var(--ink-border);
   min-height: 200px;
   display: flex;
   flex-direction: column;
   position: relative;
+  background: var(--ink-bg);
+  color: var(--ink-text);
+  border-radius: var(--ink-radius-md);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inkstream-editor-wrapper:focus-within {
+  border-color: var(--ink-border-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink-accent) 12%, transparent);
 }
 
 .inkstream-editor {
   flex-grow: 1;
-  padding: 10px;
-  outline: none; /* Remove default outline */
+  outline: none;
 }
 
 .inkstream-editor .ProseMirror {
-  min-height: 100%; /* Ensure ProseMirror content fills the container */
-  outline: none; /* Remove default outline */
+  min-height: 200px;
+  padding: 1rem 1.25rem;
+  outline: none;
   white-space: pre-wrap;
-  line-height: 1.6;
+  line-height: 1.7;
+  color: var(--ink-text);
+  caret-color: var(--ink-accent);
 }
 
-/* ── Superscript / Subscript ────────────────────────────────────────────── */
-/* Browser defaults for <sup>/<sub> use vertical-align:super/sub which
-   expands the parent line-height. These rules reset to a position:relative
-   approach so the characters float above/below the baseline without pushing
-   surrounding lines apart. Scoped to the editor to avoid global impact. */
-.inkstream-editor sup,
-.inkstream-editor sub {
-  font-size: 0.75em;
-  line-height: 0;       /* removed from the line-box height calculation */
-  position: relative;
-  vertical-align: baseline;
-}
-.inkstream-editor sup { top: -0.5em; }
-.inkstream-editor sub { bottom: -0.25em; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Toolbar
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .inkstream-toolbar {
-  margin-bottom: 0;
-  padding: 5px;
-  border-bottom: 1px solid #eee;
-  background-color: #f9f9f9;
   display: flex;
-  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--ink-border);
+  background: var(--ink-surface);
 }
 
+/* ── Toolbar Buttons ────────────────────────────────────────────────────── */
 .inkstream-toolbar-button {
-  background-color: #e0e0e0;
-  border: 1px solid #ccc;
-  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--ink-text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--ink-radius-sm);
+  padding: 5px 8px;
+  min-width: 30px;
+  height: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
   cursor: pointer;
-  border-radius: 3px;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .inkstream-toolbar-button:hover {
-  background-color: #d0d0d0;
+  background: var(--ink-surface-hover);
+  border-color: var(--ink-border);
+  color: var(--ink-text);
 }
 
-.inkstream-toolbar-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.inkstream-toolbar-button:active {
+  background: var(--ink-surface-active);
+  border-color: var(--ink-border-accent);
+  color: var(--ink-accent);
+  transform: scale(0.95);
+}
+
+.inkstream-toolbar-button:focus-visible {
+  outline: 2px solid var(--ink-accent);
+  outline-offset: 1px;
 }
 
 .inkstream-toolbar-button.active {
-  background-color: #a0a0a0;
-  border-color: #888;
+  background: var(--ink-accent-bg);
+  border-color: var(--ink-accent-border);
+  color: var(--ink-accent);
 }
 
+.inkstream-toolbar-button.active:hover {
+  background: var(--ink-surface-active);
+  border-color: var(--ink-accent);
+}
+
+.inkstream-toolbar-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Toolbar Separator ──────────────────────────────────────────────────── */
 .inkstream-toolbar-separator {
   width: 1px;
-  height: 28px; /* Temporary: Added for debugging visibility */
-  background-color: #ccc;
-  margin: 0 5px;
+  height: 20px;
+  background: var(--ink-border);
+  margin: 0 4px;
+  flex-shrink: 0;
+  border-radius: 1px;
 }
 
+/* ── Toolbar Dropdown Container ─────────────────────────────────────────── */
 .inkstream-toolbar-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
 }
 
-/* Bubble menu - appears as a floating panel like TipTap */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dropdown Menus
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.inkstream-toolbar-dropdown-content {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--ink-bg);
+  min-width: 200px;
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-md);
+  box-shadow: var(--ink-shadow-md);
+  z-index: 1000;
+  padding: 4px;
+  overflow: hidden;
+}
+
+/* Nested dropdown — opens to the right */
+.inkstream-toolbar-dropdown-content.nested {
+  left: 100%;
+  top: -4px;
+  margin-left: 4px;
+  margin-top: 0;
+}
+
+.inkstream-toolbar-dropdown-content button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 7px 10px;
+  color: var(--ink-text);
+  background: transparent;
+  border: none;
+  border-radius: var(--ink-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.inkstream-toolbar-dropdown-content button:hover {
+  background: var(--ink-surface-hover);
+  color: var(--ink-text);
+}
+
+.inkstream-toolbar-dropdown-content button:focus-visible {
+  outline: 2px solid var(--ink-accent);
+  outline-offset: -2px;
+}
+
+.inkstream-toolbar-dropdown-content button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* Compact buttons inside menus */
+.inkstream-toolbar-bubble-menu .inkstream-toolbar-button,
+.inkstream-toolbar-dropdown-content .inkstream-toolbar-button {
+  min-width: 28px;
+  height: 28px;
+  padding: 4px 7px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Bubble / Floating Menu
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .inkstream-toolbar-bubble-menu {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 8px;
-  min-width: 220px;
+  background: var(--ink-bg);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-md);
+  box-shadow: var(--ink-shadow-md);
+  padding: 6px;
+  min-width: 200px;
   max-width: 300px;
 }
 
@@ -107,28 +329,38 @@
 }
 
 .inkstream-toolbar-bubble-menu > button {
-  text-align: left;
-  padding: 10px 12px;
-  background: white;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--ink-text);
+  background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--ink-radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 400;
   white-space: nowrap;
-  transition: background-color 0.2s;
+  text-align: left;
+  transition: background 0.1s ease, color 0.1s ease;
 }
 
 .inkstream-toolbar-bubble-menu > button:hover {
-  background-color: #f5f5f5;
+  background: var(--ink-surface-hover);
+}
+
+.inkstream-toolbar-bubble-menu > button:focus-visible {
+  outline: 2px solid var(--ink-accent);
+  outline-offset: -2px;
 }
 
 .inkstream-toolbar-bubble-menu > button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  background: white;
+  background: transparent;
 }
 
-/* Nested dropdowns within bubble menu */
+/* Nested dropdown within bubble menu */
 .inkstream-toolbar-bubble-menu .inkstream-toolbar-dropdown {
   position: relative;
 }
@@ -138,79 +370,190 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  text-align: left;
-  padding: 10px 12px;
-  background: white;
+  padding: 8px 10px;
+  color: var(--ink-text);
+  background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--ink-radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .inkstream-toolbar-bubble-menu .inkstream-toolbar-dropdown > button::after {
   content: '▶';
-  font-size: 10px;
-  opacity: 0.6;
+  font-size: 9px;
+  opacity: 0.5;
   margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .inkstream-toolbar-bubble-menu .inkstream-toolbar-dropdown > button:hover {
-  background-color: #f5f5f5;
+  background: var(--ink-surface-hover);
 }
 
-.inkstream-toolbar-dropdown-content {
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Link Dropdown (floating link editor)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.link-dropdown {
   position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  min-width: 200px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  display: none;
+  background: var(--ink-bg);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-md);
+  padding: 10px;
+  box-shadow: var(--ink-shadow-md);
   z-index: 1000;
-  padding: 4px 0;
-  margin-top: 2px;
 }
 
-/* Nested dropdown positioning - appears to the right */
-.inkstream-toolbar-dropdown-content.nested {
-  left: 100%;
-  top: 0;
-  margin-top: 0;
-  margin-left: 4px;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Color System — Section Labels, Dividers, Swatches, Color Picker
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.inkstream-dropdown-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-text-subtle);
+  padding: 8px 10px 4px;
+  user-select: none;
 }
 
-.inkstream-toolbar-dropdown-content button {
-  color: black;
-  padding: 8px 16px;
-  text-decoration: none;
+.inkstream-dropdown-divider {
+  height: 1px;
+  background: var(--ink-border);
+  margin: 4px 6px;
+}
+
+/* Color swatch palette grid */
+.inkstream-color-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  padding: 4px 8px 8px;
+}
+
+/* Circular color swatch */
+.inkstream-color-swatch {
   display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+/* Swatch button */
+.inkstream-color-grid .inkstream-toolbar-button {
+  padding: 3px;
+  min-width: unset;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.inkstream-color-grid .inkstream-toolbar-button:hover {
+  background: transparent;
+  border-color: var(--ink-text-muted);
+}
+
+.inkstream-color-grid .inkstream-toolbar-button:hover .inkstream-color-swatch {
+  transform: scale(1.12);
+}
+
+.inkstream-color-grid .inkstream-toolbar-button.active {
+  background: transparent;
+  border-color: var(--ink-text);
+}
+
+.inkstream-color-grid .inkstream-toolbar-button.active .inkstream-color-swatch {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Active color indicator bar below toolbar button icon */
+.inkstream-color-indicator {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 2px;
+  margin-top: 1px;
+}
+
+/* Custom color picker input */
+.inkstream-toolbar-color-picker {
+  width: 28px;
+  height: 28px;
+  padding: 2px;
+  border: 1.5px solid var(--ink-border);
+  border-radius: var(--ink-radius-sm);
+  cursor: pointer;
+  background: none;
+  margin: 4px 8px;
+  display: block;
+  transition: border-color 140ms ease;
+}
+
+.inkstream-toolbar-color-picker:hover {
+  border-color: var(--ink-text-muted);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Menu Items (label + icon rows inside dropdown menus)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.inkstream-toolbar-button.inkstream-toolbar-menu-item {
   width: 100%;
   text-align: left;
-  border: none;
-  background: white;
-  cursor: pointer;
-  border-radius: 0;
-  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: var(--ink-radius-sm);
+  display: flex;
+  align-items: center;
+  height: auto;
+}
+
+.inkstream-toolbar-menu-item-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-text);
+  width: 100%;
+}
+
+.inkstream-toolbar-menu-label {
   white-space: nowrap;
 }
 
-.inkstream-toolbar-dropdown-content button:hover {
-  background-color: #f0f0f0;
+.inkstream-toolbar-bubble-menu .inkstream-toolbar-button.inkstream-toolbar-menu-item,
+.inkstream-toolbar-dropdown-content .inkstream-toolbar-button.inkstream-toolbar-menu-item {
+  min-width: 140px;
+  height: auto;
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
-.inkstream-toolbar-dropdown-content button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: white;
-}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Content Marks & Blocks
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Link mark ──────────────────────────────────────────────────────────── */
 /* Tailwind's preflight resets <a> styles (removes color + underline).
    Re-apply sensible link styles scoped to the editor so they are never
    affected by the host application's global resets or stylesheet order. */
 .inkstream-editor a {
-  color: #4f46e5;
+  color: var(--ink-accent);
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
@@ -218,169 +561,56 @@
 }
 
 .inkstream-editor a:hover {
-  color: #3730a3;
+  color: var(--ink-accent-hover);
 }
 
-/* Scope blockquote styles to the editor to avoid affecting the host page */
+/* ── Blockquote ─────────────────────────────────────────────────────────── */
 .inkstream-editor blockquote {
   margin: 0.75em 0;
   padding: 0.5em 1em 0.5em 1.25em;
-  border-left: 3px solid #d1d5db;
-  color: #4b5563;
-  background: #f9fafb;
-  border-radius: 0 4px 4px 0;
+  border-left: 3px solid var(--ink-border-accent);
+  color: var(--ink-text-muted);
+  background: var(--ink-accent-bg);
+  border-radius: 0 var(--ink-radius-sm) var(--ink-radius-sm) 0;
   font-style: italic;
 }
 
-/* Nested blockquotes — slightly darker treatment */
 .inkstream-editor blockquote blockquote {
-  border-left-color: #9ca3af;
-  background: #f3f4f6;
+  border-left-color: var(--ink-text-subtle);
+  background: var(--ink-surface-hover);
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
 
-/* Underline mark — enhance UA default with offset/thickness */
+/* ── Underline mark ─────────────────────────────────────────────────────── */
 .inkstream-editor u {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 
-.inkstream-image-upload-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 2px dashed #cbd5e0;
-  border-radius: 8px;
-  padding: 32px 24px;
-  margin: 4px 0;
-  cursor: pointer;
-  background: #f7fafc;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-  user-select: none;
-  min-height: 120px;
-  outline: none;
-  /* Reset line-height inherited from .image-node-view-wrapper (which sets
-     line-height:0 to remove the inline-block descender gap on the img).
-     Without this reset, <p> children inherit line-height:0 and collapse,
-     causing .inkstream-upload-text and .inkstream-upload-hint to overlap. */
-  line-height: 1.5;
-}
-
-.inkstream-image-upload-area:hover,
-.inkstream-image-upload-area:focus-visible {
-  border-color: #3182ce;
-  background: #ebf8ff;
-}
-
-.inkstream-image-upload-area--dragover {
-  border-color: #3182ce;
-  background: #bee3f8;
-}
-
-.inkstream-upload-icon {
-  color: #a0aec0;
-  margin-bottom: 4px;
-  transition: color 0.15s ease;
-}
-
-.inkstream-image-upload-area:hover .inkstream-upload-icon,
-.inkstream-image-upload-area--dragover .inkstream-upload-icon {
-  color: #3182ce;
-}
-
-.inkstream-upload-text {
-  margin: 0;
-  font-size: 14px;
-  color: #4a5568;
-  font-weight: 500;
-}
-
-.inkstream-upload-text span {
-  color: #3182ce;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.inkstream-upload-hint {
-  margin: 0;
-  font-size: 12px;
-  color: #a0aec0;
-}
-
-.inkstream-error-message {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #e53e3e;
-}
-
-/* ── Image node wrapper ────────────────────────────────────────────────── */
-.image-node-view-wrapper {
-  position: relative;
-  display: inline-block;
-  line-height: 0;        /* Remove inline-block descender gap */
-  max-width: 100%;
-  vertical-align: bottom;
-  overflow: visible;     /* Allow resize handle to protrude outside bounds */
-}
-
-.image-node-view-wrapper img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  border-radius: 2px;
-  user-select: none;
-}
-
-/* Selection ring — ProseMirror adds this class when node is selected */
-.image-node-view-wrapper.ProseMirror-selectednode img {
-  outline: 2px solid #3182ce;
-  outline-offset: 1px;
-}
-
-/* Resize handle — only visible on hover or when selected */
-.image-node-view-wrapper .resize-handle {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #3182ce;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  bottom: -6px;
-  right: -6px;
-  cursor: se-resize;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.image-node-view-wrapper:hover .resize-handle,
-.image-node-view-wrapper.ProseMirror-selectednode .resize-handle {
-  opacity: 1;
-}
-
-.inkstream-code-block {
-  background-color: #f4f4f4;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px;
-  font-family: 'Courier New', Courier, monospace;
-  overflow-x: auto;
-}
-
-/* Inline code mark — scoped to editor, excluded from inside code blocks */
+/* ── Inline code mark ───────────────────────────────────────────────────── */
 .inkstream-editor code {
   font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
   font-size: 0.875em;
-  background-color: #f1f5f9;
-  color: #e11d48;
+  background: var(--ink-surface-hover);
+  color: var(--ink-danger);
   padding: 0.15em 0.4em;
   border-radius: 3px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ink-border);
+}
+
+/* ── Code block ─────────────────────────────────────────────────────────── */
+.inkstream-code-block {
+  background: var(--ink-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-sm);
+  padding: 10px 14px;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.875em;
+  color: var(--ink-text);
+  overflow-x: auto;
+  line-height: 1.6;
 }
 
 /* Don't double-style code elements inside code blocks */
@@ -393,124 +623,149 @@
   border: none;
   border-radius: 0;
 }
-/* ── Color system ─────────────────────────────────────────────────────────── */
 
-/* Section label inside dropdowns (e.g. "Recently used", "Colors") */
-.inkstream-dropdown-section-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #9ca3af;
-  padding: 8px 12px 4px;
+/* ── Superscript / Subscript ────────────────────────────────────────────── */
+/* Browser defaults use vertical-align:super/sub which expands line-height.
+   Reset to position:relative so characters float without pushing other lines. */
+.inkstream-editor sup,
+.inkstream-editor sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.inkstream-editor sup { top: -0.5em; }
+.inkstream-editor sub { bottom: -0.25em; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Image Plugin
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Upload area ────────────────────────────────────────────────────────── */
+.inkstream-image-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px dashed var(--ink-border);
+  border-radius: var(--ink-radius-md);
+  padding: 32px 24px;
+  margin: 4px 0;
+  cursor: pointer;
+  background: var(--ink-surface);
+  transition: border-color 0.15s ease, background 0.15s ease;
+  user-select: none;
+  min-height: 120px;
+  outline: none;
+  /* Reset line-height inherited from .image-node-view-wrapper (which sets
+     line-height:0 to remove the inline-block descender gap on the img). */
+  line-height: 1.5;
+}
+
+.inkstream-image-upload-area:hover,
+.inkstream-image-upload-area:focus-visible {
+  border-color: var(--ink-accent);
+  background: var(--ink-accent-bg);
+}
+
+.inkstream-image-upload-area--dragover {
+  border-color: var(--ink-accent);
+  background: var(--ink-accent-bg);
+}
+
+.inkstream-upload-icon {
+  color: var(--ink-text-subtle);
+  margin-bottom: 4px;
+  transition: color 0.15s ease;
+}
+
+.inkstream-image-upload-area:hover .inkstream-upload-icon,
+.inkstream-image-upload-area--dragover .inkstream-upload-icon {
+  color: var(--ink-accent);
+}
+
+.inkstream-upload-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-text-muted);
+  font-weight: 500;
+}
+
+.inkstream-upload-text span {
+  color: var(--ink-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inkstream-upload-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-text-subtle);
+}
+
+.inkstream-error-message {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ink-danger);
+}
+
+/* ── Image node wrapper ─────────────────────────────────────────────────── */
+.image-node-view-wrapper {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+  vertical-align: bottom;
+  overflow: visible;
+}
+
+.image-node-view-wrapper img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 3px;
   user-select: none;
 }
 
-/* Horizontal rule divider inside dropdown menus */
-.inkstream-dropdown-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 4px 8px;
+.image-node-view-wrapper.ProseMirror-selectednode img {
+  outline: 2px solid var(--ink-accent);
+  outline-offset: 1px;
 }
 
-/* Color swatch palette grid — 8 columns, uniform circular swatches */
-.inkstream-color-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
-  padding: 4px 10px 8px;
-}
-
-/* Circular color swatch element (inside iconHtml) */
-.inkstream-color-swatch {
-  display: block;
-  width: 18px;
-  height: 18px;
+.image-node-view-wrapper .resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--ink-accent);
+  border: 2px solid var(--ink-bg);
   border-radius: 50%;
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  transition: transform 120ms ease, border-color 120ms ease;
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: var(--ink-shadow-sm);
 }
 
-/* Swatch buttons in color grid — compact, circular hit target */
-.inkstream-color-grid .inkstream-toolbar-button {
-  padding: 3px;
-  min-width: unset;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 140ms ease, background-color 140ms ease;
-}
-
-.inkstream-color-grid .inkstream-toolbar-button:hover {
-  background: transparent;
-  border-color: #9ca3af;
-}
-
-.inkstream-color-grid .inkstream-toolbar-button:hover .inkstream-color-swatch {
-  transform: scale(1.1);
-}
-
-/* Selected / active swatch — solid dark ring */
-.inkstream-color-grid .inkstream-toolbar-button.active {
-  background: transparent;
-  border-color: #1f2937;
-}
-
-.inkstream-color-grid .inkstream-toolbar-button.active .inkstream-color-swatch {
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-/* Active color indicator bar below the toolbar button icon */
-.inkstream-color-indicator {
-  display: block;
-  height: 3px;
-  width: 100%;
-  border-radius: 2px;
-  margin-top: 1px;
-}
-
-/* Custom color picker input — compact, well-aligned */
-.inkstream-toolbar-color-picker {
-  width: 28px;
-  height: 28px;
-  padding: 2px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 6px;
-  cursor: pointer;
-  background: none;
-  margin: 4px 10px;
-  display: block;
-  transition: border-color 140ms ease;
-}
-
-.inkstream-toolbar-color-picker:hover {
-  border-color: #6b7280;
-}
-
-/* Compact button size when inside bubble/dropdown menus */
-.inkstream-toolbar-bubble-menu .inkstream-toolbar-button,
-.inkstream-toolbar-dropdown-content .inkstream-toolbar-button {
-  min-width: 26px;
-  padding: 3px 5px;
-  font-size: 13px;
-  line-height: 1;
+.image-node-view-wrapper:hover .resize-handle,
+.image-node-view-wrapper.ProseMirror-selectednode .resize-handle {
+  opacity: 1;
 }
 
 
-/* ── Task List ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Task List
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .inkstream-task-list {
   list-style: none;
   padding-left: 0.25rem;
   margin: 0;
 }
 
-/* Row: checkbox column + content column */
 .inkstream-task-item {
   display: flex;
   align-items: flex-start;
@@ -518,29 +773,22 @@
   padding: 1px 0;
 }
 
-/* Browsers add margin-top/bottom to <p> by default (typically 1em each).
-   Without this reset, the first text line starts 1em below the top of the
-   content div, making the checkbox appear 1em too high even though the math
-   for label height:1.6em is correct. Reset here instead of globally so
-   other editor paragraphs are not affected. */
+/* Reset <p> margin inside task content to avoid vertical misalignment */
 .inkstream-task-content > p {
   margin: 0;
 }
 
-/* Label is the checkbox column. height:1.6em = one line of text (matches
-   the explicit line-height on .ProseMirror), so align-items:center places
-   the indicator perfectly on the first-line midpoint. No margin hacks. */
+/* Label column — height:1.7em matches one line of text */
 .inkstream-task-label {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  height: 1.6em;
+  height: 1.7em;
   cursor: pointer;
   user-select: none;
 }
 
-/* Hidden real input — kept in DOM for semantics and keyboard accessibility.
-   The label click triggers this input so native toggle + change event fire. */
+/* Hidden real input — kept for semantics and keyboard accessibility */
 .inkstream-task-input {
   position: absolute;
   opacity: 0;
@@ -549,44 +797,35 @@
   margin: 0;
 }
 
-/* Custom visual indicator */
+/* Custom visual indicator (the checkbox box) */
 .inkstream-task-indicator {
   display: block;
   width: 16px;
   height: 16px;
-  border: 1.5px solid #cbd5e0;
+  border: 1.5px solid var(--ink-border);
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--ink-bg);
   flex-shrink: 0;
   position: relative;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
 }
 
-/* Hover: driven by label hover, no specificity clash with checked state */
 .inkstream-task-label:hover .inkstream-task-indicator {
-  border-color: #3182ce;
-  background: #ebf8ff;
+  border-color: var(--ink-accent);
+  background: var(--ink-accent-bg);
 }
 
-/* Checked state: driven by data-checked on <li>, not :checked pseudo-class.
-   This avoids any specificity fight with :hover and updates instantly
-   because we set data-checked optimistically before the ProseMirror roundtrip. */
 .inkstream-task-item[data-checked="true"] .inkstream-task-indicator {
-  background: #3182ce;
-  border-color: #3182ce;
+  background: var(--ink-accent);
+  border-color: var(--ink-accent);
 }
 
-/* Checked + hover: slightly darker fill */
 .inkstream-task-item[data-checked="true"] .inkstream-task-label:hover .inkstream-task-indicator {
-  background: #2b6cb0;
-  border-color: #2b6cb0;
+  background: var(--ink-accent-hover);
+  border-color: var(--ink-accent-hover);
 }
 
-/* Checkmark via ::after on the indicator.
-   left/top 50% puts the pseudo-element top-left corner at the indicator centre.
-   translate(-50%, -50%) recentres it on its own midpoint, then rotate(45deg)
-   spins in place. The result is the checkmark geometrically centred inside the
-   16×16 indicator with no hardcoded pixel offsets. */
+/* Checkmark — geometrically centred using transform */
 .inkstream-task-item[data-checked="true"] .inkstream-task-indicator::after {
   content: '';
   position: absolute;
@@ -594,21 +833,19 @@
   top: 50%;
   width: 5px;
   height: 9px;
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--ink-text-on-accent);
   border-top: none;
   border-left: none;
   transform: translate(-50%, -50%) rotate(45deg);
   display: block;
 }
 
-/* Click feedback on the label */
 .inkstream-task-label:active .inkstream-task-indicator {
   transform: scale(0.9);
 }
 
-/* Focus ring: show on indicator when hidden input is keyboard-focused */
 .inkstream-task-input:focus-visible ~ .inkstream-task-indicator {
-  outline: 2px solid #3182ce;
+  outline: 2px solid var(--ink-accent);
   outline-offset: 2px;
 }
 
@@ -617,42 +854,10 @@
   min-width: 0;
 }
 
-/* Strikethrough for checked items — thin line, muted color */
 .inkstream-task-item[data-checked="true"] .inkstream-task-content p {
   text-decoration: line-through;
   text-decoration-thickness: 1px;
-  text-decoration-color: #9ca3af;
-  color: #9ca3af;
+  text-decoration-color: var(--ink-text-subtle);
+  color: var(--ink-text-subtle);
   transition: color 0.2s ease;
-}
-
-/* ── List Dropdown menu items (label + icon) ────────────────────────────── */
-.inkstream-toolbar-button.inkstream-toolbar-menu-item {
-  width: 100%;
-  text-align: left;
-  padding: 6px 12px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-
-.inkstream-toolbar-menu-item-inner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #374151;
-  width: 100%;
-}
-
-.inkstream-toolbar-menu-label {
-  white-space: nowrap;
-}
-
-/* Override the compact swatch size for full-width menu items */
-.inkstream-toolbar-bubble-menu .inkstream-toolbar-button.inkstream-toolbar-menu-item,
-.inkstream-toolbar-dropdown-content .inkstream-toolbar-button.inkstream-toolbar-menu-item {
-  min-width: 140px;
-  padding: 6px 12px;
-  font-size: 13px;
 }
