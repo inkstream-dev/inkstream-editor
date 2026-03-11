@@ -43,12 +43,15 @@ export interface ToolbarItem {
 
 export interface Plugin {
   name: string;
-  tier?: PluginTier; // Plugin tier - defaults to 'free' if not specified
-  description?: string; // Description of the plugin
-  nodes?: { [key: string]: any }; // Optional: Define custom nodes for the schema
-  marks?: { [key: string]: any }; // Optional: Define custom marks for the schema
+  tier?: PluginTier;
+  description?: string;
+  nodes?: { [key: string]: any };
+  marks?: { [key: string]: any };
+  /** Default options resolved from `addOptions()` at plugin creation time. */
+  defaultOptions?: unknown;
   getProseMirrorPlugins?: (schema: Schema) => ProseMirrorPlugin[];
-  getToolbarItems?: (schema: Schema, options?: any) => ToolbarItem[]; // Optional method for toolbar items with options
+  /** Receives the resolved options (defaults merged with user overrides). */
+  getToolbarItems?: (schema: Schema, options?: Record<string, unknown>) => ToolbarItem[];
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
 }
@@ -93,12 +96,15 @@ export class PluginManager {
     return nodes;
   }
 
-  getToolbarItems(schema: Schema, pluginOptions: { [key: string]: any } = {}): Map<string, ToolbarItem> {
+  getToolbarItems(schema: Schema, pluginOptions: { [key: string]: Record<string, unknown> } = {}): Map<string, ToolbarItem> {
     const toolbarItemMap = new Map<string, ToolbarItem>();
     this.plugins.forEach(plugin => {
       let items: ToolbarItem[] = [];
       if (plugin.getToolbarItems) {
-        const options = pluginOptions[plugin.name] || {};
+        // Merge plugin defaults with user-provided overrides so the plugin
+        // receives a fully resolved options object.
+        const userOptions = pluginOptions[plugin.name] || {};
+        const options = { ...(plugin.defaultOptions as Record<string, unknown> || {}), ...userOptions };
         items = plugin.getToolbarItems(schema, options);
       }
       items.forEach(item => toolbarItemMap.set(item.id, item));

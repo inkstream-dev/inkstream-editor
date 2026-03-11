@@ -16,7 +16,7 @@ import { createRoot } from 'react-dom/client';
 // Stable module-level defaults to prevent new object/array references on
 // every render, which would cause useEffect to re-run infinitely.
 const DEFAULT_PLUGINS = Object.values(availablePlugins);
-const DEFAULT_PLUGIN_OPTIONS: { [key: string]: any } = {};
+const DEFAULT_PLUGIN_OPTIONS: { [key: string]: Record<string, unknown> } = {};
 const DEFAULT_TOOLBAR_LAYOUT: string[] = [];
 
 /** Controls which colour scheme the editor uses. */
@@ -25,7 +25,7 @@ export type ThemeMode = 'auto' | 'light' | 'dark';
 interface RichTextEditorProps {
   initialContent: string;
   plugins?: Plugin[];  // Now accepts Plugin instances instead of string IDs
-  pluginOptions?: { [key: string]: any };
+  pluginOptions?: { [key: string]: Record<string, unknown> };
   toolbarLayout?: string[];
   licenseKey?: string;
   /**

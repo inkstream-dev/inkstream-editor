@@ -12,6 +12,12 @@ export interface HighlightColorEntry {
   value: string;
 }
 
+/** Typed options accepted by the highlight plugin via `pluginOptions.highlight`. */
+export interface HighlightOptions {
+  /** Color palette shown in the toolbar dropdown. Defaults to `DEFAULT_HIGHLIGHT_PALETTE`. */
+  palette: HighlightColorEntry[];
+}
+
 export const DEFAULT_HIGHLIGHT_PALETTE: HighlightColorEntry[] = [
   { label: 'Yellow',  value: '#FEF08A' },
   { label: 'Amber',   value: '#FDE68A' },
@@ -139,8 +145,10 @@ function getActiveHighlightColor(state: EditorState): string | null {
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
-export const highlightPlugin = createPlugin({
+export const highlightPlugin = createPlugin<HighlightOptions>({
   name: 'highlight',
+
+  addOptions: () => ({ palette: DEFAULT_HIGHLIGHT_PALETTE }),
 
   marks: {
     highlight: {
@@ -158,9 +166,8 @@ export const highlightPlugin = createPlugin({
 
   getProseMirrorPlugins: (_schema: Schema): ProseMirrorPlugin[] => [],
 
-  getToolbarItems: (_schema: Schema, options: any = {}): ToolbarItem[] => {
-    const palette: HighlightColorEntry[] =
-      options?.palette ?? DEFAULT_HIGHLIGHT_PALETTE;
+  getToolbarItems(_schema: Schema, options: HighlightOptions): ToolbarItem[] {
+    const { palette } = options;
 
     // Circular color swatch via iconHtml — CSS handles shape, hover/active ring
     const swatchItems: ToolbarItem[] = palette.map(({ label, value }) => ({

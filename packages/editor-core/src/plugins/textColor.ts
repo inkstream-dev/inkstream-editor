@@ -12,6 +12,12 @@ export interface ColorEntry {
   value: string;
 }
 
+/** Typed options accepted by the textColor plugin via `pluginOptions.textColor`. */
+export interface TextColorOptions {
+  /** Color palette shown in the toolbar dropdown. Defaults to `DEFAULT_TEXT_COLOR_PALETTE`. */
+  palette: ColorEntry[];
+}
+
 export const DEFAULT_TEXT_COLOR_PALETTE: ColorEntry[] = [
   // Neutrals
   { label: 'Black',      value: '#000000' },
@@ -138,9 +144,10 @@ function getActiveTextColor(state: EditorState): string | null {
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
-export const textColorPlugin = createPlugin({
+export const textColorPlugin = createPlugin<TextColorOptions>({
   name: 'textColor',
 
+  addOptions: () => ({ palette: DEFAULT_TEXT_COLOR_PALETTE }),
   marks: {
     textColor: {
       attrs: { color: { default: 'black' } },
@@ -157,9 +164,8 @@ export const textColorPlugin = createPlugin({
 
   getProseMirrorPlugins: (_schema: Schema): ProseMirrorPlugin[] => [],
 
-  getToolbarItems: (_schema: Schema, options: any = {}): ToolbarItem[] => {
-    const palette: ColorEntry[] =
-      options?.palette ?? DEFAULT_TEXT_COLOR_PALETTE;
+  getToolbarItems(_schema: Schema, options: TextColorOptions): ToolbarItem[] {
+    const { palette } = options;
 
     // Circular color swatch via iconHtml — CSS handles shape, size, hover/active ring
     const swatchItems: ToolbarItem[] = palette.map(({ label, value }) => ({
