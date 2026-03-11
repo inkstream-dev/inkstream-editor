@@ -1,129 +1,69 @@
 import { Schema, Mark } from '@inkstream/pm/model';
 import { PluginManager } from './plugins';
 
+/**
+ * Builds the ProseMirror schema from the registered plugins.
+ *
+ * Core schema defines only the two structural primitives every ProseMirror
+ * document must have (`doc` and `text`). All other nodes — paragraph, heading,
+ * blockquote, hard_break, image, etc. — are contributed by plugins registered
+ * in the PluginManager.
+ *
+ * Marks for inline formatting (bold, italic, link, …) are defined here because
+ * ProseMirror requires them to appear in a fixed order relative to the nodes.
+ * Plugin-contributed marks are merged in via `manager.getMarks()`.
+ */
 export const inkstreamSchema = (manager: PluginManager) => new Schema({
   nodes: {
-    doc: { content: "block+", toDOM() { return ["div", 0]; } },
-    paragraph: {
-      content: "inline*",
-      group: "block",
-      attrs: {
-        align: { default: null },
-        indent: { default: 0 },
-      },
-      parseDOM: [{
-        tag: 'p',
-        getAttrs(dom) {
-          const el = dom as HTMLElement;
-          const align = el.style.textAlign || null;
-          const paddingMatch = el.style.paddingLeft?.match(/^(\d+(?:\.\d+)?)px$/);
-          const indent = paddingMatch ? Math.round(parseFloat(paddingMatch[1]) / 20) : 0;
-          return { align: align || null, indent: indent || 0 };
-        },
-      }],
-      toDOM(node) {
-        const attrs: { [key: string]: string } = {};
-        if (node.attrs.align) {
-          attrs.style = `text-align: ${node.attrs.align}`;
-        }
-        if (node.attrs.indent) {
-          attrs.style = `${attrs.style || ''} padding-left: ${node.attrs.indent * 20}px;`; // Example: 20px per indent level
-        }
-        return ["p", attrs, 0];
-      },
-    },
-    blockquote: {
-      content: "block+",
-      group: "block",
-      attrs: {
-        align: { default: null },
-      },
-      parseDOM: [{ tag: 'blockquote' }],
-      toDOM(node) {
-        const attrs: { [key: string]: string } = {};
-        if (node.attrs.align) {
-          attrs.style = `text-align: ${node.attrs.align}`;
-        }
-        return ["blockquote", attrs, 0];
-      }
-    },
-    heading: {
-      attrs: {
-        level: { default: 1 },
-        align: { default: null },
-      },
-      content: "inline*",
-      marks: "_",
-      group: "block",
-      defining: true,
-      parseDOM: [
-        { tag: 'h1', getAttrs: (dom) => ({ level: 1, align: (dom as HTMLElement).style.textAlign || null }) },
-        { tag: 'h2', getAttrs: (dom) => ({ level: 2, align: (dom as HTMLElement).style.textAlign || null }) },
-        { tag: 'h3', getAttrs: (dom) => ({ level: 3, align: (dom as HTMLElement).style.textAlign || null }) },
-        { tag: 'h4', getAttrs: (dom) => ({ level: 4, align: (dom as HTMLElement).style.textAlign || null }) },
-        { tag: 'h5', getAttrs: (dom) => ({ level: 5, align: (dom as HTMLElement).style.textAlign || null }) },
-        { tag: 'h6', getAttrs: (dom) => ({ level: 6, align: (dom as HTMLElement).style.textAlign || null }) },
-      ],
-      toDOM(node) {
-        const domAttrs: { [key: string]: string } = {};
-        if (node.attrs.align) {
-          domAttrs.style = `text-align: ${node.attrs.align}`;
-        }
-        return ["h" + node.attrs.level, domAttrs, 0];
-      },
-    },
-    text: { inline: true, group: "inline", toDOM(node) { return node.text || ""; } },
-    hard_break: { inline: true, group: "inline", selectable: false, toDOM() { return ["br"]; } },
+    doc: { content: 'block+', toDOM() { return ['div', 0]; } },
+    text: { inline: true, group: 'inline', toDOM(node) { return node.text || ''; } },
 
-    ...manager.getNodes(), // Dynamically add nodes from plugins
+    ...manager.getNodes(),
   },
 
   marks: {
     link: {
       attrs: {
-        href: { default: null },
-        title: { default: null },
+        href:   { default: null },
+        title:  { default: null },
         target: { default: null },
-        rel: { default: null },
+        rel:    { default: null },
       },
       inclusive: false,
       parseDOM: [
         {
-          tag: "a[href]",
+          tag: 'a[href]',
           getAttrs(dom) {
             return {
-              href: (dom as HTMLElement).getAttribute("href"),
-              title: (dom as HTMLElement).getAttribute("title"),
-              target: (dom as HTMLElement).getAttribute("target"),
-              rel: (dom as HTMLElement).getAttribute("rel"),
+              href:   (dom as HTMLElement).getAttribute('href'),
+              title:  (dom as HTMLElement).getAttribute('title'),
+              target: (dom as HTMLElement).getAttribute('target'),
+              rel:    (dom as HTMLElement).getAttribute('rel'),
             };
           },
         },
       ],
       toDOM(node) {
         const attrs: Record<string, string> = {};
-        if (node.attrs.href) attrs.href = node.attrs.href;
-        if (node.attrs.title) attrs.title = node.attrs.title;
+        if (node.attrs.href)   attrs.href   = node.attrs.href;
+        if (node.attrs.title)  attrs.title  = node.attrs.title;
         if (node.attrs.target) attrs.target = node.attrs.target;
-        if (node.attrs.rel) attrs.rel = node.attrs.rel;
-        return ["a", attrs];
+        if (node.attrs.rel)    attrs.rel    = node.attrs.rel;
+        return ['a', attrs];
       },
     },
     strong: {
       parseDOM: [
         { tag: 'strong' },
-        // <b> is bold unless style explicitly says font-weight:normal
         {
           tag: 'b',
           getAttrs: (node: Node | string) =>
             (node as HTMLElement).style?.fontWeight !== 'normal' ? null : false,
         },
-        // font-weight:400 means normal — clear any inherited strong mark
         {
           style: 'font-weight=400',
           clearMark: (m: Mark) => m.type.name === 'strong',
         },
-        // Match bold/bolder or 500–900
         {
           style: 'font-weight',
           getAttrs: (value: Node | string) =>
@@ -158,7 +98,8 @@ export const inkstreamSchema = (manager: PluginManager) => new Schema({
       ],
       toDOM() { return ['s', 0]; },
     },
-    code: { toDOM() { return ["code", 0]; } },
-    ...manager.getMarks(), // Dynamically add marks from plugins
+    code: { toDOM() { return ['code', 0]; } },
+
+    ...manager.getMarks(),
   },
 });

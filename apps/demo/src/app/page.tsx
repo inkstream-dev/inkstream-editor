@@ -54,17 +54,19 @@ export default function Home() {
   });
 
   const allPlugins = useMemo(() => [
+    availablePlugins.paragraph,  // paragraph node (required)
+    availablePlugins.hardBreak,  // hard_break node (required)
+    availablePlugins.blockquote, // blockquote node + toolbar
+    headingPlugin,              // heading node + toolbar + keymap (@inkstream/heading)
     availablePlugins.bold,
     availablePlugins.italic,
     availablePlugins.underline,
     availablePlugins.strike,
     availablePlugins.code,
-    headingPlugin,
     availablePlugins.alignment,
     availablePlugins.indent,
     availablePlugins.lists,
     availablePlugins.taskList,
-    availablePlugins.blockquote,
     availablePlugins.codeBlock,
     availablePlugins.image,
     availablePlugins.textColor,

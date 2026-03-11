@@ -22,6 +22,9 @@ import { codePlugin } from './plugins/code';
 import { historyPlugin } from './plugins/history';
 import { listItemPlugin } from './plugins/list-item';
 import { blockquotePlugin } from './plugins/blockquote';
+import { paragraphPlugin } from './plugins/paragraph';
+import { hardBreakPlugin } from './plugins/hard-break';
+import { headingPlugin } from './plugins/heading';
 import { listsPlugin } from './plugins/lists';
 import { taskListPlugin } from './plugins/task-list';
 
@@ -128,6 +131,13 @@ export const buildKeymap = (schema: Schema, manager: PluginManager) => {
 
 // Export all available plugins for consumers to use
 export const availablePlugins = {
+  // Core structural nodes — required for any functional editor instance.
+  // For full heading experience (toolbar + keymap), use @inkstream/heading.
+  paragraph: paragraphPlugin,
+  hardBreak: hardBreakPlugin,
+  heading: headingPlugin,
+  blockquote: blockquotePlugin,
+
   bold: boldPlugin,
   underline: underlinePlugin,
   italic: italicPlugin,
@@ -143,7 +153,6 @@ export const availablePlugins = {
   bulletList: bulletListPlugin,
   orderedList: orderedListPlugin,
   listItem: listItemPlugin,
-  blockquote: blockquotePlugin,
   horizontalLine: horizontalLinePlugin,
   textColor: textColorPlugin,
   highlight: highlightPlugin,
@@ -153,6 +162,33 @@ export const availablePlugins = {
   subscript: subscriptPlugin,
   history: historyPlugin,
 };
+
+/**
+ * The minimal set of plugins needed for a functional rich-text editor:
+ * paragraph, blockquote, and hard_break.
+ *
+ * Note: heading support is not included here because the canonical heading
+ * plugin (with its full toolbar and keyboard shortcuts) lives in the separate
+ * `@inkstream/heading` package. Add it explicitly when building a plugin list:
+ *
+ * @example
+ * ```ts
+ * import { corePlugins, availablePlugins } from '@inkstream/editor-core';
+ * import { headingPlugin } from '@inkstream/heading';
+ *
+ * const myPlugins = [
+ *   ...corePlugins,
+ *   headingPlugin,
+ *   availablePlugins.bold,
+ *   availablePlugins.italic,
+ * ];
+ * ```
+ */
+export const corePlugins: Plugin[] = [
+  paragraphPlugin,
+  hardBreakPlugin,
+  blockquotePlugin,
+];
 
 /**
  * Creates ProseMirror plugins from a given array of Inkstream plugins
@@ -186,3 +222,8 @@ export { insertDivider } from './plugins/horizontal-line';
 export type { DividerOptions } from './plugins/horizontal-line';
 export { getActiveAlignment } from './commands/alignment';
 export type { AlignValue } from './commands/alignment';
+
+// Core structural plugins — re-exported for convenience
+export { paragraphPlugin } from './plugins/paragraph';
+export { hardBreakPlugin } from './plugins/hard-break';
+export { headingPlugin } from './plugins/heading';

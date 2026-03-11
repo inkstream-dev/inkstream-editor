@@ -14,14 +14,28 @@ const svgBlockquote = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 1
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
-// NOTE: The blockquote node spec (content, group, align attr, parseDOM/toDOM)
-// lives in schema.ts — do NOT redefine `nodes` here. Redefining it would
-// override the schema.ts definition and silently lose the `align` attribute
-// (breaking text alignment inside blockquotes).
 export const blockquotePlugin = createPlugin({
   name: 'blockquote',
   tier: 'free',
   description: 'Blockquote support',
+
+  nodes: {
+    blockquote: {
+      content: 'block+',
+      group: 'block',
+      attrs: {
+        align: { default: null },
+      },
+      parseDOM: [{ tag: 'blockquote' }],
+      toDOM(node: import('@inkstream/pm/model').Node) {
+        const attrs: Record<string, string> = {};
+        if (node.attrs.align) {
+          attrs.style = `text-align: ${node.attrs.align}`;
+        }
+        return ['blockquote', attrs, 0];
+      },
+    },
+  },
 
   getKeymap: () => ({
     // Mod-Shift-B — mnemonic for "Blockquote"; no conflict with bold (Mod-B)

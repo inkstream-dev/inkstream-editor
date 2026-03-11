@@ -26,6 +26,39 @@ const headingIcon = (level: number): string => {
 export const headingPlugin = createPlugin({
   name: 'heading',
 
+  /**
+   * Contributes the `heading` node to the ProseMirror schema (h1–h6).
+   * Carries an `align` attribute so the alignment plugin can apply
+   * text-align without a separate node type per level.
+   */
+  nodes: {
+    heading: {
+      attrs: {
+        level: { default: 1 },
+        align: { default: null },
+      },
+      content: 'inline*',
+      marks: '_',
+      group: 'block',
+      defining: true,
+      parseDOM: [
+        { tag: 'h1', getAttrs: (dom: Node | string) => ({ level: 1, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h2', getAttrs: (dom: Node | string) => ({ level: 2, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h3', getAttrs: (dom: Node | string) => ({ level: 3, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h4', getAttrs: (dom: Node | string) => ({ level: 4, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h5', getAttrs: (dom: Node | string) => ({ level: 5, align: (dom as HTMLElement).style.textAlign || null }) },
+        { tag: 'h6', getAttrs: (dom: Node | string) => ({ level: 6, align: (dom as HTMLElement).style.textAlign || null }) },
+      ],
+      toDOM(node: import('prosemirror-model').Node) {
+        const domAttrs: Record<string, string> = {};
+        if (node.attrs.align) {
+          domAttrs.style = `text-align: ${node.attrs.align}`;
+        }
+        return [`h${node.attrs.level}`, domAttrs, 0];
+      },
+    },
+  },
+
   getKeymap: (schema: Schema): { [key: string]: any } => {
     const keys: { [key: string]: any } = {};
     if (schema.nodes.paragraph) {
