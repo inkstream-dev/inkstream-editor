@@ -205,6 +205,22 @@
   background: white;
 }
 
+/* ── Link mark ──────────────────────────────────────────────────────────── */
+/* Tailwind's preflight resets <a> styles (removes color + underline).
+   Re-apply sensible link styles scoped to the editor so they are never
+   affected by the host application's global resets or stylesheet order. */
+.inkstream-editor a {
+  color: #4f46e5;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.inkstream-editor a:hover {
+  color: #3730a3;
+}
+
 /* Scope blockquote styles to the editor to avoid affecting the host page */
 .inkstream-editor blockquote {
   margin: 0.75em 0;
