@@ -1,6 +1,8 @@
 import { EditorState } from '@inkstream/pm/state';
 import { setBlockType } from '@inkstream/pm/commands';
-import { headingPlugin } from '../../../heading/src/heading';
+import { headingPlugin } from '@inkstream/heading';
+import { setTextColor } from '@inkstream/text-color';
+import type { ToolbarItem } from '../index';
 import {
   getTestSchema,
   createState,
@@ -202,26 +204,26 @@ describe('isHeadingActive (toolbar isActive)', () => {
   // Per-level isActive via children items
   it.each([1, 2, 3, 4, 5, 6])('heading%i child isActive returns true when in H%i', (level) => {
     const state = createState(doc(schema, h(level, 'hello')), POS_IN_HEADING);
-    const child = toolbarItem.children!.find(c => c.id === `heading${level}`)!;
+    const child = toolbarItem.children!.find((c: ToolbarItem) => c.id === `heading${level}`)!;
     expect(child.isActive!(state)).toBe(true);
   });
 
   it.each([1, 2, 3, 4, 5, 6])('heading%i child isActive returns false for wrong level', (level) => {
     const otherLevel = level === 1 ? 2 : 1;
     const state = createState(doc(schema, h(otherLevel, 'hello')), POS_IN_HEADING);
-    const child = toolbarItem.children!.find(c => c.id === `heading${level}`)!;
+    const child = toolbarItem.children!.find((c: ToolbarItem) => c.id === `heading${level}`)!;
     expect(child.isActive!(state)).toBe(false);
   });
 
   it('paragraph child isActive returns true when cursor is in paragraph', () => {
     const state = createState(doc(schema, p(schema, text(schema, 'hello'))), 2);
-    const paraChild = toolbarItem.children!.find(c => c.id === 'paragraph')!;
+    const paraChild = toolbarItem.children!.find((c: ToolbarItem) => c.id === 'paragraph')!;
     expect(paraChild.isActive!(state)).toBe(true);
   });
 
   it('paragraph child isActive returns false when cursor is in heading', () => {
     const state = createState(doc(schema, h(1, 'hello')), POS_IN_HEADING);
-    const paraChild = toolbarItem.children!.find(c => c.id === 'paragraph')!;
+    const paraChild = toolbarItem.children!.find((c: ToolbarItem) => c.id === 'paragraph')!;
     expect(paraChild.isActive!(state)).toBe(false);
   });
 });
@@ -268,26 +270,26 @@ describe('headingPlugin toolbar', () => {
 
   it.each([1, 2, 3, 4, 5, 6])('child heading%i has correct id and tooltip', (level) => {
     const item = headingPlugin.getToolbarItems!(schema)[0];
-    const child = item.children!.find(c => c.id === `heading${level}`)!;
+    const child = item.children!.find((c: ToolbarItem) => c.id === `heading${level}`)!;
     expect(child).toBeDefined();
     expect(child.tooltip).toContain(`Heading ${level}`);
   });
 
   it.each([1, 2, 3, 4, 5, 6])('heading%i child has iconHtml with H%i label', (level) => {
     const item = headingPlugin.getToolbarItems!(schema)[0];
-    const child = item.children!.find(c => c.id === `heading${level}`)!;
+    const child = item.children!.find((c: ToolbarItem) => c.id === `heading${level}`)!;
     expect(child.iconHtml).toContain(`H${level}`);
   });
 
   it('paragraph child has iconHtml with pilcrow (¶)', () => {
     const item = headingPlugin.getToolbarItems!(schema)[0];
-    const paraChild = item.children!.find(c => c.id === 'paragraph')!;
+    const paraChild = item.children!.find((c: ToolbarItem) => c.id === 'paragraph')!;
     expect(paraChild.iconHtml).toContain('¶');
   });
 
   it.each([1, 2, 3, 4, 5, 6])('heading%i child command converts to H%i', (level) => {
     const item = headingPlugin.getToolbarItems!(schema)[0];
-    const child = item.children!.find(c => c.id === `heading${level}`)!;
+    const child = item.children!.find((c: ToolbarItem) => c.id === `heading${level}`)!;
     const state = createState(doc(schema, p(schema, text(schema, 'hello'))), 2);
     const next = applyCommand(state, child.command!)!;
     expect(next.doc.firstChild!.attrs.level).toBe(level);
@@ -295,7 +297,7 @@ describe('headingPlugin toolbar', () => {
 
   it('paragraph child command converts heading back to paragraph', () => {
     const item = headingPlugin.getToolbarItems!(schema)[0];
-    const paraChild = item.children!.find(c => c.id === 'paragraph')!;
+    const paraChild = item.children!.find((c: ToolbarItem) => c.id === 'paragraph')!;
     const state = createState(doc(schema, h(1, 'hello')), POS_IN_HEADING);
     const next = applyCommand(state, paraChild.command!)!;
     expect(next.doc.firstChild!.type.name).toBe('paragraph');
@@ -501,7 +503,6 @@ describe('heading edge cases', () => {
       doc(schema, h(2, 'hello')),
       2, 6,
     );
-    const { setTextColor } = require('./textColor');
     const next = applyCommand(state, setTextColor('#EF4444'));
     expect(next).not.toBeNull();
     expect(next!.doc.textContent).toBe('hello');

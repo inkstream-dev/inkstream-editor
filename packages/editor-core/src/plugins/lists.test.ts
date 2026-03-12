@@ -1,6 +1,7 @@
 import { EditorState } from '@inkstream/pm/state';
 import { sinkListItem, liftListItem, splitListItem } from '@inkstream/pm/schema-list';
 import { Node } from '@inkstream/pm/model';
+import { setTextColor } from '@inkstream/text-color';
 import {
   listsPlugin,
   toggleBulletList,
@@ -802,7 +803,6 @@ describe('marks inside list items', () => {
       doc(schema, tl(ti(false, p(schema, text(schema, 'hello'))))),
       3, 8,
     );
-    const { setTextColor } = require('./textColor');
     const next = applyCommand(state, setTextColor('#FF0000'));
     expect(next).not.toBeNull();
     expect(next!.doc.textContent).toBe('hello');
