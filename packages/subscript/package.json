@@ -49,5 +49,8 @@
   "homepage": "https://inkstream.dev",
   "bugs": {
     "url": "https://github.com/inkstream-dev/inkstream/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "@inkstream/pm",
   "version": "0.1.0",
-  "description": "ProseMirror dependency wrapper for Inkstream — single source of truth for all PM packages",
+  "description": "ProseMirror dependency wrapper for Inkstream \u2014 single source of truth for all PM packages",
   "license": "MIT",
   "author": "",
   "keywords": [],
@@ -72,17 +72,39 @@
   },
   "typesVersions": {
     "*": {
-      "model": ["./dist/model.d.ts"],
-      "state": ["./dist/state.d.ts"],
-      "view": ["./dist/view.d.ts"],
-      "commands": ["./dist/commands.d.ts"],
-      "keymap": ["./dist/keymap.d.ts"],
-      "inputrules": ["./dist/inputrules.d.ts"],
-      "history": ["./dist/history.d.ts"],
-      "schema-list": ["./dist/schema-list.d.ts"],
-      "transform": ["./dist/transform.d.ts"],
-      "utils": ["./dist/utils.d.ts"],
-      "tables": ["./dist/tables.d.ts"]
+      "model": [
+        "./dist/model.d.ts"
+      ],
+      "state": [
+        "./dist/state.d.ts"
+      ],
+      "view": [
+        "./dist/view.d.ts"
+      ],
+      "commands": [
+        "./dist/commands.d.ts"
+      ],
+      "keymap": [
+        "./dist/keymap.d.ts"
+      ],
+      "inputrules": [
+        "./dist/inputrules.d.ts"
+      ],
+      "history": [
+        "./dist/history.d.ts"
+      ],
+      "schema-list": [
+        "./dist/schema-list.d.ts"
+      ],
+      "transform": [
+        "./dist/transform.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
+      ],
+      "tables": [
+        "./dist/tables.d.ts"
+      ]
     }
   },
   "dependencies": {
@@ -112,5 +134,8 @@
   "homepage": "https://inkstream.dev",
   "bugs": {
     "url": "https://github.com/inkstream-dev/inkstream-editor/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
