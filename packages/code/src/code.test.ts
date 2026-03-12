@@ -1,5 +1,5 @@
 import { EditorState, TextSelection } from '@inkstream/pm/state';
-import { toggleCode, isCodeActive, codePlugin } from '@inkstream/code';
+import { toggleCode, isCodeActive, codePlugin } from './index';
 import {
   getTestSchema,
   createState,
@@ -10,7 +10,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 const codeMark = schema.marks.code;

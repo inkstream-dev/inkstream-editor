@@ -5,7 +5,7 @@ import {
   unsetHighlight,
   DEFAULT_HIGHLIGHT_PALETTE,
   HighlightColorEntry,
-} from '@inkstream/highlight';
+} from './index';
 import {
   getTestSchema,
   createState,
@@ -15,7 +15,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 const hlMarkType = schema.marks.highlight;

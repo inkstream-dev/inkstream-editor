@@ -13,8 +13,8 @@
  *   - Edge cases
  */
 
-import { superscriptPlugin } from '@inkstream/superscript';
-import { subscriptPlugin } from '@inkstream/subscript';
+import { superscriptPlugin } from './index';
+import { subscriptPlugin } from '../../subscript/src';
 import { toggleMark } from '@inkstream/pm/commands';
 import {
   getTestSchema,
@@ -26,7 +26,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 import { Schema } from '@inkstream/pm/model';
 import { TextSelection } from '@inkstream/pm/state';
 

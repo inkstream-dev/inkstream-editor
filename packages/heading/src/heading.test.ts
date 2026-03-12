@@ -1,8 +1,8 @@
 import { EditorState } from '@inkstream/pm/state';
 import { setBlockType } from '@inkstream/pm/commands';
-import { headingPlugin } from '@inkstream/heading';
-import { setTextColor } from '@inkstream/text-color';
-import type { ToolbarItem } from '../index';
+import { headingPlugin } from './index';
+import { setTextColor } from '../../text-color/src';
+import type { ToolbarItem } from '../../editor-core/src';
 import {
   getTestSchema,
   createState,
@@ -12,7 +12,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 

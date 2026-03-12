@@ -125,12 +125,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -149,12 +158,24 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@inkstream/starter-kit':
+        specifier: workspace:*
+        version: link:../starter-kit
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -173,12 +194,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -197,12 +227,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -402,12 +441,24 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@inkstream/text-color':
+        specifier: workspace:*
+        version: link:../text-color
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -426,12 +477,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -498,12 +558,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -522,12 +591,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -546,12 +624,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -603,12 +690,24 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@inkstream/text-color':
+        specifier: workspace:*
+        version: link:../text-color
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -851,12 +950,24 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@inkstream/superscript':
+        specifier: workspace:*
+        version: link:../superscript
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -875,12 +986,24 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@inkstream/subscript':
+        specifier: workspace:*
+        version: link:../subscript
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -899,12 +1022,21 @@ importers:
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/jest':
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.27
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)
+      ts-jest:
+        specifier: ^29.1.2
+        version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)

@@ -5,7 +5,7 @@ import {
   removeTextColor,
   DEFAULT_TEXT_COLOR_PALETTE,
   ColorEntry,
-} from '@inkstream/text-color';
+} from './index';
 import {
   getTestSchema,
   createState,
@@ -15,7 +15,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 const colorMarkType = schema.marks.textColor;

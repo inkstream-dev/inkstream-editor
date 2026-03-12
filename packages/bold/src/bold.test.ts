@@ -1,4 +1,4 @@
-import { boldPlugin } from '@inkstream/bold';
+import { boldPlugin } from './index';
 import {
   getTestSchema,
   createState,
@@ -9,7 +9,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 import { toggleMark } from '@inkstream/pm/commands';
 
 const schema = getTestSchema();

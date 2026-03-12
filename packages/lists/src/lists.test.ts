@@ -1,15 +1,15 @@
 import { EditorState } from '@inkstream/pm/state';
 import { sinkListItem, liftListItem, splitListItem } from '@inkstream/pm/schema-list';
 import { Node } from '@inkstream/pm/model';
-import { setTextColor } from '@inkstream/text-color';
+import { setTextColor } from '../../text-color/src';
 import {
   listsPlugin,
   toggleBulletList,
   toggleOrderedList,
   isBulletListActive,
   isOrderedListActive,
-} from '@inkstream/lists';
-import { taskListPlugin, toggleTaskList, isTaskListActive } from '@inkstream/lists';
+} from './index';
+import { taskListPlugin, toggleTaskList, isTaskListActive } from './index';
 import {
   getTestSchema,
   createState,
@@ -19,7 +19,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 

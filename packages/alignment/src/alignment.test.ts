@@ -1,5 +1,5 @@
-import { setAlignment, getActiveAlignment, AlignValue } from '@inkstream/alignment';
-import { alignmentPlugin } from '@inkstream/alignment';
+import { setAlignment, getActiveAlignment, AlignValue } from './index';
+import { alignmentPlugin } from './index';
 import {
   getTestSchema,
   createState,
@@ -9,7 +9,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 

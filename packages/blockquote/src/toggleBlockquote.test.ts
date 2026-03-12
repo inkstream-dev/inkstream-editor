@@ -1,6 +1,6 @@
 import { EditorState } from '@inkstream/pm/state';
-import { toggleBlockquote } from '@inkstream/blockquote';
-import { inkstreamSchema, PluginManager } from '../index';
+import { toggleBlockquote } from './index';
+import { inkstreamSchema, PluginManager } from '../../editor-core/src';
 import { availablePlugins } from '@inkstream/starter-kit';
 
 describe('toggleBlockquote', () => {

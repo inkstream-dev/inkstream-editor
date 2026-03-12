@@ -1,6 +1,6 @@
 import { EditorState, TextSelection } from '@inkstream/pm/state';
 import { toggleMark } from '@inkstream/pm/commands';
-import { italicPlugin } from '@inkstream/italic';
+import { italicPlugin } from './index';
 import {
   getTestSchema,
   createState,
@@ -11,7 +11,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 const emMark = schema.marks.em;

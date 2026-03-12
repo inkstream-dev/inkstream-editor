@@ -17,7 +17,7 @@
  * in the current plugin — those require browser/UI testing.
  */
 
-import { imagePlugin, insertImage } from '@inkstream/image';
+import { imagePlugin, insertImage } from './index';
 import {
   getTestSchema,
   createState,
@@ -27,7 +27,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 import { NodeSelection } from '@inkstream/pm/state';
 import { Schema, Node } from '@inkstream/pm/model';
 

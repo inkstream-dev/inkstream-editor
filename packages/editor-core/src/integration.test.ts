@@ -23,8 +23,8 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
-import { PluginManager, inkstreamSchema, inkstreamPlugins } from '../index';
+} from './test-utils';
+import { PluginManager, inkstreamSchema, inkstreamPlugins } from './index';
 import { availablePlugins } from '@inkstream/starter-kit';
 
 const schema = getTestSchema();

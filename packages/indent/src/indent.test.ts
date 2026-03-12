@@ -1,5 +1,5 @@
 import { EditorState } from '@inkstream/pm/state';
-import { indentPlugin } from '@inkstream/indent';
+import { indentPlugin } from './index';
 import {
   getTestSchema,
   createState,
@@ -10,7 +10,7 @@ import {
   p,
   text,
   doc,
-} from '../test-utils';
+} from '../../editor-core/src/test-utils';
 
 const schema = getTestSchema();
 
