@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@inkstream/editor-core": "workspace:^",
+    "@inkstream/image": "workspace:^",
     "@inkstream/link-bubble": "workspace:^",
     "@inkstream/starter-kit": "workspace:^"
   },

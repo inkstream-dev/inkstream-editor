@@ -800,6 +800,9 @@ importers:
       '@inkstream/editor-core':
         specifier: workspace:^
         version: link:../editor-core
+      '@inkstream/image':
+        specifier: workspace:^
+        version: link:../image
       '@inkstream/link-bubble':
         specifier: workspace:^
         version: link:../link-bubble

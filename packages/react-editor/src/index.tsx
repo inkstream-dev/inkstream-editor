@@ -9,14 +9,17 @@ import { availablePlugins } from '@inkstream/starter-kit';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
-import { ImageNodeView } from './ImageNodeView';
+import { imagePluginWithNodeView } from './imagePluginWithNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
 import { EditorStateStore } from './useEditorState';
-import { createRoot } from 'react-dom/client';
 
 // Stable module-level defaults to prevent new object/array references on
 // every render, which would cause useEffect to re-run infinitely.
-const DEFAULT_PLUGINS = Object.values(availablePlugins);
+// The image plugin is replaced with its React-enhanced variant so that the
+// drag-and-drop upload UI is available without any extra configuration.
+const DEFAULT_PLUGINS = Object.values(availablePlugins).map(p =>
+  p.name === 'image' ? imagePluginWithNodeView : p
+);
 const DEFAULT_PLUGIN_OPTIONS: { [key: string]: Record<string, unknown> } = {};
 const DEFAULT_TOOLBAR_LAYOUT: string[] = [];
 
@@ -270,35 +273,7 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
           return false;
         },
       },
-      nodeViews: {
-        image: (node, view, getPos) => new class {
-          dom: HTMLDivElement;
-          root: any;
-
-          constructor() {
-            this.dom = document.createElement('div');
-            this.dom.classList.add('image-node-view-wrapper');
-            this.root = createRoot(this.dom);
-            this.render(node, view, getPos);
-          }
-
-          render(node: any, view: any, getPos: any) {
-            this.root.render(
-              <ImageNodeView node={node} view={view} getPos={getPos} />
-            );
-          }
-
-          update(newNode: any) {
-            if (newNode.type !== node.type) return false;
-            this.render(newNode, view, getPos);
-            return true;
-          }
-
-          destroy() {
-            this.root.unmount();
-          }
-        }()
-      }
+      nodeViews: pluginManager.getNodeViews(),
     });
 
     editorViewRef.current = view;
@@ -393,3 +368,6 @@ export { useLazyPlugins } from './useLazyPlugins';
 export { useLicenseValidation } from './useLicenseValidation';
 export type { UseLicenseValidationOptions, UseLicenseValidationResult } from './useLicenseValidation';
 export { useEditorState, EditorStateStore } from './useEditorState';
+export { ReactNodeViewRenderer } from './ReactNodeViewRenderer';
+export type { NodeViewComponentProps, ReactNodeViewRendererOptions } from './ReactNodeViewRenderer';
+export { imagePluginWithNodeView } from './imagePluginWithNodeView';

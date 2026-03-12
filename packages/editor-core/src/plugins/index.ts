@@ -1,6 +1,6 @@
 import { Schema } from '@inkstream/pm/model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
-import { EditorView } from '@inkstream/pm/view';
+import { EditorView, NodeViewConstructor } from '@inkstream/pm/view';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 import { CommandsMap } from '../commands/types';
@@ -107,6 +107,12 @@ export interface Plugin {
   commands?: CommandsMap;
   /** Global attributes to inject onto existing node/mark types. */
   globalAttributes?: GlobalAttributeDef[];
+  /**
+   * Custom NodeView constructors for this plugin's nodes.
+   * Passed directly to the `EditorView` constructor's `nodeViews` option.
+   * Collected via `PluginManager.getNodeViews()`.
+   */
+  nodeViews?: Record<string, NodeViewConstructor>;
   /** Called once after the EditorView is created. */
   onCreate?: (ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch, after the state is updated. */
@@ -217,5 +223,22 @@ export class PluginManager {
    */
   getGlobalAttributes(): GlobalAttributeDef[] {
     return this.plugins.flatMap(plugin => plugin.globalAttributes ?? []);
+  }
+
+  /**
+   * Aggregates all NodeView constructors from registered plugins into a single
+   * flat map. If two plugins declare a NodeView for the same node type name,
+   * the later-registered plugin's constructor wins.
+   *
+   * Pass the result directly to the `EditorView` constructor:
+   * ```ts
+   * new EditorView(dom, { nodeViews: manager.getNodeViews(), ... });
+   * ```
+   */
+  getNodeViews(): Record<string, NodeViewConstructor> {
+    return this.plugins.reduce((acc, plugin) => {
+      if (plugin.nodeViews) Object.assign(acc, plugin.nodeViews);
+      return acc;
+    }, {} as Record<string, NodeViewConstructor>);
   }
 }

@@ -1,5 +1,6 @@
 import { Schema } from '@inkstream/pm/model';
 import { Plugin as ProseMirrorPlugin } from '@inkstream/pm/state';
+import { NodeViewConstructor } from '@inkstream/pm/view';
 import { ToolbarItem, Plugin, PasteRule, EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleContext } from './index';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
@@ -104,6 +105,26 @@ export interface PluginConfig<TOptions = Record<string, unknown>, TStorage = Rec
    * ```
    */
   addGlobalAttributes?: () => GlobalAttributeDef[];
+  /**
+   * Return a map of node/mark type name → NodeView constructor for this
+   * plugin's custom DOM rendering. Collected by `PluginManager.getNodeViews()`
+   * and passed directly to the `EditorView` constructor's `nodeViews` option.
+   *
+   * Use `ReactNodeViewRenderer` from `@inkstream/react-editor` to wrap a React
+   * component as a NodeView constructor without manual DOM management.
+   *
+   * Example (framework-agnostic):
+   * ```ts
+   * addNodeViews: () => ({
+   *   myNode: (node, view, getPos) => {
+   *     const dom = document.createElement('div');
+   *     // … render into dom …
+   *     return { dom, update: (newNode) => true, destroy: () => {} };
+   *   },
+   * }),
+   * ```
+   */
+  addNodeViews?: () => Record<string, NodeViewConstructor>;
   /** Called once after the EditorView is created. `this.options` and `this.storage` are available. */
   onCreate?: (this: PluginContext<TOptions, TStorage>, ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch. `this.options` and `this.storage` are available. */
@@ -203,6 +224,9 @@ export function createPlugin<
       : undefined,
     globalAttributes: config.addGlobalAttributes
       ? config.addGlobalAttributes()
+      : undefined,
+    nodeViews: config.addNodeViews
+      ? config.addNodeViews()
       : undefined,
     onCreate: config.onCreate
       ? (ctx) => config.onCreate!.call(makeContext(), ctx)
