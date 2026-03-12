@@ -121,6 +121,7 @@ export const inkstreamPlugins = (plugins: Plugin[]) => {
 };
 
 export type { Plugin, ToolbarItem };
+export type { EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleContext } from './plugins';
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
 export type { PluginContext, PluginConfig } from './plugins/plugin-factory';

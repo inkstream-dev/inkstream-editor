@@ -161,15 +161,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const onEditorReadyRef = useRef(onEditorReady);
   useEffect(() => { onEditorReadyRef.current = onEditorReady; });
 
+  // Stable ref to the current set of validated plugins so lifecycle hooks
+  // (onUpdate, onFocus, onBlur) can be called from stable callbacks without
+  // appearing in their dependency arrays.
+  const validatedPluginsRef = useRef<Plugin[]>(validatedPlugins);
+  useEffect(() => { validatedPluginsRef.current = validatedPlugins; });
+
   // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
   // and then notifying the store so subscribed toolbar buttons can re-render independently.
   const handleDispatchTransaction = useCallback((transaction: Transaction) => {
     if (editorViewRef.current) {
-      const newState = editorViewRef.current.state.apply(transaction);
+      const prevState = editorViewRef.current.state;
+      const newState = prevState.apply(transaction);
       editorViewRef.current.updateState(newState);
       // Notify all subscribers (toolbar buttons) — each decides independently
       // whether to re-render based on their selector's return value.
       storeRef.current?.update(newState);
+      // Call onUpdate lifecycle hooks for all active plugins.
+      validatedPluginsRef.current.forEach(p =>
+        p.onUpdate?.({ view: editorViewRef.current!, state: newState, prevState, tr: transaction })
+      );
       if (onChangeRef.current && transaction.docChanged) {
         const div = document.createElement('div');
         const fragment = DOMSerializer.fromSchema(newState.schema).serializeFragment(newState.doc.content);
@@ -218,6 +229,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const view = new EditorView(editorRef.current, {
       state,
       dispatchTransaction: handleDispatchTransaction,
+      handleDOMEvents: {
+        focus: (v, event) => {
+          validatedPluginsRef.current.forEach(p => p.onFocus?.({ view: v, event }));
+          return false;
+        },
+        blur: (v, event) => {
+          validatedPluginsRef.current.forEach(p => p.onBlur?.({ view: v, event }));
+          return false;
+        },
+      },
       nodeViews: {
         image: (node, view, getPos) => new class {
           dom: HTMLDivElement;
@@ -256,9 +277,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     // Trigger one React re-render so Toolbar receives editorView prop.
     setEditorView(view);
     onEditorReadyRef.current?.(view);
+    // Call onCreate lifecycle hooks for all active plugins.
+    pluginState.validatedPlugins.forEach(p => p.onCreate?.({ view }));
 
     // Destroy the EditorView when schema/plugins change or component unmounts.
     return () => {
+      // Call onDestroy lifecycle hooks before tearing down the editor.
+      pluginState.validatedPlugins.forEach(p => p.onDestroy?.());
       if (editorViewRef.current) {
         editorViewRef.current.destroy();
         editorViewRef.current = null;

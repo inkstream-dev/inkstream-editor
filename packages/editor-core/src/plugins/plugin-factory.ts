@@ -1,6 +1,6 @@
 import { Schema } from '@inkstream/pm/model';
 import { Plugin as ProseMirrorPlugin } from '@inkstream/pm/state';
-import { ToolbarItem, Plugin } from './index';
+import { ToolbarItem, Plugin, EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleContext } from './index';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 
@@ -41,6 +41,16 @@ export interface PluginConfig<TOptions = Record<string, unknown>> {
   getToolbarItems?: (this: PluginContext<TOptions>, schema: Schema, options: TOptions) => ToolbarItem[];
   getInputRules?: (this: PluginContext<TOptions>, schema: Schema) => InputRule[];
   getKeymap?: (this: PluginContext<TOptions>, schema: Schema) => { [key: string]: any };
+  /** Called once after the EditorView is created. `this.options` is available. */
+  onCreate?: (this: PluginContext<TOptions>, ctx: EditorLifecycleContext) => void;
+  /** Called on every transaction dispatch. `this.options` is available. */
+  onUpdate?: (this: PluginContext<TOptions>, ctx: UpdateLifecycleContext) => void;
+  /** Called before the EditorView is destroyed. `this.options` is available. */
+  onDestroy?: (this: PluginContext<TOptions>) => void;
+  /** Called when the editor gains focus. `this.options` is available. */
+  onFocus?: (this: PluginContext<TOptions>, ctx: FocusLifecycleContext) => void;
+  /** Called when the editor loses focus. `this.options` is available. */
+  onBlur?: (this: PluginContext<TOptions>, ctx: FocusLifecycleContext) => void;
 }
 
 /**
@@ -82,5 +92,20 @@ export function createPlugin<TOptions = Record<string, unknown>>(
     getKeymap: config.getKeymap
       ? (schema) => config.getKeymap!.call(makeContext(), schema)
       : () => ({}),
+    onCreate: config.onCreate
+      ? (ctx) => config.onCreate!.call(makeContext(), ctx)
+      : undefined,
+    onUpdate: config.onUpdate
+      ? (ctx) => config.onUpdate!.call(makeContext(), ctx)
+      : undefined,
+    onDestroy: config.onDestroy
+      ? () => config.onDestroy!.call(makeContext())
+      : undefined,
+    onFocus: config.onFocus
+      ? (ctx) => config.onFocus!.call(makeContext(), ctx)
+      : undefined,
+    onBlur: config.onBlur
+      ? (ctx) => config.onBlur!.call(makeContext(), ctx)
+      : undefined,
   };
 }

@@ -5,6 +5,30 @@ import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 
 
+/** Context passed to `onCreate` and the argument to `onFocus`/`onBlur` base. */
+export interface EditorLifecycleContext {
+  /** The live EditorView instance. */
+  view: EditorView;
+}
+
+/** Context passed to `onUpdate` on every transaction dispatch. */
+export interface UpdateLifecycleContext {
+  view: EditorView;
+  /** The new editor state after the transaction was applied. */
+  state: EditorState;
+  /** The editor state before the transaction was applied. */
+  prevState: EditorState;
+  /** The transaction that was dispatched. */
+  tr: Transaction;
+}
+
+/** Context passed to `onFocus` and `onBlur`. */
+export interface FocusLifecycleContext {
+  view: EditorView;
+  /** The raw DOM focus/blur event. */
+  event: Event;
+}
+
 export interface ToolbarItem {
   id: string;
   icon?: string; // Or a React component, for now a string (optional when iconHtml is used)
@@ -46,6 +70,16 @@ export interface Plugin {
   getToolbarItems?: (schema: Schema, options?: Record<string, unknown>) => ToolbarItem[];
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
+  /** Called once after the EditorView is created. */
+  onCreate?: (ctx: EditorLifecycleContext) => void;
+  /** Called on every transaction dispatch, after the state is updated. */
+  onUpdate?: (ctx: UpdateLifecycleContext) => void;
+  /** Called before the EditorView is destroyed. */
+  onDestroy?: () => void;
+  /** Called when the editor gains focus. */
+  onFocus?: (ctx: FocusLifecycleContext) => void;
+  /** Called when the editor loses focus. */
+  onBlur?: (ctx: FocusLifecycleContext) => void;
 }
 
 
