@@ -14,6 +14,18 @@ const svgUnderline = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16
 
 export const underlinePlugin = createPlugin({
   name: 'underline',
+
+  marks: {
+    underline: {
+      parseDOM: [
+        { tag: 'u' },
+        { style: 'text-decoration=underline' },
+        { style: 'text-decoration-line=underline' },
+      ],
+      toDOM() { return ['u', 0]; },
+    },
+  },
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-u': toggleMark(schema.marks.underline) };
   },

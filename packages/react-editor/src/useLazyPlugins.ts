@@ -129,7 +129,7 @@ export function useLazyPlugins(options: UseLazyPluginsOptions): UseLazyPluginsRe
     };
 
     loadPlugins();
-  }, [effectiveTier]); // Depend on server-validated tier, not raw licenseKey
+  }, [effectiveTier, lazyPlugins]); // Depend on server-validated tier and plugin config
 
   return { loadedPlugins, isLoading, error };
 }

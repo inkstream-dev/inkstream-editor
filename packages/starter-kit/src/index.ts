@@ -63,6 +63,9 @@ export { listsPlugin, taskListPlugin, bulletListPlugin, orderedListPlugin, listI
 // Utilities
 export { historyPlugin } from '@inkstream/history';
 
+// Link with bubble editor UI
+export { linkBubbleWrapperPlugin } from '@inkstream/link-bubble';
+
 // Heading — from @inkstream/heading (full plugin with toolbar + keymap)
 export { headingPlugin } from '@inkstream/heading';
 
@@ -82,6 +85,7 @@ import { indentPlugin } from '@inkstream/indent';
 import { imagePlugin } from '@inkstream/image';
 import { horizontalRulePlugin } from '@inkstream/horizontal-rule';
 import { historyPlugin } from '@inkstream/history';
+import { linkBubbleWrapperPlugin } from '@inkstream/link-bubble';
 import { textColorPlugin } from '@inkstream/text-color';
 import { highlightPlugin } from '@inkstream/highlight';
 import { codeBlockPlugin } from '@inkstream/code-block';
@@ -126,6 +130,7 @@ export const availablePlugins = {
   superscript: superscriptPlugin,
   subscript: subscriptPlugin,
   history: historyPlugin,
+  linkBubble: linkBubbleWrapperPlugin,
 };
 
 /**

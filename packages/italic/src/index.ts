@@ -17,6 +17,17 @@ const svgItalic = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" w
 export const italicPlugin = createPlugin({
   name: 'italic',
 
+  marks: {
+    em: {
+      parseDOM: [
+        { tag: 'em' },
+        { tag: 'i' },
+        { style: 'font-style=italic' },
+      ],
+      toDOM() { return ['em', 0]; },
+    },
+  },
+
   getInputRules: (schema: Schema): InputRule[] => [
     // *text* — single asterisk (not preceded/followed by asterisk, avoids bold overlap)
     new InputRule(/(?<!\*)\*([^*]+)\*$/, (state, match, start, end) => {

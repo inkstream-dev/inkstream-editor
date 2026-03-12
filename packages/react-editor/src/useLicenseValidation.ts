@@ -42,20 +42,24 @@ export function useLicenseValidation({
   licenseKey,
   validationEndpoint,
 }: UseLicenseValidationOptions): UseLicenseValidationResult {
-  // SSR guard — this hook must not attempt DOM or fetch operations on the server.
-  // The editor itself is client-only, so this is a safety net for edge cases
-  // where the hook is evaluated before hydration.
-  if (typeof window === 'undefined') {
-    return { tier: 'free', isValidating: false, error: null };
-  }
   const [tier, setTier] = useState<LicenseTier>('free');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // SSR guard — the editor is client-only, but keep the hook order stable
+    // and skip network work when evaluated before hydration.
+    if (typeof window === 'undefined') {
+      setTier('free');
+      setIsValidating(false);
+      setError(null);
+      return;
+    }
+
     // No key — stay on free tier
     if (!licenseKey) {
       setTier('free');
+      setIsValidating(false);
       setError(null);
       return;
     }
@@ -64,6 +68,7 @@ export function useLicenseValidation({
     // This does NOT grant access — it only avoids an unnecessary round-trip.
     if (!LicenseManager.isValidKeyFormat(licenseKey)) {
       setTier('free');
+      setIsValidating(false);
       setError('Invalid license key format');
       return;
     }
@@ -72,6 +77,7 @@ export function useLicenseValidation({
     // We will never unlock paid features based on the key string alone.
     if (!validationEndpoint) {
       setTier('free');
+      setIsValidating(false);
       setError(null);
       return;
     }
@@ -80,6 +86,7 @@ export function useLicenseValidation({
     const cached = validationCache.get(licenseKey);
     if (cached && Date.now() < cached.expiresAt) {
       setTier(cached.tier);
+      setIsValidating(false);
       setError(null);
       return;
     }

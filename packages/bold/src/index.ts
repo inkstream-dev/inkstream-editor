@@ -1,5 +1,5 @@
 import { createPlugin } from '@inkstream/editor-core';
-import { Schema } from '@inkstream/pm/model';
+import { Schema, Mark } from '@inkstream/pm/model';
 import { EditorState } from '@inkstream/pm/state';
 import { toggleMark } from '@inkstream/pm/commands';
 import { InputRule } from '@inkstream/pm/inputrules';
@@ -27,6 +27,30 @@ function markInputRule(regexp: RegExp, markType: any) {
 
 export const boldPlugin = createPlugin({
   name: 'bold',
+
+  marks: {
+    strong: {
+      parseDOM: [
+        { tag: 'strong' },
+        {
+          tag: 'b',
+          getAttrs: (node: Node | string) =>
+            (node as HTMLElement).style?.fontWeight !== 'normal' ? null : false,
+        },
+        {
+          style: 'font-weight=400',
+          clearMark: (m: Mark) => m.type.name === 'strong',
+        },
+        {
+          style: 'font-weight',
+          getAttrs: (value: Node | string) =>
+            /^(bold(er)?|[5-9]\d{2,})$/.test(value as string) ? null : false,
+        },
+      ],
+      toDOM() { return ['strong', 0]; },
+    },
+  },
+
   getInputRules: (schema: Schema): InputRule[] => {
     return [
       markInputRule(/\*\*([^*]+)\*\*$/, schema.marks.strong),

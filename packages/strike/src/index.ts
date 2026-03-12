@@ -15,6 +15,20 @@ const svgStrike = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" w
 
 export const strikePlugin = createPlugin({
   name: 'strike',
+
+  marks: {
+    strike: {
+      parseDOM: [
+        { tag: 's' },
+        { tag: 'del' },
+        { tag: 'strike' },
+        { style: 'text-decoration=line-through' },
+        { style: 'text-decoration-line=line-through' },
+      ],
+      toDOM() { return ['s', 0]; },
+    },
+  },
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-Shift-s': toggleMark(schema.marks.strike) };
   },

@@ -44,7 +44,8 @@
     "@inkstream/superscript": "^0.1.0",
     "@inkstream/subscript": "^0.1.0",
     "@inkstream/lists": "^0.1.0",
-    "@inkstream/heading": "^0.1.0"
+    "@inkstream/heading": "^0.1.0",
+    "@inkstream/link-bubble": "^0.1.5"
   },
   "devDependencies": {
     "@inkstream/editor-core": "workspace:*",
@@ -70,6 +71,7 @@
     "@inkstream/subscript": "workspace:*",
     "@inkstream/lists": "workspace:*",
     "@inkstream/heading": "workspace:*",
+    "@inkstream/link-bubble": "workspace:*",
     "@types/node": "^20.11.5",
     "eslint": "^8.56.0",
     "tsup": "^8.5.1",
