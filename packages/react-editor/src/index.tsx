@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { EditorState, Transaction } from '@inkstream/pm/state';
 import { EditorView } from '@inkstream/pm/view';
 import { DOMParser, DOMSerializer, Schema } from '@inkstream/pm/model';
-import { inkstreamSchema, PluginManager, Plugin, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap } from '@inkstream/editor-core';
+import { inkstreamSchema, PluginManager, Plugin, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap, buildPastePlugin } from '@inkstream/editor-core';
 import { availablePlugins } from '@inkstream/starter-kit';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
@@ -142,6 +142,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       ...manager.getProseMirrorPlugins(editorSchema),
       buildInputRules(editorSchema),
       buildKeymap(editorSchema, manager),
+      buildPastePlugin(manager.getPasteRules(editorSchema)),
     ];
 
     return {

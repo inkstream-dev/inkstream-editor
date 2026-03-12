@@ -5,6 +5,30 @@ import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 
 
+/**
+ * A rule that runs against text content immediately after a paste operation.
+ * Rules are applied only to the newly inserted range; existing document
+ * content is never affected.
+ */
+export interface PasteRule {
+  /** Regular expression to match in pasted text nodes. */
+  find: RegExp;
+  /**
+   * Called for each match found in the pasted content.
+   * Mutate `tr` to apply document changes (add/remove marks, replace text, etc.).
+   * `from`/`to` are positions in `state.doc`.
+   */
+  handler: (props: {
+    state: EditorState;
+    tr: Transaction;
+    match: RegExpExecArray;
+    /** Start of the match in the document. */
+    from: number;
+    /** End of the match in the document. */
+    to: number;
+  }) => void;
+}
+
 /** Context passed to `onCreate` and the argument to `onFocus`/`onBlur` base. */
 export interface EditorLifecycleContext {
   /** The live EditorView instance. */
@@ -70,6 +94,10 @@ export interface Plugin {
   getToolbarItems?: (schema: Schema, options?: Record<string, unknown>) => ToolbarItem[];
   getInputRules?: (schema: Schema) => InputRule[];
   getKeymap?: (schema: Schema) => { [key: string]: any };
+  /** Paste-time patterns applied to newly pasted content. */
+  getPasteRules?: (schema: Schema) => PasteRule[];
+  /** Mutable per-instance storage initialised by `addStorage()`. */
+  storage?: unknown;
   /** Called once after the EditorView is created. */
   onCreate?: (ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch, after the state is updated. */
@@ -145,6 +173,12 @@ export class PluginManager {
       }
       return marks;
     }, {});
+  }
+
+  getPasteRules(schema: Schema): PasteRule[] {
+    return this.plugins.flatMap(plugin =>
+      plugin.getPasteRules ? plugin.getPasteRules(schema) : []
+    );
   }
 
   getPlugin(name: string): Plugin | undefined {

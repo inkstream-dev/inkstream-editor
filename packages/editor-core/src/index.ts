@@ -121,7 +121,9 @@ export const inkstreamPlugins = (plugins: Plugin[]) => {
 };
 
 export type { Plugin, ToolbarItem };
+export type { PasteRule } from './plugins';
 export type { EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleContext } from './plugins';
+export { buildPastePlugin } from './paste-rules';
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
 export type { PluginContext, PluginConfig } from './plugins/plugin-factory';
