@@ -1,6 +1,6 @@
 {
   "name": "@inkstream/pm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ProseMirror dependency wrapper for Inkstream \u2014 single source of truth for all PM packages",
   "license": "MIT",
   "author": "",
