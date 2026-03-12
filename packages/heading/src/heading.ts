@@ -73,6 +73,35 @@ export const headingPlugin = createPlugin({
     return keys;
   },
 
+  addCommands() {
+    return {
+      /**
+       * Set the current block to a heading of the given level (1–6).
+       * If the block is already a heading of that level, converts it to a paragraph.
+       */
+      setHeading: (level: number) => ({ state, dispatch }) => {
+        const headingType = state.schema.nodes.heading;
+        if (!headingType) return false;
+        const { $from } = state.selection;
+        const isActive =
+          $from.parent.type === headingType &&
+          $from.parent.attrs.level === level;
+        if (isActive) {
+          const paragraphType = state.schema.nodes.paragraph;
+          if (!paragraphType) return false;
+          return setBlockType(paragraphType)(state, dispatch);
+        }
+        return setBlockType(headingType, { level })(state, dispatch);
+      },
+      /** Convert the current block to a paragraph (heading level 0). */
+      setParagraph: () => ({ state, dispatch }) => {
+        const paragraphType = state.schema.nodes.paragraph;
+        if (!paragraphType) return false;
+        return setBlockType(paragraphType)(state, dispatch);
+      },
+    };
+  },
+
   getToolbarItems: (schema: Schema): ToolbarItem[] => {
     const items: ToolbarItem[] = [];
 

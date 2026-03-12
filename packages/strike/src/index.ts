@@ -29,6 +29,13 @@ export const strikePlugin = createPlugin({
     },
   },
 
+  addCommands() {
+    return {
+      toggleStrike: () => ({ state, dispatch }) =>
+        toggleMark(state.schema.marks.strike)(state, dispatch),
+    };
+  },
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-Shift-s': toggleMark(schema.marks.strike) };
   },

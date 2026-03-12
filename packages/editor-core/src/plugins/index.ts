@@ -3,6 +3,7 @@ import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstrea
 import { EditorView } from '@inkstream/pm/view';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
+import { CommandsMap } from '../commands/types';
 
 
 /**
@@ -98,6 +99,11 @@ export interface Plugin {
   getPasteRules?: (schema: Schema) => PasteRule[];
   /** Mutable per-instance storage initialised by `addStorage()`. */
   storage?: unknown;
+  /**
+   * Named commands exposed via `editor.chain()` / `editor.can()`.
+   * Keyed by command name (e.g. `'toggleBold'`, `'setHeading'`).
+   */
+  commands?: CommandsMap;
   /** Called once after the EditorView is created. */
   onCreate?: (ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch, after the state is updated. */
@@ -187,5 +193,17 @@ export class PluginManager {
 
   getPlugins(): Plugin[] {
     return Array.from(this.pluginRegistry.values());
+  }
+
+  /**
+   * Aggregates all commands registered by plugins into a single flat map.
+   * If two plugins declare a command with the same name, the later-registered
+   * plugin's command wins.
+   */
+  getCommands(): CommandsMap {
+    return this.plugins.reduce((acc, plugin) => {
+      if (plugin.commands) Object.assign(acc, plugin.commands);
+      return acc;
+    }, {} as CommandsMap);
   }
 }

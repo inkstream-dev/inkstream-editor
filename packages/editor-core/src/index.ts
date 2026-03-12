@@ -127,6 +127,9 @@ export { buildPastePlugin } from './paste-rules';
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
 export type { PluginContext, PluginConfig } from './plugins/plugin-factory';
+export { CommandChain } from './commands/chain';
+export type { ChainedCommands } from './commands/chain';
+export type { CommandProps, CommandFunction, CommandCreator, CommandsMap } from './commands/types';
 
 // ProseMirror helper utilities — needed by plugin packages (e.g. @inkstream/lists)
 export { findParentNode, getNodeType, isList } from './helpers/prosemirror';

@@ -26,6 +26,13 @@ export const underlinePlugin = createPlugin({
     },
   },
 
+  addCommands() {
+    return {
+      toggleUnderline: () => ({ state, dispatch }) =>
+        toggleMark(state.schema.marks.underline)(state, dispatch),
+    };
+  },
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-u': toggleMark(schema.marks.underline) };
   },

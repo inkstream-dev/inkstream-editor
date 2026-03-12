@@ -3,6 +3,7 @@ import { Plugin as ProseMirrorPlugin } from '@inkstream/pm/state';
 import { ToolbarItem, Plugin, PasteRule, EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleContext } from './index';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
+import { CommandsMap } from '../commands/types';
 
 /**
  * The `this` context bound to every plugin method when called through
@@ -54,6 +55,30 @@ export interface PluginConfig<TOptions = Record<string, unknown>, TStorage = Rec
   getKeymap?: (this: PluginContext<TOptions, TStorage>, schema: Schema) => { [key: string]: any };
   /** Return paste-time rules applied only to newly inserted content. */
   getPasteRules?: (this: PluginContext<TOptions, TStorage>, schema: Schema) => PasteRule[];
+  /**
+   * Return a map of named commands exposed via `editor.chain()` / `editor.can()`.
+   *
+   * Each key is the public command name; the value is a **creator** function
+   * that accepts optional arguments and returns the command function.
+   * The command function receives `{ state, dispatch, view, tr }` and returns
+   * a boolean indicating success.
+   *
+   * Using `state.schema` inside the command body is the recommended way to
+   * access marks and nodes — no need to capture `schema` upfront.
+   *
+   * Example:
+   * ```ts
+   * addCommands() {
+   *   return {
+   *     toggleBold: () => ({ state, dispatch }) =>
+   *       toggleMark(state.schema.marks.strong)(state, dispatch),
+   *     setHeading: (level: number) => ({ state, dispatch }) =>
+   *       setBlockType(state.schema.nodes.heading, { level })(state, dispatch),
+   *   };
+   * }
+   * ```
+   */
+  addCommands?: (this: PluginContext<TOptions, TStorage>) => CommandsMap;
   /** Called once after the EditorView is created. `this.options` and `this.storage` are available. */
   onCreate?: (this: PluginContext<TOptions, TStorage>, ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch. `this.options` and `this.storage` are available. */
@@ -114,6 +139,9 @@ export function createPlugin<
       : () => ({}),
     getPasteRules: config.getPasteRules
       ? (schema) => config.getPasteRules!.call(makeContext(), schema)
+      : undefined,
+    commands: config.addCommands
+      ? config.addCommands.call(makeContext())
       : undefined,
     onCreate: config.onCreate
       ? (ctx) => config.onCreate!.call(makeContext(), ctx)

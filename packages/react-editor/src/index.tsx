@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { EditorState, Transaction } from '@inkstream/pm/state';
 import { EditorView } from '@inkstream/pm/view';
 import { DOMParser, DOMSerializer, Schema } from '@inkstream/pm/model';
-import { inkstreamSchema, PluginManager, Plugin, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap, buildPastePlugin } from '@inkstream/editor-core';
+import { inkstreamSchema, PluginManager, Plugin, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap, buildPastePlugin, CommandChain, ChainedCommands } from '@inkstream/editor-core';
 import { availablePlugins } from '@inkstream/starter-kit';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
@@ -22,6 +22,36 @@ const DEFAULT_TOOLBAR_LAYOUT: string[] = [];
 
 /** Controls which colour scheme the editor uses. */
 export type ThemeMode = 'auto' | 'light' | 'dark';
+
+/**
+ * Ref handle returned by `<RichTextEditor ref={...} />`.
+ *
+ * Provides programmatic access to the editor's command API:
+ *
+ * ```tsx
+ * const editorRef = useRef<EditorRef>(null);
+ *
+ * // Execute commands
+ * editorRef.current?.chain().toggleBold().focus().run();
+ *
+ * // Dry-run check (no state mutation)
+ * const canBold = editorRef.current?.can().toggleBold().run();
+ * ```
+ */
+export interface EditorRef {
+  /**
+   * Build a chainable command chain. Commands are executed sequentially
+   * when `.run()` is called.
+   */
+  chain(): ChainedCommands;
+  /**
+   * Build a dry-run chain. Commands test feasibility (dispatch is undefined)
+   * and never mutate editor state. Returns `true` if all commands would succeed.
+   */
+  can(): ChainedCommands;
+  /** Direct access to the live EditorView, or `null` before the editor mounts. */
+  getView(): EditorView | null;
+}
 
 interface RichTextEditorProps {
   initialContent: string;
@@ -59,7 +89,7 @@ interface RichTextEditorProps {
   onThemeChange?: (theme: ThemeMode) => void;
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(function RichTextEditor({ 
   initialContent, 
   plugins = DEFAULT_PLUGINS,
   pluginOptions = DEFAULT_PLUGIN_OPTIONS,
@@ -72,7 +102,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   theme,
   showThemeToggle = false,
   onThemeChange,
-}) => {
+}, ref) {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   // Per-transaction notification store — toolbar buttons subscribe to this
@@ -321,6 +351,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setToolbarItems(orderedToolbarItems);
   }, [pluginManager, schema, pluginOptions, toolbarLayout]);
 
+  // Expose chain() / can() / getView() on the forwarded ref.
+  useImperativeHandle(ref, () => ({
+    chain(): ChainedCommands {
+      return new CommandChain(
+        () => editorViewRef.current,
+        pluginManager.getCommands(),
+        false,
+      ) as ChainedCommands;
+    },
+    can(): ChainedCommands {
+      return new CommandChain(
+        () => editorViewRef.current,
+        pluginManager.getCommands(),
+        true,
+      ) as ChainedCommands;
+    },
+    getView(): EditorView | null {
+      return editorViewRef.current;
+    },
+  }), [pluginManager]);
+
   return (
     <div className={wrapperClass}>
       <Toolbar
@@ -333,7 +384,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div ref={editorRef} className="inkstream-editor" />
     </div>
   );
-};
+});
 
 export * from './EditorWithTableDialog';
 export { TablePropertiesDialog } from './TablePropertiesDialog';

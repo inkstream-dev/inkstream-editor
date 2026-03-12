@@ -41,6 +41,13 @@ export const italicPlugin = createPlugin({
     }),
   ],
 
+  addCommands() {
+    return {
+      toggleItalic: () => ({ state, dispatch }) =>
+        toggleMark(state.schema.marks.em)(state, dispatch),
+    };
+  },
+
   getKeymap: (schema: Schema) => {
     return { 'Mod-i': toggleMark(schema.marks.em) };
   },

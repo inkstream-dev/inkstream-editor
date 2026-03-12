@@ -57,6 +57,12 @@ export const boldPlugin = createPlugin({
       markInputRule(/__([^_]+)__$/, schema.marks.strong),
     ];
   },
+  addCommands() {
+    return {
+      toggleBold: () => ({ state, dispatch }) =>
+        toggleMark(state.schema.marks.strong)(state, dispatch),
+    };
+  },
   getKeymap: (schema: Schema) => {
     return { 'Mod-b': toggleMark(schema.marks.strong) };
   },
