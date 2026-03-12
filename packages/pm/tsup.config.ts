@@ -12,6 +12,7 @@ export default defineConfig({
     'schema-list': 'src/schema-list.ts',
     transform: 'src/transform.ts',
     utils: 'src/utils.ts',
+    tables: 'src/tables.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,

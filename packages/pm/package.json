@@ -63,6 +63,11 @@
       "import": "./dist/utils.mjs",
       "require": "./dist/utils.js"
     },
+    "./tables": {
+      "types": "./dist/tables.d.ts",
+      "import": "./dist/tables.mjs",
+      "require": "./dist/tables.js"
+    },
     "./package.json": "./package.json"
   },
   "typesVersions": {
@@ -76,7 +81,8 @@
       "history": ["./dist/history.d.ts"],
       "schema-list": ["./dist/schema-list.d.ts"],
       "transform": ["./dist/transform.d.ts"],
-      "utils": ["./dist/utils.d.ts"]
+      "utils": ["./dist/utils.d.ts"],
+      "tables": ["./dist/tables.d.ts"]
     }
   },
   "dependencies": {
@@ -88,6 +94,7 @@
     "prosemirror-schema-list": "^1.5.1",
     "prosemirror-state": "^1.4.0",
     "prosemirror-view": "^1.32.2",
+    "prosemirror-tables": "^1.8.5",
     "prosemirror-transform": "^1.3.2",
     "prosemirror-utils": "^1.0.4"
   },
