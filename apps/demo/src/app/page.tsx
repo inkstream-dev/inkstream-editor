@@ -1,6 +1,6 @@
 "use client";
 
-import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
+import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation, imagePluginWithNodeView } from "@inkstream/react-editor";
 import type { EditorHandle } from "@inkstream/react-editor";
 import type { Plugin } from "@inkstream/editor-core";
 import { availablePlugins } from "@inkstream/starter-kit";
@@ -69,7 +69,7 @@ export default function Home() {
     availablePlugins.lists,
     availablePlugins.taskList,
     availablePlugins.codeBlock,
-    availablePlugins.image,
+    imagePluginWithNodeView,
     availablePlugins.textColor,
     availablePlugins.highlight,
     availablePlugins.superscript,

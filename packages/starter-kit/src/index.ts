@@ -113,6 +113,11 @@ export const availablePlugins = {
   strike: strikePlugin,
   // Unified alignment plugin (all 4 alignments + SVG icons + keyboard shortcuts)
   alignment: alignmentPlugin,
+  /**
+   * Framework-agnostic image node (schema + toolbar button only).
+   * When using `@inkstream/react-editor`, use `imagePluginWithNodeView` from
+   * that package instead to get the drag-and-drop upload UI.
+   */
   image: imagePlugin,
   indent: indentPlugin,
   // Unified list plugin (replaces bulletList + orderedList + listItem)
