@@ -126,7 +126,7 @@ export type { EditorLifecycleContext, UpdateLifecycleContext, FocusLifecycleCont
 export { buildPastePlugin } from './paste-rules';
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
-export type { PluginContext, PluginConfig } from './plugins/plugin-factory';
+export type { PluginContext, PluginConfig, ExtendablePlugin } from './plugins/plugin-factory';
 export { CommandChain } from './commands/chain';
 export type { ChainedCommands } from './commands/chain';
 export type { CommandProps, CommandFunction, CommandCreator, CommandsMap } from './commands/types';

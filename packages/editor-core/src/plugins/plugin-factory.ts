@@ -92,16 +92,49 @@ export interface PluginConfig<TOptions = Record<string, unknown>, TStorage = Rec
 }
 
 /**
+ * A plugin returned by `createPlugin()`. Identical to `Plugin` but exposes
+ * an `extend()` method that creates a child plugin by shallow-merging an
+ * override config on top of this plugin's config.
+ *
+ * Any field provided in `overrides` replaces the parent's value; omitted
+ * fields are inherited as-is. `name` is optional — it defaults to the
+ * parent's name if not supplied.
+ *
+ * ```ts
+ * import { boldPlugin } from '@inkstream/bold';
+ *
+ * const customBold = boldPlugin.extend({
+ *   name: 'custom-bold',
+ *   getKeymap: (schema) => ({
+ *     'Mod-b':  toggleMark(schema.marks.strong),
+ *     'Ctrl-b': toggleMark(schema.marks.strong),
+ *   }),
+ * });
+ * ```
+ */
+export type ExtendablePlugin<
+  TOptions = Record<string, unknown>,
+  TStorage = Record<string, unknown>,
+> = Plugin & {
+  extend<TNewOptions = TOptions, TNewStorage = TStorage>(
+    overrides: Partial<PluginConfig<TNewOptions, TNewStorage>>,
+  ): ExtendablePlugin<TNewOptions, TNewStorage>;
+};
+
+/**
  * Creates a typed plugin. Supply `TOptions` and (optionally) `TStorage`
  * generics to get autocomplete on `this.options` / `this.storage` inside
  * method bodies and on the `pluginOptions[name]` consumer-facing prop.
+ *
+ * The returned plugin has an `extend()` method that allows creating child
+ * plugins by overriding specific config fields (see `ExtendablePlugin`).
  */
 export function createPlugin<
   TOptions = Record<string, unknown>,
   TStorage = Record<string, unknown>,
 >(
   config: PluginConfig<TOptions, TStorage>,
-): Plugin {
+): ExtendablePlugin<TOptions, TStorage> {
   const defaultOptions: TOptions = config.addOptions ? config.addOptions() : ({} as TOptions);
   // Storage is created once per plugin instance and mutated in place.
   const storage: TStorage = config.addStorage ? config.addStorage() : ({} as TStorage);
@@ -158,5 +191,16 @@ export function createPlugin<
     onBlur: config.onBlur
       ? (ctx) => config.onBlur!.call(makeContext(), ctx)
       : undefined,
+    extend<TNewOptions = TOptions, TNewStorage = TStorage>(
+      overrides: Partial<PluginConfig<TNewOptions, TNewStorage>>,
+    ): ExtendablePlugin<TNewOptions, TNewStorage> {
+      // Shallow-merge: child fields replace parent fields; omitted fields are
+      // inherited from the parent config via the closure.
+      const mergedConfig: PluginConfig<TNewOptions, TNewStorage> = {
+        ...(config as unknown as PluginConfig<TNewOptions, TNewStorage>),
+        ...overrides,
+      };
+      return createPlugin<TNewOptions, TNewStorage>(mergedConfig);
+    },
   };
 }
