@@ -4,6 +4,7 @@ import { ToolbarItem, Plugin, PasteRule, EditorLifecycleContext, UpdateLifecycle
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 import { CommandsMap } from '../commands/types';
+import { GlobalAttributeDef } from '../global-attributes';
 
 /**
  * The `this` context bound to every plugin method when called through
@@ -79,6 +80,30 @@ export interface PluginConfig<TOptions = Record<string, unknown>, TStorage = Rec
    * ```
    */
   addCommands?: (this: PluginContext<TOptions, TStorage>) => CommandsMap;
+  /**
+   * Return a list of global attribute definitions to inject onto existing
+   * node/mark types. Each definition specifies which types receive the
+   * attributes and how they are extracted from / serialised into the DOM.
+   *
+   * Global attributes are merged into the node/mark specs **before** the
+   * ProseMirror Schema is constructed, so they participate fully in
+   * ProseMirror's attribute system.
+   *
+   * Example:
+   * ```ts
+   * addGlobalAttributes: () => [{
+   *   types: ['paragraph', 'heading'],
+   *   attributes: {
+   *     'data-analytics-id': {
+   *       default: null,
+   *       parseDOM: el => el.getAttribute('data-analytics-id'),
+   *       renderDOM: attrs => ({ 'data-analytics-id': attrs['data-analytics-id'] }),
+   *     },
+   *   },
+   * }],
+   * ```
+   */
+  addGlobalAttributes?: () => GlobalAttributeDef[];
   /** Called once after the EditorView is created. `this.options` and `this.storage` are available. */
   onCreate?: (this: PluginContext<TOptions, TStorage>, ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch. `this.options` and `this.storage` are available. */
@@ -175,6 +200,9 @@ export function createPlugin<
       : undefined,
     commands: config.addCommands
       ? config.addCommands.call(makeContext())
+      : undefined,
+    globalAttributes: config.addGlobalAttributes
+      ? config.addGlobalAttributes()
       : undefined,
     onCreate: config.onCreate
       ? (ctx) => config.onCreate!.call(makeContext(), ctx)

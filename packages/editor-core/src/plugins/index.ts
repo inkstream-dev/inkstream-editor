@@ -4,6 +4,7 @@ import { EditorView } from '@inkstream/pm/view';
 import { InputRule } from '@inkstream/pm/inputrules';
 import { PluginTier } from '../license';
 import { CommandsMap } from '../commands/types';
+import { GlobalAttributeDef } from '../global-attributes';
 
 
 /**
@@ -104,6 +105,8 @@ export interface Plugin {
    * Keyed by command name (e.g. `'toggleBold'`, `'setHeading'`).
    */
   commands?: CommandsMap;
+  /** Global attributes to inject onto existing node/mark types. */
+  globalAttributes?: GlobalAttributeDef[];
   /** Called once after the EditorView is created. */
   onCreate?: (ctx: EditorLifecycleContext) => void;
   /** Called on every transaction dispatch, after the state is updated. */
@@ -205,5 +208,14 @@ export class PluginManager {
       if (plugin.commands) Object.assign(acc, plugin.commands);
       return acc;
     }, {} as CommandsMap);
+  }
+
+  /**
+   * Returns all global attribute definitions contributed by registered plugins,
+   * in registration order. Used by `inkstreamSchema()` to augment node/mark
+   * specs before constructing the ProseMirror Schema.
+   */
+  getGlobalAttributes(): GlobalAttributeDef[] {
+    return this.plugins.flatMap(plugin => plugin.globalAttributes ?? []);
   }
 }
