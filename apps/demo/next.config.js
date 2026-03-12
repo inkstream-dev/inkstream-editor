@@ -1,6 +1,33 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@inkstream/react-editor", "@inkstream/editor-core", "@inkstream/heading", "@inkstream/font-family", "@inkstream/link-bubble", "@inkstream-dev/pro-plugins"],
+  transpilePackages: [
+    "@inkstream/react-editor",
+    "@inkstream/editor-core",
+    "@inkstream/starter-kit",
+    "@inkstream/heading",
+    "@inkstream/font-family",
+    "@inkstream/link-bubble",
+    "@inkstream-dev/pro-plugins",
+    "@inkstream/paragraph",
+    "@inkstream/hard-break",
+    "@inkstream/blockquote",
+    "@inkstream/bold",
+    "@inkstream/italic",
+    "@inkstream/underline",
+    "@inkstream/strike",
+    "@inkstream/code",
+    "@inkstream/alignment",
+    "@inkstream/indent",
+    "@inkstream/image",
+    "@inkstream/horizontal-rule",
+    "@inkstream/history",
+    "@inkstream/text-color",
+    "@inkstream/highlight",
+    "@inkstream/code-block",
+    "@inkstream/superscript",
+    "@inkstream/subscript",
+    "@inkstream/lists",
+  ],
   reactStrictMode: false, // Disable StrictMode to prevent double-initialization of ProseMirror
   
   webpack: (config, { isServer }) => {

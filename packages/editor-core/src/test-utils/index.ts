@@ -17,8 +17,9 @@
 
 import { Schema, Node, Mark, MarkType } from '@inkstream/pm/model';
 import { EditorState, Transaction, TextSelection } from '@inkstream/pm/state';
-import { PluginManager, availablePlugins } from '../index';
+import { PluginManager } from '../index';
 import { inkstreamSchema } from '../schema';
+import { availablePlugins } from '@inkstream/starter-kit';
 
 // ---------------------------------------------------------------------------
 // Schema singleton — build once, reuse across all tests

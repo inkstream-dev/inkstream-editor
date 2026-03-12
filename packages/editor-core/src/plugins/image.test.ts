@@ -17,7 +17,7 @@
  * in the current plugin — those require browser/UI testing.
  */
 
-import { imagePlugin, insertImage } from './image';
+import { imagePlugin, insertImage } from '@inkstream/image';
 import {
   getTestSchema,
   createState,

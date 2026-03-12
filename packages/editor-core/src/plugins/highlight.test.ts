@@ -5,7 +5,7 @@ import {
   unsetHighlight,
   DEFAULT_HIGHLIGHT_PALETTE,
   HighlightColorEntry,
-} from './highlight';
+} from '@inkstream/highlight';
 import {
   getTestSchema,
   createState,

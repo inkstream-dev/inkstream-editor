@@ -1,5 +1,5 @@
-import { setAlignment, getActiveAlignment, AlignValue } from '../commands/alignment';
-import { alignmentPlugin } from './alignment';
+import { setAlignment, getActiveAlignment, AlignValue } from '@inkstream/alignment';
+import { alignmentPlugin } from '@inkstream/alignment';
 import {
   getTestSchema,
   createState,

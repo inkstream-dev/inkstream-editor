@@ -2,7 +2,8 @@
 
 import { EditorWithTableDialog, useLazyPlugins, useLicenseValidation } from "@inkstream/react-editor";
 import type { EditorHandle } from "@inkstream/react-editor";
-import { availablePlugins, Plugin } from "@inkstream/editor-core";
+import type { Plugin } from "@inkstream/editor-core";
+import { availablePlugins } from "@inkstream/starter-kit";
 import { headingPlugin } from "@inkstream/heading";
 import { linkBubbleWrapperPlugin } from "@inkstream/link-bubble";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";

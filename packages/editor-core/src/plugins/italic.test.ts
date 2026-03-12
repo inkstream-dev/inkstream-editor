@@ -1,6 +1,6 @@
 import { EditorState, TextSelection } from '@inkstream/pm/state';
 import { toggleMark } from '@inkstream/pm/commands';
-import { italicPlugin } from './italic';
+import { italicPlugin } from '@inkstream/italic';
 import {
   getTestSchema,
   createState,

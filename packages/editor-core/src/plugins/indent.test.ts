@@ -1,5 +1,5 @@
 import { EditorState } from '@inkstream/pm/state';
-import { indentPlugin } from './indent';
+import { indentPlugin } from '@inkstream/indent';
 import {
   getTestSchema,
   createState,

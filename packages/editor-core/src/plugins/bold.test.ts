@@ -1,4 +1,4 @@
-import { boldPlugin } from './bold';
+import { boldPlugin } from '@inkstream/bold';
 import {
   getTestSchema,
   createState,

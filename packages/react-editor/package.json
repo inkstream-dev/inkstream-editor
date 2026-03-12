@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@inkstream/editor-core": "workspace:^",
-    "@inkstream/link-bubble": "workspace:^"
+    "@inkstream/link-bubble": "workspace:^",
+    "@inkstream/starter-kit": "workspace:^"
   },
   "peerDependencies": {
     "@inkstream/pm": ">=0.1.0",

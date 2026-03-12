@@ -46,6 +46,9 @@ importers:
       '@inkstream/react-editor':
         specifier: workspace:*
         version: link:../../packages/react-editor
+      '@inkstream/starter-kit':
+        specifier: workspace:*
+        version: link:../../packages/starter-kit
       next:
         specifier: 15.3.5
         version: 15.3.5(react-dom@19.2.3)(react@19.2.3)
@@ -111,14 +114,197 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  packages/editor-core:
+  packages/alignment:
     devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
       '@inkstream/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@inkstream/pm':
         specifier: workspace:*
         version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/blockquote:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/bold:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/code:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/code-block:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/editor-core:
+    devDependencies:
+      '@inkstream/alignment':
+        specifier: workspace:*
+        version: link:../alignment
+      '@inkstream/blockquote':
+        specifier: workspace:*
+        version: link:../blockquote
+      '@inkstream/bold':
+        specifier: workspace:*
+        version: link:../bold
+      '@inkstream/code':
+        specifier: workspace:*
+        version: link:../code
+      '@inkstream/code-block':
+        specifier: workspace:*
+        version: link:../code-block
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/hard-break':
+        specifier: workspace:*
+        version: link:../hard-break
+      '@inkstream/heading':
+        specifier: workspace:*
+        version: link:../heading
+      '@inkstream/highlight':
+        specifier: workspace:*
+        version: link:../highlight
+      '@inkstream/history':
+        specifier: workspace:*
+        version: link:../history
+      '@inkstream/horizontal-rule':
+        specifier: workspace:*
+        version: link:../horizontal-rule
+      '@inkstream/image':
+        specifier: workspace:*
+        version: link:../image
+      '@inkstream/indent':
+        specifier: workspace:*
+        version: link:../indent
+      '@inkstream/italic':
+        specifier: workspace:*
+        version: link:../italic
+      '@inkstream/lists':
+        specifier: workspace:*
+        version: link:../lists
+      '@inkstream/paragraph':
+        specifier: workspace:*
+        version: link:../paragraph
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@inkstream/starter-kit':
+        specifier: workspace:*
+        version: link:../starter-kit
+      '@inkstream/strike':
+        specifier: workspace:*
+        version: link:../strike
+      '@inkstream/subscript':
+        specifier: workspace:*
+        version: link:../subscript
+      '@inkstream/superscript':
+        specifier: workspace:*
+        version: link:../superscript
+      '@inkstream/text-color':
+        specifier: workspace:*
+        version: link:../text-color
+      '@inkstream/underline':
+        specifier: workspace:*
+        version: link:../underline
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
@@ -181,7 +367,175 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/hard-break:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/heading:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/highlight:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/history:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/horizontal-rule:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/image:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/indent:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/italic:
     devDependencies:
       '@inkstream/editor-core':
         specifier: workspace:*
@@ -231,6 +585,54 @@ importers:
       ts-jest:
         specifier: ^29.1.2
         version: 29.4.6(@babel/core@7.28.5)(esbuild@0.27.3)(jest@29.7.0)(typescript@5.9.3)
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/lists:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/paragraph:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)
@@ -295,6 +697,9 @@ importers:
       '@inkstream/link-bubble':
         specifier: workspace:^
         version: link:../link-bubble
+      '@inkstream/starter-kit':
+        specifier: workspace:^
+        version: link:../starter-kit
     devDependencies:
       '@inkstream/eslint-config':
         specifier: workspace:*
@@ -320,6 +725,210 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.2.3(react@19.2.3)
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/starter-kit:
+    devDependencies:
+      '@inkstream/alignment':
+        specifier: workspace:*
+        version: link:../alignment
+      '@inkstream/blockquote':
+        specifier: workspace:*
+        version: link:../blockquote
+      '@inkstream/bold':
+        specifier: workspace:*
+        version: link:../bold
+      '@inkstream/code':
+        specifier: workspace:*
+        version: link:../code
+      '@inkstream/code-block':
+        specifier: workspace:*
+        version: link:../code-block
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/hard-break':
+        specifier: workspace:*
+        version: link:../hard-break
+      '@inkstream/heading':
+        specifier: workspace:*
+        version: link:../heading
+      '@inkstream/highlight':
+        specifier: workspace:*
+        version: link:../highlight
+      '@inkstream/history':
+        specifier: workspace:*
+        version: link:../history
+      '@inkstream/horizontal-rule':
+        specifier: workspace:*
+        version: link:../horizontal-rule
+      '@inkstream/image':
+        specifier: workspace:*
+        version: link:../image
+      '@inkstream/indent':
+        specifier: workspace:*
+        version: link:../indent
+      '@inkstream/italic':
+        specifier: workspace:*
+        version: link:../italic
+      '@inkstream/lists':
+        specifier: workspace:*
+        version: link:../lists
+      '@inkstream/paragraph':
+        specifier: workspace:*
+        version: link:../paragraph
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@inkstream/strike':
+        specifier: workspace:*
+        version: link:../strike
+      '@inkstream/subscript':
+        specifier: workspace:*
+        version: link:../subscript
+      '@inkstream/superscript':
+        specifier: workspace:*
+        version: link:../superscript
+      '@inkstream/text-color':
+        specifier: workspace:*
+        version: link:../text-color
+      '@inkstream/underline':
+        specifier: workspace:*
+        version: link:../underline
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/strike:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/subscript:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/superscript:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/text-color:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/underline:
+    devDependencies:
+      '@inkstream/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@inkstream/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@inkstream/pm':
+        specifier: workspace:*
+        version: link:../pm
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.27
+      eslint:
+        specifier: ^8.56.0
+        version: 8.57.1
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(typescript@5.9.3)

@@ -7,8 +7,8 @@ import {
   toggleOrderedList,
   isBulletListActive,
   isOrderedListActive,
-} from './lists';
-import { taskListPlugin, toggleTaskList, isTaskListActive } from './task-list';
+} from '@inkstream/lists';
+import { taskListPlugin, toggleTaskList, isTaskListActive } from '@inkstream/lists';
 import {
   getTestSchema,
   createState,

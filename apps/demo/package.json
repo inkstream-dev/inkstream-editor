@@ -14,6 +14,7 @@
     "@inkstream/heading": "workspace:*",
     "@inkstream/link-bubble": "workspace:*",
     "@inkstream/react-editor": "workspace:*",
+    "@inkstream/starter-kit": "workspace:*",
     "next": "15.3.5",
     "prosemirror-commands": "^1.5.2",
     "prosemirror-history": "^1.2.2",

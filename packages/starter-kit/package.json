@@ -1,0 +1,86 @@
+{
+  "name": "@inkstream/starter-kit",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint .",
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@inkstream/editor-core": "^0.1.5",
+    "@inkstream/pm": ">=0.1.0",
+    "@inkstream/paragraph": "^0.1.0",
+    "@inkstream/hard-break": "^0.1.0",
+    "@inkstream/blockquote": "^0.1.0",
+    "@inkstream/bold": "^0.1.0",
+    "@inkstream/italic": "^0.1.0",
+    "@inkstream/underline": "^0.1.0",
+    "@inkstream/strike": "^0.1.0",
+    "@inkstream/code": "^0.1.0",
+    "@inkstream/alignment": "^0.1.0",
+    "@inkstream/indent": "^0.1.0",
+    "@inkstream/image": "^0.1.0",
+    "@inkstream/horizontal-rule": "^0.1.0",
+    "@inkstream/history": "^0.1.0",
+    "@inkstream/text-color": "^0.1.0",
+    "@inkstream/highlight": "^0.1.0",
+    "@inkstream/code-block": "^0.1.0",
+    "@inkstream/superscript": "^0.1.0",
+    "@inkstream/subscript": "^0.1.0",
+    "@inkstream/lists": "^0.1.0",
+    "@inkstream/heading": "^0.1.0"
+  },
+  "devDependencies": {
+    "@inkstream/editor-core": "workspace:*",
+    "@inkstream/eslint-config": "workspace:*",
+    "@inkstream/pm": "workspace:*",
+    "@inkstream/paragraph": "workspace:*",
+    "@inkstream/hard-break": "workspace:*",
+    "@inkstream/blockquote": "workspace:*",
+    "@inkstream/bold": "workspace:*",
+    "@inkstream/italic": "workspace:*",
+    "@inkstream/underline": "workspace:*",
+    "@inkstream/strike": "workspace:*",
+    "@inkstream/code": "workspace:*",
+    "@inkstream/alignment": "workspace:*",
+    "@inkstream/indent": "workspace:*",
+    "@inkstream/image": "workspace:*",
+    "@inkstream/horizontal-rule": "workspace:*",
+    "@inkstream/history": "workspace:*",
+    "@inkstream/text-color": "workspace:*",
+    "@inkstream/highlight": "workspace:*",
+    "@inkstream/code-block": "workspace:*",
+    "@inkstream/superscript": "workspace:*",
+    "@inkstream/subscript": "workspace:*",
+    "@inkstream/lists": "workspace:*",
+    "@inkstream/heading": "workspace:*",
+    "@types/node": "^20.11.5",
+    "eslint": "^8.56.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/inkstream-dev/inkstream-editor.git"
+  },
+  "homepage": "https://inkstream.dev",
+  "bugs": {
+    "url": "https://github.com/inkstream-dev/inkstream/issues"
+  }
+}

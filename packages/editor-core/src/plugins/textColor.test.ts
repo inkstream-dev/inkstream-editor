@@ -5,7 +5,7 @@ import {
   removeTextColor,
   DEFAULT_TEXT_COLOR_PALETTE,
   ColorEntry,
-} from './textColor';
+} from '@inkstream/text-color';
 import {
   getTestSchema,
   createState,

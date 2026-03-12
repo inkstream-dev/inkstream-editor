@@ -2,14 +2,6 @@ import { Schema } from '@inkstream/pm/model';
 import { Plugin as ProseMirrorPlugin, EditorState, Transaction } from '@inkstream/pm/state';
 import { EditorView } from '@inkstream/pm/view';
 import { InputRule } from '@inkstream/pm/inputrules';
-import { bulletListPlugin, isBulletListActive } from './bullet-list';
-import { orderedListPlugin, isOrderedListActive } from './ordered-list';
-import { codePlugin } from './code';
-import { historyPlugin } from './history';
-import { listItemPlugin } from './list-item';
-import { textColorPlugin } from './textColor';
-import { highlightPlugin } from './highlight';
-import { codeBlockPlugin } from './codeBlock';
 import { PluginTier } from '../license';
 
 

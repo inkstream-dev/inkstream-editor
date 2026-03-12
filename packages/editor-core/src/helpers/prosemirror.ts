@@ -1,7 +1,8 @@
 import { Node, NodeType } from '@inkstream/pm/model';
 import { findParentNode as pmFindParentNode } from '@inkstream/pm/utils';
+import { Selection } from '@inkstream/pm/state';
 
-export const findParentNode = (predicate: (node: Node) => boolean) => (selection: any) => {
+export const findParentNode = (predicate: (node: Node) => boolean) => (selection: Selection): ReturnType<ReturnType<typeof pmFindParentNode>> => {
   return pmFindParentNode(predicate)(selection);
 };
 

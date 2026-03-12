@@ -11,9 +11,9 @@
 import { EditorState } from '@inkstream/pm/state';
 import { undo, redo } from '@inkstream/pm/history';
 import { toggleMark } from '@inkstream/pm/commands';
-import { toggleCode, isCodeActive } from './code';
-import { setAlignment, getActiveAlignment } from '../commands/alignment';
-import { toggleBlockquote } from '../commands/toggleBlockquote';
+import { toggleCode, isCodeActive } from '@inkstream/code';
+import { setAlignment, getActiveAlignment } from '@inkstream/alignment';
+import { toggleBlockquote } from '@inkstream/blockquote';
 import {
   getTestSchema,
   createState,
@@ -24,7 +24,8 @@ import {
   text,
   doc,
 } from '../test-utils';
-import { PluginManager, availablePlugins, inkstreamSchema, inkstreamPlugins } from '../index';
+import { PluginManager, inkstreamSchema, inkstreamPlugins } from '../index';
+import { availablePlugins } from '@inkstream/starter-kit';
 
 const schema = getTestSchema();
 
