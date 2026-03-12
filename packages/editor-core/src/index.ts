@@ -127,6 +127,6 @@ export { buildPastePlugin } from './paste-rules';
 export { PluginManager };
 export { createPlugin } from './plugins/plugin-factory';
 export type { PluginContext, PluginConfig } from './plugins/plugin-factory';
-export { tableDialogBridge } from './tableDialogBridge';
+
 // ProseMirror helper utilities — needed by plugin packages (e.g. @inkstream/lists)
 export { findParentNode, getNodeType, isList } from './helpers/prosemirror';

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { tableDialogBridge } from '@inkstream/editor-core';
+import { EditorView } from '@inkstream/pm/view';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,6 +19,14 @@ interface CellState {
 interface TablePropertiesDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Returns the live EditorView so the dialog can read current cell attrs on open. */
+  getEditorView?: () => EditorView | null;
+  /** Apply cell-level style attributes (background, alignment, border, etc.). */
+  applyCellStyling?: (attrs: Record<string, unknown>) => void;
+  /** Toggle the header row on the current table. */
+  runToggleHeaderRow?: () => void;
+  /** Delete the current table from the document. */
+  runDeleteTable?: () => void;
 }
 
 // ─── Preset colors ────────────────────────────────────────────────────────────
@@ -179,6 +187,10 @@ const S = {
 export const TablePropertiesDialog: React.FC<TablePropertiesDialogProps> = ({
   isOpen,
   onClose,
+  getEditorView,
+  applyCellStyling,
+  runToggleHeaderRow,
+  runDeleteTable,
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>('cell');
 
@@ -192,7 +204,7 @@ export const TablePropertiesDialog: React.FC<TablePropertiesDialogProps> = ({
   // Populate from current editor state when opening
   useEffect(() => {
     if (!isOpen) return;
-    const view = tableDialogBridge.getEditorView?.();
+    const view = getEditorView?.();
     if (!view) return;
     // Dynamically import getCellAttrs from pro-plugins at runtime to avoid
     // a hard dependency in the react-editor package.
@@ -211,7 +223,7 @@ export const TablePropertiesDialog: React.FC<TablePropertiesDialogProps> = ({
       }
     }
     setActiveTab('cell');
-  }, [isOpen]);
+  }, [isOpen, getEditorView]);
 
   // Keyboard: close on Escape
   useEffect(() => {
@@ -223,23 +235,23 @@ export const TablePropertiesDialog: React.FC<TablePropertiesDialogProps> = ({
 
   const handleApply = useCallback(() => {
     const effectiveBg = customBg.trim() || bg;
-    tableDialogBridge.applyCellStyling?.({
+    applyCellStyling?.({
       background: effectiveBg || null,
       alignment: hAlign,
       verticalAlignment: vAlign,
       border: border.trim() || null,
     });
     onClose();
-  }, [bg, customBg, hAlign, vAlign, border, onClose]);
+  }, [bg, customBg, hAlign, vAlign, border, onClose, applyCellStyling]);
 
   const handleDeleteTable = useCallback(() => {
-    tableDialogBridge.runDeleteTable?.();
+    runDeleteTable?.();
     onClose();
-  }, [onClose]);
+  }, [onClose, runDeleteTable]);
 
   const handleToggleHeaderRow = useCallback(() => {
-    tableDialogBridge.runToggleHeaderRow?.();
-  }, []);
+    runToggleHeaderRow?.();
+  }, [runToggleHeaderRow]);
 
   if (!isOpen) return null;
 

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useCallback, useMemo, useRef, forwardRef, useImperativeHandle } from 'react';
 import { DOMSerializer } from '@inkstream/pm/model';
 import { EditorView } from '@inkstream/pm/view';
+import type { EditorState, Transaction } from '@inkstream/pm/state';
 import { RichTextEditor } from './index';
 import { TableInsertDialog } from './TableInsertDialog';
 import { TablePropertiesDialog } from './TablePropertiesDialog';
-import { tableDialogBridge } from '@inkstream/editor-core';
 
 /** Imperative handle exposed via ref on EditorWithTableDialog. */
 export interface EditorHandle {
@@ -16,10 +16,45 @@ export interface EditorHandle {
   focus: () => void;
 }
 
+/**
+ * Commands registered by the table plugin when it initialises.
+ * The table plugin should call `this.options.onCommandsReady(commands)` in its
+ * `onCreate` lifecycle hook; `EditorWithTableDialog` then forwards them to the
+ * table dialogs so they can dispatch operations without needing a global bridge.
+ */
+export interface TableCommands {
+  insertTable: (
+    rows: number,
+    cols: number,
+    withHeaderRow: boolean,
+  ) => (state: EditorState, dispatch: (tr: Transaction) => void, view: EditorView) => boolean;
+  applyCellStyling: (attrs: Record<string, unknown>) => void;
+  runToggleHeaderRow: () => void;
+  runDeleteTable: () => void;
+}
+
+/**
+ * Options injected into `pluginOptions.table` by `EditorWithTableDialog`.
+ * The table plugin should declare these in its `addOptions()` so that
+ * `this.options.openInsertDialog()` etc. work inside toolbar commands.
+ */
+export interface TablePluginOptions {
+  /** Call to open the table-insert dialog. Set by EditorWithTableDialog. */
+  openInsertDialog?: () => void;
+  /** Call to open the table-properties dialog. Set by EditorWithTableDialog. */
+  openPropertiesDialog?: () => void;
+  /**
+   * The table plugin calls this in `onCreate`, providing its command
+   * implementations. EditorWithTableDialog stores them and forwards them to the
+   * dialog components as props — no global state involved.
+   */
+  onCommandsReady?: (commands: TableCommands) => void;
+}
+
 export interface EditorWithTableDialogProps {
   initialContent: string;
   plugins?: any[];
-  pluginOptions?: { [key: string]: any };
+  pluginOptions?: { [key: string]: Record<string, unknown> };
   toolbarLayout?: string[];
   licenseKey?: string;
   licenseValidationEndpoint?: string;
@@ -35,10 +70,12 @@ export interface EditorWithTableDialogProps {
 }
 
 export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDialogProps>(
-  (props, ref) => {
+  ({ pluginOptions, ...restProps }, ref) => {
     const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
     const [isPropertiesDialogOpen, setIsPropertiesDialogOpen] = useState(false);
     const editorViewRef = useRef<EditorView | null>(null);
+    // Populated by the table plugin via onCommandsReady; forwarded to dialogs as props.
+    const tableCommandsRef = useRef<TableCommands | null>(null);
 
     useImperativeHandle(ref, () => ({
       getContent: () => {
@@ -54,26 +91,30 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
       },
     }));
 
-    // Register bridges; clean up on unmount
-    useEffect(() => {
-      tableDialogBridge.openDialog = () => setIsTableDialogOpen(true);
-      tableDialogBridge.openPropertiesDialog = () => setIsPropertiesDialogOpen(true);
-      tableDialogBridge.getEditorView = () => editorViewRef.current;
-      return () => {
-        tableDialogBridge.openDialog = null;
-        tableDialogBridge.openPropertiesDialog = null;
-        tableDialogBridge.getEditorView = null;
-      };
-    }, []);
-
     const handleEditorReady = useCallback((view: EditorView) => {
       editorViewRef.current = view;
     }, []);
 
+    // Merge caller-provided pluginOptions with the hook callbacks the table
+    // plugin needs. The table plugin reads these from this.options so it can
+    // open dialogs and register its commands without any global state.
+    const mergedPluginOptions = useMemo<{ [key: string]: Record<string, unknown> }>(() => ({
+      ...pluginOptions,
+      table: {
+        ...(pluginOptions?.table ?? {}),
+        openInsertDialog: () => setIsTableDialogOpen(true),
+        openPropertiesDialog: () => setIsPropertiesDialogOpen(true),
+        onCommandsReady: (cmds: TableCommands) => {
+          tableCommandsRef.current = cmds;
+        },
+      } as unknown as Record<string, unknown>,
+    }), [pluginOptions]);
+
     const handleInsertTable = useCallback((config: { rows: number; cols: number; withHeaderRow: boolean }) => {
       const view = editorViewRef.current;
-      if (view && tableDialogBridge.insertTable) {
-        const command = tableDialogBridge.insertTable(config.rows, config.cols, config.withHeaderRow);
+      const cmds = tableCommandsRef.current;
+      if (view && cmds?.insertTable) {
+        const command = cmds.insertTable(config.rows, config.cols, config.withHeaderRow);
         command(view.state, view.dispatch, view);
       }
       setIsTableDialogOpen(false);
@@ -81,7 +122,11 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
 
     return (
       <>
-        <RichTextEditor {...props} onEditorReady={handleEditorReady} />
+        <RichTextEditor
+          {...restProps}
+          pluginOptions={mergedPluginOptions}
+          onEditorReady={handleEditorReady}
+        />
         <TableInsertDialog
           isOpen={isTableDialogOpen}
           onClose={() => setIsTableDialogOpen(false)}
@@ -90,8 +135,14 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
         <TablePropertiesDialog
           isOpen={isPropertiesDialogOpen}
           onClose={() => setIsPropertiesDialogOpen(false)}
+          getEditorView={() => editorViewRef.current}
+          applyCellStyling={(attrs) => tableCommandsRef.current?.applyCellStyling(attrs)}
+          runToggleHeaderRow={() => tableCommandsRef.current?.runToggleHeaderRow()}
+          runDeleteTable={() => tableCommandsRef.current?.runDeleteTable()}
         />
       </>
     );
-  }
+  },
 );
+
+EditorWithTableDialog.displayName = 'EditorWithTableDialog';
