@@ -90,6 +90,24 @@ interface RichTextEditorProps {
   showThemeToggle?: boolean;
   /** Called whenever the theme changes (both via the built-in toggle and via prop). */
   onThemeChange?: (theme: ThemeMode) => void;
+  /**
+   * Controls whether the editor renders its initial output immediately (default)
+   * or defers to the first client-side effect.
+   *
+   * Set to `false` when rendering inside an SSR / Next.js App Router environment
+   * to prevent hydration mismatches. The server and the initial client paint will
+   * both output an empty wrapper `<div>`; the full editor mounts only after the
+   * component's `useEffect` fires on the client.
+   *
+   * ```tsx
+   * // Next.js App Router — safe SSR usage
+   * <RichTextEditor immediatelyRender={false} initialContent={html} />
+   * ```
+   *
+   * Defaults to `true` for backward compatibility. In a pure client-only app
+   * (no SSR) the default is always safe.
+   */
+  immediatelyRender?: boolean;
 }
 
 export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(function RichTextEditor({ 
@@ -105,6 +123,7 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   theme,
   showThemeToggle = false,
   onThemeChange,
+  immediatelyRender = true,
 }, ref) {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
@@ -125,6 +144,15 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   useEffect(() => {
     if (theme !== undefined) setInternalTheme(theme);
   }, [theme]);
+
+  // SSR safety: when immediatelyRender=false, skip the first render so that
+  // the server HTML (empty wrapper) and the first client paint match exactly.
+  // After this effect fires (client-side only) the full editor mounts.
+  const [isMounted, setIsMounted] = useState(immediatelyRender);
+  useEffect(() => {
+    if (!immediatelyRender) setIsMounted(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleThemeChange = useCallback((next: ThemeMode) => {
     setInternalTheme(next);
@@ -346,6 +374,12 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
       return editorViewRef.current;
     },
   }), [pluginManager]);
+
+  // When deferred rendering is requested, show only the wrapper shell until
+  // the client-side effect above flips isMounted → true.
+  if (!isMounted) {
+    return <div className={wrapperClass} />;
+  }
 
   return (
     <div className={wrapperClass}>

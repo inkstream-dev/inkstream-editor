@@ -67,6 +67,12 @@ export interface EditorWithTableDialogProps {
   showThemeToggle?: boolean;
   /** Called whenever the theme changes. */
   onThemeChange?: (theme: import('./index').ThemeMode) => void;
+  /**
+   * When `false`, defers the editor's first render to the client-side effect,
+   * preventing SSR / Next.js App Router hydration mismatches.
+   * Forwarded directly to `RichTextEditor`. Defaults to `true`.
+   */
+  immediatelyRender?: boolean;
 }
 
 export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDialogProps>(
