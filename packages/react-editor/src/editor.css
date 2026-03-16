@@ -712,12 +712,23 @@
 }
 
 /* ── Image node wrapper ─────────────────────────────────────────────────── */
+
+/*
+ * Outer NodeView container — set by ReactNodeViewRenderer({ wrapperClass }).
+ * ProseMirror adds ProseMirror-selectednode to THIS element on NodeSelection.
+ * Image is a block node so the outer container is also block-level.
+ */
+.inkstream-image-nodeview {
+  display: block;
+  margin: 0.5em 0;
+}
+
+/* Inner React component wrapper — owns position:relative for the resize handle */
 .image-node-view-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
   line-height: 0;
   max-width: 100%;
-  vertical-align: bottom;
   overflow: visible;
 }
 
@@ -729,7 +740,8 @@
   user-select: none;
 }
 
-.image-node-view-wrapper.ProseMirror-selectednode img {
+/* ProseMirror-selectednode is on the OUTER .inkstream-image-nodeview div */
+.inkstream-image-nodeview.ProseMirror-selectednode .image-node-view-wrapper img {
   outline: 2px solid var(--ink-accent);
   outline-offset: 1px;
 }
@@ -751,7 +763,7 @@
 }
 
 .image-node-view-wrapper:hover .resize-handle,
-.image-node-view-wrapper.ProseMirror-selectednode .resize-handle {
+.inkstream-image-nodeview.ProseMirror-selectednode .resize-handle {
   opacity: 1;
 }
 

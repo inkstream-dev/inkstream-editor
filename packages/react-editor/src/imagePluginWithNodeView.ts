@@ -24,6 +24,9 @@ import { ImageNodeView } from './ImageNodeView';
 export const imagePluginWithNodeView = imagePlugin.extend({
   name: 'image',
   addNodeViews: () => ({
-    image: ReactNodeViewRenderer(ImageNodeView),
+    // wrapperClass is applied to the outer NodeView container (dom).
+    // ProseMirror adds ProseMirror-selectednode to this element, so we
+    // need the class to write correct CSS selectors for selection styling.
+    image: ReactNodeViewRenderer(ImageNodeView, { wrapperClass: 'inkstream-image-nodeview' }),
   }),
 });
