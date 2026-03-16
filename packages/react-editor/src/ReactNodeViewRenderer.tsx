@@ -60,13 +60,19 @@ export function ReactNodeViewRenderer(
   Component: React.ComponentType<NodeViewComponentProps>,
   options: ReactNodeViewRendererOptions = {},
 ): NodeViewConstructor {
-  return (node, view, getPos) => {
+  return (initialNode, view, getPos) => {
+    // Mutable reference to the current node. Updated whenever attrs/content
+    // actually change so we can skip renders when ProseMirror calls update()
+    // with the exact same node reference (e.g. Enter key creating a new paragraph
+    // elsewhere in the document — the image node itself is unchanged).
+    let node = initialNode;
+
     const dom = document.createElement('div');
     if (options.wrapperClass) dom.classList.add(options.wrapperClass);
 
     const root = createRoot(dom);
 
-    const render = (currentNode: typeof node) => {
+    const render = (currentNode: typeof initialNode) => {
       root.render(
         React.createElement(Component, { node: currentNode, view, getPos }),
       );
@@ -79,8 +85,17 @@ export function ReactNodeViewRenderer(
       update(newNode) {
         // Reject updates for a different node type — ProseMirror convention.
         if (newNode.type !== node.type) return false;
-        // Re-render with fresh node (new attrs / content).
-        render(newNode);
+
+        // ProseMirror uses structural sharing: when a transaction does not touch
+        // this node, it passes the SAME object reference back in update(). Skip
+        // root.render() entirely in that case — calling it on every transaction
+        // (even ones that only affect other nodes) was causing React 18's
+        // concurrent scheduler to enqueue work inside ProseMirror's synchronous
+        // dispatch, leading to a forced reflow on the next layout read.
+        if (newNode === node) return true;
+
+        node = newNode;
+        render(node);
         return true;
       },
       destroy() {

@@ -20,7 +20,14 @@ const ACCEPTED_MIME_TYPES = new Set([
 ]);
 
 export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos }) => {
-  const [src, setSrc] = useState<string | null>(node.attrs.src ?? null);
+  // Derive src directly from node attrs instead of mirroring it into local state.
+  // Local state + useEffect sync caused an extra render cycle on every transaction
+  // because the effect ran after root.render(newNode) and called setSrc(), which
+  // scheduled yet another React render even when nothing had changed.
+  // Node attrs are always up-to-date because root.render(newNode) is called
+  // by ReactNodeViewRenderer whenever attrs actually change (newNode !== node).
+  const src = node.attrs.src ?? null;
+
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -44,12 +51,6 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
       cleanupResizeRef.current?.();
     };
   }, []);
-
-  // Sync node attribute changes (undo/redo, external setNodeMarkup) to local state.
-  // This is separate from the upload dispatch flow to avoid circular updates.
-  useEffect(() => {
-    setSrc(node.attrs.src ?? null);
-  }, [node.attrs.src]);
 
   // Dispatch a src update into the ProseMirror document.
   // Uses nodeAttrsRef so it always reads the latest attrs, and the callback
@@ -83,8 +84,10 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
       if (!mountedRef.current) return; // Component unmounted — discard result
       const dataUrl = e.target?.result as string | undefined;
       if (!dataUrl) return;
-      setSrc(dataUrl);      // Optimistic update: show image immediately
-      dispatchSrc(dataUrl); // Persist to ProseMirror document
+      // Dispatch to ProseMirror — this triggers nodeView.update(newNode) which
+      // calls root.render(newNode) with the new src. src is derived from node
+      // attrs so the component updates automatically without local state.
+      dispatchSrc(dataUrl);
     };
 
     reader.onerror = () => {
@@ -197,7 +200,6 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
           title={node.attrs.title ?? undefined}
           width={node.attrs.width ?? undefined}
           height={node.attrs.height ?? undefined}
-          loading="lazy"
           draggable={false}
         />
         <div
