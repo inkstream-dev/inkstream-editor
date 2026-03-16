@@ -30,6 +30,13 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
   const mountedRef = useRef(true);
   // Stores cleanup fn for resize listeners so unmount can remove them
   const cleanupResizeRef = useRef<(() => void) | null>(null);
+  // Always holds the latest node.attrs without making it a callback dependency.
+  // Avoids stale closures when view.dispatch() triggers a synchronous re-render
+  // (ProseMirror → nodeView.update → root.render) mid-drag.
+  const nodeAttrsRef = useRef(node.attrs);
+
+  // Keep nodeAttrsRef in sync on every render.
+  nodeAttrsRef.current = node.attrs;
 
   useEffect(() => {
     return () => {
@@ -45,13 +52,15 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
   }, [node.attrs.src]);
 
   // Dispatch a src update into the ProseMirror document.
+  // Uses nodeAttrsRef so it always reads the latest attrs, and the callback
+  // itself only needs to be recreated when view or getPos change.
   const dispatchSrc = useCallback((newSrc: string) => {
     const pos = getPos();
     if (pos === undefined) return;
     view.dispatch(
-      view.state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, src: newSrc })
+      view.state.tr.setNodeMarkup(pos, undefined, { ...nodeAttrsRef.current, src: newSrc })
     );
-  }, [view, getPos, node.attrs]);
+  }, [view, getPos]);
 
   const handleFile = useCallback((file: File | null) => {
     if (!file) {
@@ -114,46 +123,69 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
     e.preventDefault();
     if (!imgRef.current) return;
 
+    // Remove any lingering listeners from a previous drag that ended outside
+    // the browser window (mouseup never fired over the document).
+    cleanupResizeRef.current?.();
+
     const startX = e.clientX;
-    // Use offsetWidth/offsetHeight for CSS-rendered dimensions (not the HTML attribute)
-    const initialWidth = imgRef.current.offsetWidth;
+    // Read layout once at drag-start — the only acceptable forced reflow.
+    const initialWidth  = imgRef.current.offsetWidth;
     const initialHeight = imgRef.current.offsetHeight;
-    // Guard against zero height (image not yet loaded) to prevent division by zero
+    // Guard against zero height (image not yet loaded) to prevent division by zero.
     const aspectRatio = initialHeight > 0 ? initialWidth / initialHeight : 1;
 
+    // Cache final dimensions so onMouseUp never needs to read offsetWidth/Height.
+    // Reading layout properties (offsetWidth) after many queued style writes
+    // forces the browser to flush all pending style calculations at once —
+    // that synchronous reflow was the cause of the 57-second hang.
+    let cachedWidth  = initialWidth;
+    let cachedHeight = initialHeight;
+
+    // rAF token so we can cancel a pending frame when a newer mousemove arrives.
+    let rafId = 0;
+
     const onMouseMove = (ev: MouseEvent) => {
-      if (!imgRef.current) return;
-      const newWidth = Math.max(40, initialWidth + (ev.clientX - startX));
-      const newHeight = Math.round(newWidth / aspectRatio);
-      imgRef.current.style.width = `${newWidth}px`;
-      imgRef.current.style.height = `${newHeight}px`;
+      // Throttle DOM writes to one per animation frame.  Without this the
+      // browser queues hundreds of style mutations between paints, and the
+      // single offsetWidth read in onMouseUp has to flush all of them.
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (!imgRef.current) return;
+        const newWidth  = Math.max(40, initialWidth + (ev.clientX - startX));
+        const newHeight = Math.round(newWidth / aspectRatio);
+        imgRef.current.style.width  = `${newWidth}px`;
+        imgRef.current.style.height = `${newHeight}px`;
+        cachedWidth  = newWidth;
+        cachedHeight = newHeight;
+      });
     };
 
     const onMouseUp = () => {
       cleanup();
-      if (!imgRef.current) return;
       const pos = getPos();
       if (pos === undefined) return;
+      // Use the cached values — no DOM read, no forced reflow.
       view.dispatch(
         view.state.tr.setNodeMarkup(pos, undefined, {
-          ...node.attrs,
-          width: imgRef.current.offsetWidth,
-          height: imgRef.current.offsetHeight,
+          ...nodeAttrsRef.current,
+          width:  cachedWidth,
+          height: cachedHeight,
         })
       );
     };
 
     const cleanup = () => {
+      cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mouseup',   onMouseUp);
       cleanupResizeRef.current = null;
     };
 
     window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    // Store so unmount can remove listeners if resize is interrupted
+    window.addEventListener('mouseup',   onMouseUp);
+    // Store so unmount (or next mousedown) can remove listeners if resize is interrupted.
     cleanupResizeRef.current = cleanup;
-  }, [node.attrs, view, getPos]);
+  }, [view, getPos]); // node.attrs removed — read via nodeAttrsRef to avoid stale closures
 
   if (src) {
     return (
