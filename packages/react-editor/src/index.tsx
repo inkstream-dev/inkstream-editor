@@ -130,6 +130,10 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   // Per-transaction notification store — toolbar buttons subscribe to this
   // instead of receiving editorState as a React prop on every keystroke.
   const storeRef = useRef<EditorStateStore | null>(null);
+  // Debounce timer for onChange serialization. Avoids blocking the main thread
+  // on every keystroke when the document contains large base64 images — reading
+  // div.innerHTML with a multi-MB src attribute was the cause of the 4s hang.
+  const changeDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // React state for the EditorView instance — triggers re-render once on mount/unmount
   // so that the Toolbar receives a non-null editorView prop after initialization.
   const [editorView, setEditorView] = useState<EditorView | null>(null);
@@ -244,10 +248,21 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
         p.onUpdate?.({ view: editorViewRef.current!, state: newState, prevState, tr: transaction })
       );
       if (onChangeRef.current && transaction.docChanged) {
-        const div = document.createElement('div');
-        const fragment = DOMSerializer.fromSchema(newState.schema).serializeFragment(newState.doc.content);
-        div.appendChild(fragment);
-        onChangeRef.current(div.innerHTML);
+        // Debounce the HTML serialization: reading div.innerHTML when the doc
+        // contains a large base64 image blocks the input handler for seconds.
+        // We wait until typing pauses before serializing and calling onChange.
+        if (changeDebounceTimerRef.current !== null) {
+          clearTimeout(changeDebounceTimerRef.current);
+        }
+        changeDebounceTimerRef.current = setTimeout(() => {
+          changeDebounceTimerRef.current = null;
+          if (!onChangeRef.current || !editorViewRef.current) return;
+          const state = editorViewRef.current.state;
+          const div = document.createElement('div');
+          const fragment = DOMSerializer.fromSchema(state.schema).serializeFragment(state.doc.content);
+          div.appendChild(fragment);
+          onChangeRef.current(div.innerHTML);
+        }, 300);
       }
     }
   }, []); // stable — reads everything via refs, not closures
@@ -316,6 +331,12 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
 
     // Destroy the EditorView when schema/plugins change or component unmounts.
     return () => {
+      // Cancel any pending onChange debounce to prevent stale serialization
+      // from firing after the editor has been torn down.
+      if (changeDebounceTimerRef.current !== null) {
+        clearTimeout(changeDebounceTimerRef.current);
+        changeDebounceTimerRef.current = null;
+      }
       // Call onDestroy lifecycle hooks before tearing down the editor.
       pluginState.validatedPlugins.forEach(p => p.onDestroy?.());
       if (editorViewRef.current) {

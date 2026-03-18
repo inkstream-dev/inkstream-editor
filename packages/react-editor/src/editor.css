@@ -723,13 +723,17 @@
   margin: 0.5em 0;
 }
 
-/* Inner React component wrapper — owns position:relative for the resize handle */
+/* Inner React component wrapper — owns position:relative for the resize handle.
+ * MUST be inline-block so the box shrinks to the image's rendered dimensions.
+ * display:block would span the full editor width, placing the resize handle at
+ * the right edge of the editor rather than the right edge of the image. */
 .image-node-view-wrapper {
   position: relative;
-  display: block;
+  display: inline-block;
   line-height: 0;
   max-width: 100%;
   overflow: visible;
+  vertical-align: top;
 }
 
 .image-node-view-wrapper img {
@@ -748,23 +752,42 @@
 
 .image-node-view-wrapper .resize-handle {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--ink-accent);
   border: 2px solid var(--ink-bg);
-  border-radius: 50%;
-  bottom: -6px;
-  right: -6px;
+  border-radius: 3px;
+  /* Anchor to the bottom-right corner of the image (wrapper = inline-block). */
+  bottom: -7px;
+  right: -7px;
   cursor: se-resize;
   z-index: 10;
   opacity: 0;
   transition: opacity 0.15s ease;
   box-shadow: var(--ink-shadow-sm);
+  /* Grip dots — visual affordance without an extra element */
+  background-image:
+    radial-gradient(circle, var(--ink-bg) 1.5px, transparent 1.5px),
+    radial-gradient(circle, var(--ink-bg) 1.5px, transparent 1.5px),
+    radial-gradient(circle, var(--ink-bg) 1.5px, transparent 1.5px);
+  background-size: 4px 4px;
+  background-position: 2px 2px, 6px 2px, 2px 6px;
+  background-repeat: no-repeat;
 }
 
 .image-node-view-wrapper:hover .resize-handle,
 .inkstream-image-nodeview.ProseMirror-selectednode .resize-handle {
   opacity: 1;
+}
+
+/* Applied via JS during a live resize drag — lock the cursor globally */
+body.inkstream-resizing {
+  cursor: se-resize !important;
+  user-select: none;
+}
+/* Prevent hover/focus effects on editor content while dragging */
+body.inkstream-resizing .ProseMirror {
+  pointer-events: none;
 }
 
 

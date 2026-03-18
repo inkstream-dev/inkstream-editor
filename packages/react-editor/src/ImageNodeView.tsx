@@ -124,38 +124,49 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
 
   const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!imgRef.current) return;
 
-    // Remove any lingering listeners from a previous drag that ended outside
-    // the browser window (mouseup never fired over the document).
+    // Remove any lingering listeners from a previous drag that escaped the browser.
     cleanupResizeRef.current?.();
 
     const startX = e.clientX;
-    // Read layout once at drag-start — the only acceptable forced reflow.
-    const initialWidth  = imgRef.current.offsetWidth;
-    const initialHeight = imgRef.current.offsetHeight;
+    // Single layout read at drag-start — the only acceptable forced reflow.
+    // getBoundingClientRect is preferred over offsetWidth: it returns a
+    // fractional DOMRect, avoids the "box-sizing + borders" pitfall of
+    // offsetWidth, and is no more expensive than offsetWidth.
+    const rect = imgRef.current.getBoundingClientRect();
+    const initialWidth  = rect.width;
+    const initialHeight = rect.height;
     // Guard against zero height (image not yet loaded) to prevent division by zero.
     const aspectRatio = initialHeight > 0 ? initialWidth / initialHeight : 1;
 
-    // Cache final dimensions so onMouseUp never needs to read offsetWidth/Height.
-    // Reading layout properties (offsetWidth) after many queued style writes
-    // forces the browser to flush all pending style calculations at once —
-    // that synchronous reflow was the cause of the 57-second hang.
-    let cachedWidth  = initialWidth;
-    let cachedHeight = initialHeight;
+    // Cache final dimensions so onMouseUp never needs to read layout properties.
+    // Reading offsetWidth after many queued style mutations forces a synchronous
+    // reflow that flushes all pending calculations at once — that was the source
+    // of the multi-second hangs. Cached values sidestep this entirely.
+    let cachedWidth  = Math.round(initialWidth);
+    let cachedHeight = Math.round(initialHeight);
 
-    // rAF token so we can cancel a pending frame when a newer mousemove arrives.
+    // rAF handle — cancel a pending frame when a newer mousemove arrives so we
+    // never queue more than one DOM write per paint cycle.
     let rafId = 0;
 
+    // Lock the cursor globally and suppress hover effects on editor content so
+    // the resize drag feels snappy (no text-selection, no cursor flicker).
+    document.body.classList.add('inkstream-resizing');
+
     const onMouseMove = (ev: MouseEvent) => {
-      // Throttle DOM writes to one per animation frame.  Without this the
-      // browser queues hundreds of style mutations between paints, and the
-      // single offsetWidth read in onMouseUp has to flush all of them.
+      // Throttle DOM writes to one per animation frame.
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         if (!imgRef.current) return;
-        const newWidth  = Math.max(40, initialWidth + (ev.clientX - startX));
+        const newWidth  = Math.max(40, Math.round(initialWidth + (ev.clientX - startX)));
         const newHeight = Math.round(newWidth / aspectRatio);
+        // Write only width; height: auto (CSS) derives it from the intrinsic
+        // aspect ratio during the drag, keeping frames fast. We write height
+        // as well only so the element doesn't relayout mid-drag (avoids reflow
+        // from auto + explicit width fighting each other in some browsers).
         imgRef.current.style.width  = `${newWidth}px`;
         imgRef.current.style.height = `${newHeight}px`;
         cachedWidth  = newWidth;
@@ -167,7 +178,7 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
       cleanup();
       const pos = getPos();
       if (pos === undefined) return;
-      // Use the cached values — no DOM read, no forced reflow.
+      // Use cached values — zero DOM reads, zero forced reflow.
       view.dispatch(
         view.state.tr.setNodeMarkup(pos, undefined, {
           ...nodeAttrsRef.current,
@@ -179,6 +190,7 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
 
     const cleanup = () => {
       cancelAnimationFrame(rafId);
+      document.body.classList.remove('inkstream-resizing');
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup',   onMouseUp);
       cleanupResizeRef.current = null;
@@ -186,11 +198,18 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup',   onMouseUp);
-    // Store so unmount (or next mousedown) can remove listeners if resize is interrupted.
+    // Store cleanup so unmount (or next mousedown) can tear down if drag is interrupted.
     cleanupResizeRef.current = cleanup;
-  }, [view, getPos]); // node.attrs removed — read via nodeAttrsRef to avoid stale closures
+  }, [view, getPos]); // nodeAttrsRef used instead of node.attrs — avoids stale closures
 
   if (src) {
+    // Dimensions come from node attrs written by the resize handler.
+    // They are applied as inline styles, NOT as HTML width/height attributes, so
+    // they take precedence over the CSS `height: auto` rule and the stored size
+    // is faithfully reflected after every re-render.
+    const widthStyle  = node.attrs.width  != null ? `${node.attrs.width}px`  : undefined;
+    const heightStyle = node.attrs.height != null ? `${node.attrs.height}px` : undefined;
+
     return (
       <div className="image-node-view-wrapper" contentEditable={false}>
         <img
@@ -198,14 +217,14 @@ export const ImageNodeView: React.FC<ImageNodeViewProps> = ({ node, view, getPos
           src={src}
           alt={node.attrs.alt ?? ''}
           title={node.attrs.title ?? undefined}
-          width={node.attrs.width ?? undefined}
-          height={node.attrs.height ?? undefined}
+          style={{ width: widthStyle, height: heightStyle }}
           draggable={false}
         />
         <div
           className="resize-handle"
           onMouseDown={handleResizeMouseDown}
           aria-label="Resize image"
+          role="presentation"
         />
       </div>
     );
