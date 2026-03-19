@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useRef, forwardRef, useImperativeHandle } from 'react';
-import { DOMSerializer } from '@inkstream/pm/model';
 import { EditorView } from '@inkstream/pm/view';
 import type { EditorState, Transaction } from '@inkstream/pm/state';
-import { RichTextEditor } from './index';
+import { RichTextEditor, EditorRef } from './index';
 import { TableInsertDialog } from './TableInsertDialog';
 import { TablePropertiesDialog } from './TablePropertiesDialog';
 
@@ -79,27 +78,15 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
   ({ pluginOptions, ...restProps }, ref) => {
     const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
     const [isPropertiesDialogOpen, setIsPropertiesDialogOpen] = useState(false);
-    const editorViewRef = useRef<EditorView | null>(null);
+    // Ref to the inner RichTextEditor — used to call getContent(), getView(), focus().
+    const richEditorRef = useRef<EditorRef>(null);
     // Populated by the table plugin via onCommandsReady; forwarded to dialogs as props.
     const tableCommandsRef = useRef<TableCommands | null>(null);
 
     useImperativeHandle(ref, () => ({
-      getContent: () => {
-        const view = editorViewRef.current;
-        if (!view) return '';
-        const div = document.createElement('div');
-        const fragment = DOMSerializer.fromSchema(view.state.schema).serializeFragment(view.state.doc.content);
-        div.appendChild(fragment);
-        return div.innerHTML;
-      },
-      focus: () => {
-        editorViewRef.current?.focus();
-      },
+      getContent: () => richEditorRef.current?.getContent() ?? '',
+      focus: () => richEditorRef.current?.getView()?.focus(),
     }));
-
-    const handleEditorReady = useCallback((view: EditorView) => {
-      editorViewRef.current = view;
-    }, []);
 
     // Merge caller-provided pluginOptions with the hook callbacks the table
     // plugin needs. The table plugin reads these from this.options so it can
@@ -117,7 +104,7 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
     }), [pluginOptions]);
 
     const handleInsertTable = useCallback((config: { rows: number; cols: number; withHeaderRow: boolean }) => {
-      const view = editorViewRef.current;
+      const view = richEditorRef.current?.getView();
       const cmds = tableCommandsRef.current;
       if (view && cmds?.insertTable) {
         const command = cmds.insertTable(config.rows, config.cols, config.withHeaderRow);
@@ -129,9 +116,9 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
     return (
       <>
         <RichTextEditor
+          ref={richEditorRef}
           {...restProps}
           pluginOptions={mergedPluginOptions}
-          onEditorReady={handleEditorReady}
         />
         <TableInsertDialog
           isOpen={isTableDialogOpen}
@@ -141,7 +128,7 @@ export const EditorWithTableDialog = forwardRef<EditorHandle, EditorWithTableDia
         <TablePropertiesDialog
           isOpen={isPropertiesDialogOpen}
           onClose={() => setIsPropertiesDialogOpen(false)}
-          getEditorView={() => editorViewRef.current}
+          getEditorView={() => richEditorRef.current?.getView() ?? null}
           applyCellStyling={(attrs) => tableCommandsRef.current?.applyCellStyling(attrs)}
           runToggleHeaderRow={() => tableCommandsRef.current?.runToggleHeaderRow()}
           runDeleteTable={() => tableCommandsRef.current?.runDeleteTable()}

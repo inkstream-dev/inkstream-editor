@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plugin, LicenseTier } from '@inkstream/editor-core';
+import { Plugin, LicenseTier, LicenseManager } from '@inkstream/editor-core';
 
 /**
  * A plugin loader function that receives the server-validated tier so it can
@@ -43,11 +43,8 @@ interface UseLazyPluginsResult {
   error: Error | null;
 }
 
-const canLoadTier = (requiredTier: 'pro' | 'premium', currentTier: LicenseTier): boolean => {
-  if (requiredTier === 'premium') return currentTier === 'premium';
-  if (requiredTier === 'pro') return currentTier === 'pro' || currentTier === 'premium';
-  return true;
-};
+const canLoadTier = (requiredTier: 'pro' | 'premium', currentTier: LicenseTier): boolean =>
+  LicenseManager.canTierAccess(currentTier, requiredTier);
 
 /**
  * Lazy-loads plugins based on a server-validated tier.

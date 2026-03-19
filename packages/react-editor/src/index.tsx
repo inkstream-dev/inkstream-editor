@@ -51,6 +51,8 @@ export interface EditorRef {
   can(): ChainedCommands;
   /** Direct access to the live EditorView, or `null` before the editor mounts. */
   getView(): EditorView | null;
+  /** Returns the current document serialised as an HTML string. */
+  getContent(): string;
 }
 
 interface RichTextEditorProps {
@@ -252,7 +254,7 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
     setToolbarItems(orderedToolbarItems);
   }, [editorView, pluginOptions, toolbarLayout]);
 
-  // Expose chain() / can() / getView() on the forwarded ref.
+  // Expose chain() / can() / getView() / getContent() on the forwarded ref.
   useImperativeHandle(ref, () => ({
     chain(): ChainedCommands {
       if (editorInstanceRef.current) return editorInstanceRef.current.chain();
@@ -264,6 +266,9 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
     },
     getView(): EditorView | null {
       return editorInstanceRef.current?.getView() ?? null;
+    },
+    getContent(): string {
+      return editorInstanceRef.current?.getContent() ?? '';
     },
   }), [editorView]);
 
