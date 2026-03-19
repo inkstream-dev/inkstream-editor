@@ -9,6 +9,8 @@ import { buildPastePlugin } from '../paste-rules';
 import { CommandChain } from '../commands/chain';
 import type { ChainedCommands } from '../commands/chain';
 import { EditorStateStore } from './EditorStateStore';
+import { EventEmitter } from './EventEmitter';
+import type { EditorEventMap } from './types';
 
 // ---------------------------------------------------------------------------
 // Public config types
@@ -102,7 +104,7 @@ export interface InkstreamEditorCallbacks {
  * editor.destroy();
  * ```
  */
-export class InkstreamEditor {
+export class InkstreamEditor extends EventEmitter<EditorEventMap> {
   // ---------------------------------------------------------------------------
   // Private state
   // ---------------------------------------------------------------------------
@@ -143,6 +145,7 @@ export class InkstreamEditor {
   // ---------------------------------------------------------------------------
 
   constructor(config: InkstreamEditorConfig) {
+    super();
     this._plugins = config.plugins ?? [];
     this._onChangeCb = config.onChange;
     this._onReadyCb = config.onReady;
@@ -178,10 +181,12 @@ export class InkstreamEditor {
       handleDOMEvents: {
         focus: (v, event) => {
           this._plugins.forEach(p => p.onFocus?.({ view: v, event }));
+          this.emit('focus', event);
           return false;
         },
         blur: (v, event) => {
           this._plugins.forEach(p => p.onBlur?.({ view: v, event }));
+          this.emit('blur', event);
           return false;
         },
       },
@@ -197,6 +202,7 @@ export class InkstreamEditor {
 
     // Notify consumer that the editor is ready.
     this._onReadyCb?.(this._view);
+    this.emit('ready', this._view);
   }
 
   // ---------------------------------------------------------------------------
@@ -216,15 +222,25 @@ export class InkstreamEditor {
       p.onUpdate?.({ view: this._view!, state: newState, prevState, tr: transaction }),
     );
 
-    // Debounced HTML serialisation for onChange.
-    if (this._onChangeCb && transaction.docChanged) {
+    // Emit 'update' on every transaction.
+    this.emit('update', newState);
+
+    // Emit 'selectionUpdate' when only the selection changed (no doc change).
+    if (!transaction.docChanged && !newState.selection.eq(prevState.selection)) {
+      this.emit('selectionUpdate', newState);
+    }
+
+    // Debounced HTML serialisation for onChange callback and 'change' event.
+    if (transaction.docChanged) {
       if (this._changeDebounceTimer !== null) {
         clearTimeout(this._changeDebounceTimer);
       }
       this._changeDebounceTimer = setTimeout(() => {
         this._changeDebounceTimer = null;
-        if (!this._onChangeCb || !this._view) return;
-        this._onChangeCb(this._serializeToHTML());
+        if (!this._view) return;
+        const html = this._serializeToHTML();
+        this._onChangeCb?.(html);
+        this.emit('change', html);
       }, this._onChangeDebounceMs);
     }
   }
@@ -282,6 +298,39 @@ export class InkstreamEditor {
       this._pluginManager.getCommands(),
       true,
     ) as ChainedCommands;
+  }
+
+  /**
+   * Execute a single named command by string key, with optional arguments.
+   *
+   * This is the recommended API for framework integrations (Vue, Svelte,
+   * Vanilla JS) where building a full `chain()` call is impractical. React
+   * consumers may prefer `chain()` for its type-safe fluent interface.
+   *
+   * Returns `true` if the command ran successfully, `false` if:
+   * - The command name is not registered by any plugin.
+   * - The editor view is not yet mounted or has been destroyed.
+   * - The command itself returned `false` (not applicable in current state).
+   *
+   * @example
+   * ```ts
+   * editor.executeCommand('toggleBold');
+   * editor.executeCommand('setHeading', 2);
+   * editor.executeCommand('setTextColor', '#ff0000');
+   * ```
+   */
+  executeCommand(cmd: string, ...args: unknown[]): boolean {
+    if (!this._view || this._destroyed) return false;
+    const commands = this._pluginManager.getCommands();
+    const creator = commands[cmd];
+    if (!creator) return false;
+    const commandFn = creator(...args);
+    return commandFn({
+      state: this._view.state,
+      dispatch: (tr) => this._view!.dispatch(tr),
+      view: this._view,
+      tr: this._view.state.tr,
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -427,12 +476,16 @@ export class InkstreamEditor {
       this._changeDebounceTimer = null;
     }
 
+    this.emit('destroy');
+
     this._plugins.forEach(p => p.onDestroy?.());
 
     if (this._view) {
       this._view.destroy();
       this._view = null;
     }
+
+    this.removeAllListeners();
   }
 
   /** Returns `true` after `destroy()` has been called. */

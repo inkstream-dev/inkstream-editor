@@ -2,6 +2,8 @@ import { PluginManager, Plugin, ToolbarItem } from './plugins';
 import { inkstreamSchema } from './schema';
 import { buildInputRules } from './input-rules';
 import { buildKeymap } from './keymap';
+import { InkstreamEditor } from './editor/InkstreamEditor';
+import type { InkstreamEditorConfig } from './editor/InkstreamEditor';
 
 export { inkstreamSchema };
 export * from './license';
@@ -17,8 +19,8 @@ export { buildKeymap } from './keymap';
 // Headless editor + reactive store
 // ---------------------------------------------------------------------------
 
-export { InkstreamEditor, EditorStateStore } from './editor';
-export type { InkstreamEditorConfig, InkstreamEditorCallbacks } from './editor';
+export { InkstreamEditor, EditorStateStore, EventEmitter } from './editor';
+export type { InkstreamEditorConfig, InkstreamEditorCallbacks, EditorEventMap } from './editor';
 
 // ---------------------------------------------------------------------------
 // Plugin system
@@ -55,10 +57,41 @@ export { findParentNode, getNodeType, isList } from './helpers/prosemirror';
 // InkstreamEditor class (no DOM required).
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Framework-agnostic factory function
+// ---------------------------------------------------------------------------
+
 /**
- * Builds the complete ProseMirror plugin array from an array of Inkstream
- * plugin instances.
+ * Create a new `InkstreamEditor` instance.
  *
+ * Equivalent to `new InkstreamEditor(config)` but preferred for functional
+ * and non-class-based framework integrations (Vue composables, Svelte, etc.).
+ *
+ * @example
+ * ```ts
+ * // Vanilla JS
+ * const editor = createEditor({
+ *   element: document.getElementById('editor')!,
+ *   plugins: corePlugins,
+ *   initialContent: '<p>Hello</p>',
+ * });
+ *
+ * editor.on('change', html => console.log(html));
+ * editor.executeCommand('toggleBold');
+ * editor.destroy();
+ * ```
+ */
+export function createEditor(config: InkstreamEditorConfig): InkstreamEditor {
+  return new InkstreamEditor(config);
+}
+
+// ---------------------------------------------------------------------------
+// Framework adapter helpers
+// ---------------------------------------------------------------------------
+
+export * from './adapters';
+
+/**
  * Useful for testing and headless scenarios where you need the ProseMirror
  * plugin array but do not want to mount an `EditorView`.
  *

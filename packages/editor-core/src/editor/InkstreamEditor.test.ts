@@ -9,6 +9,7 @@
 import { InkstreamEditor } from './InkstreamEditor';
 import { EditorView } from '@inkstream/pm/view';
 import { availablePlugins } from '@inkstream/starter-kit';
+import type { EditorState } from '@inkstream/pm/state';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -420,5 +421,155 @@ describe('InkstreamEditor — getToolbarItems()', () => {
     const items = editor.getToolbarItems();
     expect(items.has('bold')).toBe(true);
     expect(items.has('italic')).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// executeCommand()
+// ---------------------------------------------------------------------------
+
+describe('InkstreamEditor — executeCommand()', () => {
+  let editor: InkstreamEditor;
+  afterEach(() => editor.destroy());
+
+  it('returns false for an unknown command', () => {
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    expect(editor.executeCommand('nonExistentCommand')).toBe(false);
+  });
+
+  it('executes a registered command by name and returns true on success', () => {
+    const el = makeEl();
+    document.body.appendChild(el);
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins, initialContent: '<p>Hello</p>' });
+    editor.getView()!.focus();
+    // Select all text using AllSelection so toggleBold has a non-empty range to apply to.
+    const { AllSelection } = require('@inkstream/pm/state');
+    const tr = editor.getState()!.tr.setSelection(new AllSelection(editor.getState()!.doc));
+    editor.getView()!.dispatch(tr);
+    const result = editor.executeCommand('toggleBold');
+    expect(result).toBe(true);
+  });
+
+  it('returns false after the editor is destroyed', () => {
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    editor.destroy();
+    expect(editor.executeCommand('toggleBold')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// on() / off() / event emission
+// ---------------------------------------------------------------------------
+
+describe('InkstreamEditor — events', () => {
+  let editor: InkstreamEditor;
+  afterEach(() => editor?.destroy());
+
+  it('emits "ready" once after construction with the EditorView', () => {
+    const fn = jest.fn();
+    const el = makeEl();
+    // Attach listener before constructing via on() in the constructor
+    // ready fires in constructor, so we verify via a callback in config instead
+    editor = new InkstreamEditor({
+      element: el,
+      plugins: allPlugins,
+      onReady: fn,
+    });
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][0]).toBeInstanceOf(EditorView);
+  });
+
+  it('emits "ready" via the event system (on listener added before construction would miss it — verify via onReady config)', () => {
+    // "ready" is emitted synchronously in the constructor, so a listener
+    // added after construction would miss it. Test the config-based pathway.
+    const fn = jest.fn();
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins, onReady: fn });
+    expect(fn).toHaveBeenCalledWith(expect.any(EditorView));
+  });
+
+  it('emits "update" on every transaction', () => {
+    const updates: EditorState[] = [];
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    editor.on('update', state => updates.push(state));
+
+    editor.chain().toggleBold().run();
+
+    expect(updates.length).toBeGreaterThan(0);
+    expect(updates[0]).not.toBeNull();
+  });
+
+  it('off() stops receiving events', () => {
+    const fn = jest.fn();
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    editor.on('update', fn);
+    editor.off('update', fn);
+
+    editor.chain().toggleBold().run();
+
+    expect(fn).not.toHaveBeenCalled();
+  });
+
+  it('emits "destroy" when destroy() is called', () => {
+    const fn = jest.fn();
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    editor.on('destroy', fn);
+    editor.destroy();
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits "change" (debounced) when document content changes', async () => {
+    const htmlValues: string[] = [];
+    const el = makeEl();
+    document.body.appendChild(el);
+    editor = new InkstreamEditor({
+      element: el,
+      plugins: allPlugins,
+      onChangeDebounceMs: 10,
+    });
+    editor.on('change', html => htmlValues.push(html));
+
+    editor.setContent('<p>Updated content</p>');
+    // setContent replaces state directly (no debounce) but does not fire onChange
+    // Trigger via a transaction instead
+    const view = editor.getView()!;
+    const tr = view.state.tr.insertText(' extra');
+    view.dispatch(tr);
+
+    await new Promise(r => setTimeout(r, 50));
+
+    expect(htmlValues.length).toBeGreaterThan(0);
+    expect(typeof htmlValues[0]).toBe('string');
+  });
+
+  it('removeAllListeners() clears all event listeners', () => {
+    const fn = jest.fn();
+    const el = makeEl();
+    editor = new InkstreamEditor({ element: el, plugins: allPlugins });
+    editor.on('update', fn);
+    editor.removeAllListeners();
+
+    editor.chain().toggleBold().run();
+
+    expect(fn).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createEditor() factory
+// ---------------------------------------------------------------------------
+
+describe('createEditor()', () => {
+  it('returns an InkstreamEditor instance', async () => {
+    const { createEditor } = await import('../index');
+    const el = makeEl();
+    const editor = createEditor({ element: el, plugins: allPlugins });
+    expect(editor).toBeInstanceOf(InkstreamEditor);
+    editor.destroy();
   });
 });
