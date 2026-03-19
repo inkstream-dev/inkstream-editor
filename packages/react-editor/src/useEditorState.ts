@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { EditorState } from '@inkstream/pm/state';
+import { EditorStateStore } from '@inkstream/editor-core';
+
+export { EditorStateStore };
 
 // useLayoutEffect is not safe in SSR (throws a React warning about effects not
 // encoding into the server renderer's output). Use a no-op on the server.
@@ -9,36 +12,6 @@ const useIsomorphicLayoutEffect =
 
 type Subscriber = () => void;
 type Unsubscribe = () => void;
-
-/**
- * Lightweight pub/sub store that bridges ProseMirror transactions to React.
- *
- * One instance is created per EditorView lifecycle. Call `update()` on every
- * transaction; React components subscribe via `useEditorState()`.
- *
- * This is the architectural equivalent of @tiptap/react's useSyncExternalStore
- * integration — it decouples ProseMirror state from React's render cycle so
- * that only components whose selected value actually changed will re-render.
- */
-export class EditorStateStore {
-  private _state: EditorState | null = null;
-  private _subscribers = new Set<Subscriber>();
-
-  /** Called by handleDispatchTransaction on every ProseMirror transaction. */
-  update(state: EditorState): void {
-    this._state = state;
-    this._subscribers.forEach(fn => fn());
-  }
-
-  subscribe(callback: Subscriber): Unsubscribe {
-    this._subscribers.add(callback);
-    return () => this._subscribers.delete(callback);
-  }
-
-  getSnapshot(): EditorState | null {
-    return this._state;
-  }
-}
 
 /**
  * Subscribe to a derived slice of ProseMirror editor state.

@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react';
-import { EditorState, Transaction } from '@inkstream/pm/state';
 import { EditorView } from '@inkstream/pm/view';
-import { DOMParser, DOMSerializer, Schema } from '@inkstream/pm/model';
-import { inkstreamSchema, PluginManager, Plugin, inkstreamPlugins, ToolbarItem, LicenseManager, buildInputRules, buildKeymap, buildPastePlugin, CommandChain, ChainedCommands } from '@inkstream/editor-core';
+import { InkstreamEditor, Plugin, ToolbarItem, LicenseManager, ChainedCommands, CommandChain, EditorStateStore } from '@inkstream/editor-core';
 import { availablePlugins } from '@inkstream/starter-kit';
 import { getLinkBubbleToolbarItem } from '@inkstream/link-bubble';
 import { Toolbar } from './Toolbar';
 import './editor.css';
 import { imagePluginWithNodeView } from './imagePluginWithNodeView';
 import { useLicenseValidation } from './useLicenseValidation';
-import { EditorStateStore } from './useEditorState';
 
 // Stable module-level defaults to prevent new object/array references on
 // every render, which would cause useEffect to re-run infinitely.
@@ -126,14 +123,10 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   immediatelyRender = true,
 }, ref) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const editorViewRef = useRef<EditorView | null>(null);
+  const editorInstanceRef = useRef<InkstreamEditor | null>(null);
   // Per-transaction notification store — toolbar buttons subscribe to this
   // instead of receiving editorState as a React prop on every keystroke.
   const storeRef = useRef<EditorStateStore | null>(null);
-  // Debounce timer for onChange serialization. Avoids blocking the main thread
-  // on every keystroke when the document contains large base64 images — reading
-  // div.innerHTML with a multi-MB src attribute was the cause of the 4s hang.
-  const changeDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // React state for the EditorView instance — triggers re-render once on mount/unmount
   // so that the Toolbar receives a non-null editorView prop after initialization.
   const [editorView, setEditorView] = useState<EditorView | null>(null);
@@ -174,7 +167,7 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   
   // Filter plugins based on server-validated tier only
   const validatedPlugins = useMemo(() => {
-    const validated = plugins.filter(plugin => {
+    return plugins.filter(plugin => {
       const pluginTier = plugin.tier || 'free';
       const canUse = LicenseManager.canTierAccess(validatedTier, pluginTier);
       
@@ -188,37 +181,7 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
       
       return true;
     });
-    
-    return validated;
   }, [plugins, validatedTier, onLicenseError]);
-  
-  // Create plugin state - recalculates when validatedPlugins change
-  const pluginState = useMemo(() => {
-    // Create plugin manager and register all plugins
-    const manager = new PluginManager();
-    validatedPlugins.forEach(plugin => manager.registerPlugin(plugin));
-    
-    // Create schema from the manager
-    const editorSchema = inkstreamSchema(manager);
-    
-    // Build ProseMirror plugins - do NOT call inkstreamPlugins() which creates a duplicate manager!
-    // Instead, build plugins directly from this manager instance
-    const pmPlugins = [
-      ...manager.getProseMirrorPlugins(editorSchema),
-      buildInputRules(editorSchema),
-      buildKeymap(editorSchema, manager),
-      buildPastePlugin(manager.getPasteRules(editorSchema)),
-    ];
-
-    return {
-      validatedPlugins,
-      pluginManager: manager,
-      schema: editorSchema,
-      proseMirrorPlugins: pmPlugins,
-    };
-  }, [validatedPlugins]);
-
-  const { pluginManager, schema, proseMirrorPlugins } = pluginState;
 
   // Keep refs so callbacks are never stale without appearing in effect dep arrays.
   // This prevents: prop change → new callback identity → effect re-run → editor destroyed.
@@ -227,134 +190,48 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
   const onEditorReadyRef = useRef(onEditorReady);
   useEffect(() => { onEditorReadyRef.current = onEditorReady; });
 
-  // Stable ref to the current set of validated plugins so lifecycle hooks
-  // (onUpdate, onFocus, onBlur) can be called from stable callbacks without
-  // appearing in their dependency arrays.
-  const validatedPluginsRef = useRef<Plugin[]>(validatedPlugins);
-  useEffect(() => { validatedPluginsRef.current = validatedPlugins; });
-
-  // This function will be passed to EditorView and will be responsible for updating ProseMirror's state
-  // and then notifying the store so subscribed toolbar buttons can re-render independently.
-  const handleDispatchTransaction = useCallback((transaction: Transaction) => {
-    if (editorViewRef.current) {
-      const prevState = editorViewRef.current.state;
-      const newState = prevState.apply(transaction);
-      editorViewRef.current.updateState(newState);
-      // Notify all subscribers (toolbar buttons) — each decides independently
-      // whether to re-render based on their selector's return value.
-      storeRef.current?.update(newState);
-      // Call onUpdate lifecycle hooks for all active plugins.
-      validatedPluginsRef.current.forEach(p =>
-        p.onUpdate?.({ view: editorViewRef.current!, state: newState, prevState, tr: transaction })
-      );
-      if (onChangeRef.current && transaction.docChanged) {
-        // Debounce the HTML serialization: reading div.innerHTML when the doc
-        // contains a large base64 image blocks the input handler for seconds.
-        // We wait until typing pauses before serializing and calling onChange.
-        if (changeDebounceTimerRef.current !== null) {
-          clearTimeout(changeDebounceTimerRef.current);
-        }
-        changeDebounceTimerRef.current = setTimeout(() => {
-          changeDebounceTimerRef.current = null;
-          if (!onChangeRef.current || !editorViewRef.current) return;
-          const state = editorViewRef.current.state;
-          const div = document.createElement('div');
-          const fragment = DOMSerializer.fromSchema(state.schema).serializeFragment(state.doc.content);
-          div.appendChild(fragment);
-          onChangeRef.current(div.innerHTML);
-        }, 300);
-      }
-    }
-  }, []); // stable — reads everything via refs, not closures
-
-  // Effect 1 — EditorView lifecycle.
-  // Creates and destroys the ProseMirror editor instance.
-  // Depends ONLY on what actually requires a new EditorView:
-  //   schema, plugins, initial content, and the stable dispatch function.
-  // toolbarLayout / pluginOptions changes do NOT belong here and will NOT
-  // cause the editor to be torn down and recreated.
+  // Effect 1 — InkstreamEditor lifecycle.
+  // Creates and destroys the headless editor instance.
+  // Depends ONLY on what actually requires a new editor: plugins and initial content.
+  // toolbarLayout / pluginOptions / onChange changes do NOT belong here.
   useEffect(() => {
-    if (!editorRef.current) {
-      return;
-    }
-
-    // Create a fresh store for this EditorView lifetime.
-    const store = new EditorStateStore();
-    storeRef.current = store;
-
-    // SSR guard — this effect only runs on the client, but be explicit.
+    if (!editorRef.current) return;
     if (typeof window === 'undefined') return;
 
-    // Parse initial content from HTML string
-    let doc;
-    try {
-      const parser = DOMParser.fromSchema(schema);
-      const domDoc = new window.DOMParser().parseFromString(initialContent, "text/html");
-      doc = parser.parse(domDoc.body);
-    } catch (error) {
-      console.warn("Failed to parse initial content, using empty doc:", error);
-      // Fallback to empty document
-      doc = schema.node("doc", null, [schema.node("paragraph")]);
-    }
-
-    const state = EditorState.create({
-      schema: schema,
-      doc: doc,
-      plugins: proseMirrorPlugins,
+    const editor = new InkstreamEditor({
+      element: editorRef.current,
+      plugins: validatedPlugins,
+      initialContent,
+      onChange: onChangeRef.current,
+      onReady: (view) => onEditorReadyRef.current?.(view),
     });
 
-    const view = new EditorView(editorRef.current, {
-      state,
-      dispatchTransaction: handleDispatchTransaction,
-      handleDOMEvents: {
-        focus: (v, event) => {
-          validatedPluginsRef.current.forEach(p => p.onFocus?.({ view: v, event }));
-          return false;
-        },
-        blur: (v, event) => {
-          validatedPluginsRef.current.forEach(p => p.onBlur?.({ view: v, event }));
-          return false;
-        },
-      },
-      nodeViews: pluginManager.getNodeViews(),
-    });
+    editorInstanceRef.current = editor;
+    storeRef.current = editor.store;
+    setEditorView(editor.getView());
 
-    editorViewRef.current = view;
-    // Seed the store with the initial state so buttons render correctly
-    // before the first transaction fires.
-    store.update(state);
-    // Trigger one React re-render so Toolbar receives editorView prop.
-    setEditorView(view);
-    onEditorReadyRef.current?.(view);
-    // Call onCreate lifecycle hooks for all active plugins.
-    pluginState.validatedPlugins.forEach(p => p.onCreate?.({ view }));
-
-    // Destroy the EditorView when schema/plugins change or component unmounts.
     return () => {
-      // Cancel any pending onChange debounce to prevent stale serialization
-      // from firing after the editor has been torn down.
-      if (changeDebounceTimerRef.current !== null) {
-        clearTimeout(changeDebounceTimerRef.current);
-        changeDebounceTimerRef.current = null;
-      }
-      // Call onDestroy lifecycle hooks before tearing down the editor.
-      pluginState.validatedPlugins.forEach(p => p.onDestroy?.());
-      if (editorViewRef.current) {
-        editorViewRef.current.destroy();
-        editorViewRef.current = null;
-        storeRef.current = null;
-        setEditorView(null);
-      }
+      editor.destroy();
+      editorInstanceRef.current = null;
+      storeRef.current = null;
+      setEditorView(null);
     };
-  }, [schema, proseMirrorPlugins, initialContent, handleDispatchTransaction]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [validatedPlugins, initialContent]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Effect 2 — Toolbar construction.
-  // Builds toolbar items and applies toolbarLayout ordering.
-  // This effect runs independently of the EditorView — changing toolbarLayout
-  // or pluginOptions only re-runs this effect, never recreating the editor.
+  // Effect 2 — Keep onChange in sync without recreating the editor.
   useEffect(() => {
-    const allToolbarItems = pluginManager.getToolbarItems(schema, pluginOptions);
-    allToolbarItems.set('link', getLinkBubbleToolbarItem(schema));
+    editorInstanceRef.current?.updateCallbacks({ onChange });
+  }, [onChange]);
+
+  // Effect 3 — Toolbar construction.
+  // Builds toolbar items and applies toolbarLayout ordering.
+  // Runs when the editor mounts (editorView changes) or pluginOptions/layout change.
+  useEffect(() => {
+    const editor = editorInstanceRef.current;
+    if (!editor) return;
+
+    const allToolbarItems = editor.getToolbarItems(pluginOptions);
+    allToolbarItems.set('link', getLinkBubbleToolbarItem(editor.schema));
     let orderedToolbarItems: ToolbarItemOrSeparator[] = [];
 
     if (toolbarLayout && toolbarLayout.length > 0) {
@@ -373,28 +250,22 @@ export const RichTextEditor = forwardRef<EditorRef, RichTextEditorProps>(functio
     }
 
     setToolbarItems(orderedToolbarItems);
-  }, [pluginManager, schema, pluginOptions, toolbarLayout]);
+  }, [editorView, pluginOptions, toolbarLayout]);
 
   // Expose chain() / can() / getView() on the forwarded ref.
   useImperativeHandle(ref, () => ({
     chain(): ChainedCommands {
-      return new CommandChain(
-        () => editorViewRef.current,
-        pluginManager.getCommands(),
-        false,
-      ) as ChainedCommands;
+      if (editorInstanceRef.current) return editorInstanceRef.current.chain();
+      return new CommandChain(() => null, {}, false) as ChainedCommands;
     },
     can(): ChainedCommands {
-      return new CommandChain(
-        () => editorViewRef.current,
-        pluginManager.getCommands(),
-        true,
-      ) as ChainedCommands;
+      if (editorInstanceRef.current) return editorInstanceRef.current.can();
+      return new CommandChain(() => null, {}, true) as ChainedCommands;
     },
     getView(): EditorView | null {
-      return editorViewRef.current;
+      return editorInstanceRef.current?.getView() ?? null;
     },
-  }), [pluginManager]);
+  }), [editorView]);
 
   // When deferred rendering is requested, show only the wrapper shell until
   // the client-side effect above flips isMounted → true.

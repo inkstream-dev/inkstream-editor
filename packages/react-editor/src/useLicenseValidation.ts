@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LicenseTier, LicenseManager, ServerValidationResponse } from '@inkstream/editor-core';
+import { LicenseTier, validateLicense } from '@inkstream/editor-core';
 
 export interface UseLicenseValidationOptions {
   licenseKey?: string;
@@ -23,20 +23,14 @@ export interface UseLicenseValidationResult {
   error: string | null;
 }
 
-// Module-level cache shared across all instances.
-// Key: licenseKey, Value: { tier, expiresAt (ms timestamp) }
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const validationCache = new Map<string, { tier: LicenseTier; expiresAt: number }>();
-
 /**
- * Validates a license key against a server endpoint and returns the authoritative
- * tier. Falls back to 'free' on network errors or when no endpoint is provided.
+ * React hook that wraps the framework-agnostic `validateLicense` function from
+ * `@inkstream/editor-core`, adding `isValidating` state for UI feedback.
  *
- * Security guarantees:
+ * Security guarantees (enforced by `validateLicense`):
  * - Without validationEndpoint → always returns 'free'.
- * - With validationEndpoint → trusts only the server response, never the key format.
  * - Network failure → fails secure (returns 'free'), never fails open.
- * - SSR / server environment → returns 'free' immediately (no browser APIs needed).
+ * - Results are cached for 5 minutes inside `validateLicense`.
  */
 export function useLicenseValidation({
   licenseKey,
@@ -47,8 +41,7 @@ export function useLicenseValidation({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // SSR guard — the editor is client-only, but keep the hook order stable
-    // and skip network work when evaluated before hydration.
+    // SSR guard — skip network work before hydration.
     if (typeof window === 'undefined') {
       setTier('free');
       setIsValidating(false);
@@ -56,78 +49,15 @@ export function useLicenseValidation({
       return;
     }
 
-    // No key — stay on free tier
-    if (!licenseKey) {
-      setTier('free');
-      setIsValidating(false);
-      setError(null);
-      return;
-    }
-
-    // Client-side format check for instant UX feedback only.
-    // This does NOT grant access — it only avoids an unnecessary round-trip.
-    if (!LicenseManager.isValidKeyFormat(licenseKey)) {
-      setTier('free');
-      setIsValidating(false);
-      setError('Invalid license key format');
-      return;
-    }
-
-    // No endpoint configured → secure default: free tier.
-    // We will never unlock paid features based on the key string alone.
-    if (!validationEndpoint) {
-      setTier('free');
-      setIsValidating(false);
-      setError(null);
-      return;
-    }
-
-    // Serve from cache if still fresh
-    const cached = validationCache.get(licenseKey);
-    if (cached && Date.now() < cached.expiresAt) {
-      setTier(cached.tier);
-      setIsValidating(false);
-      setError(null);
-      return;
-    }
-
-    // Server validation
     let cancelled = false;
     setIsValidating(true);
-    setError(null);
 
-    fetch(validationEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ licenseKey }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<ServerValidationResponse>;
-      })
-      .then(result => {
-        if (cancelled) return;
-        if (result.isValid) {
-          validationCache.set(licenseKey, {
-            tier: result.tier,
-            expiresAt: Date.now() + CACHE_TTL_MS,
-          });
-          setTier(result.tier);
-          setError(null);
-        } else {
-          setTier('free');
-          setError(result.reason ?? 'License validation failed');
-        }
-      })
-      .catch(() => {
-        if (cancelled) return;
-        // Fail secure — do not grant paid access on network errors
-        setTier('free');
-        setError('Unable to reach license server. Continuing with free tier.');
-      })
-      .finally(() => {
-        if (!cancelled) setIsValidating(false);
-      });
+    validateLicense({ licenseKey, validationEndpoint }).then(result => {
+      if (cancelled) return;
+      setTier(result.tier);
+      setError(result.error);
+      setIsValidating(false);
+    });
 
     return () => {
       cancelled = true;
