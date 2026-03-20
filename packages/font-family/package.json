@@ -20,10 +20,10 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@inkstream/editor-core": "^0.1.1"
+    "@inkstream/editor-core": "^0.1.6"
   },
   "peerDependencies": {
-    "@inkstream/pm": ">=0.1.0"
+    "@inkstream/pm": ">=0.1.2"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 {
   "name": "@inkstream/starter-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -23,8 +23,8 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@inkstream/editor-core": "^0.1.5",
-    "@inkstream/pm": ">=0.1.0",
+    "@inkstream/editor-core": "^0.1.6",
+    "@inkstream/pm": ">=0.1.2",
     "@inkstream/paragraph": "^0.1.0",
     "@inkstream/hard-break": "^0.1.0",
     "@inkstream/blockquote": "^0.1.0",
@@ -35,7 +35,7 @@
     "@inkstream/code": "^0.1.0",
     "@inkstream/alignment": "^0.1.0",
     "@inkstream/indent": "^0.1.0",
-    "@inkstream/image": "^0.1.0",
+    "@inkstream/image": "^0.1.1",
     "@inkstream/horizontal-rule": "^0.1.0",
     "@inkstream/history": "^0.1.0",
     "@inkstream/text-color": "^0.1.0",
@@ -44,8 +44,8 @@
     "@inkstream/superscript": "^0.1.0",
     "@inkstream/subscript": "^0.1.0",
     "@inkstream/lists": "^0.1.0",
-    "@inkstream/heading": "^0.1.0",
-    "@inkstream/link-bubble": "^0.1.5"
+    "@inkstream/heading": "^0.1.6",
+    "@inkstream/link-bubble": "^0.1.6"
   },
   "devDependencies": {
     "@inkstream/editor-core": "workspace:*",
